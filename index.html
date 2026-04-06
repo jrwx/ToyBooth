@@ -63,7 +63,7 @@
 <body>
 
     <div id="camera-ui">
-        <div style="font-family: 'VT323'; font-size: 32px; letter-spacing: 4px; margin-bottom: 20px;">PHOTO BOOTH SYSTEM</div>
+        <div style="font-family: 'VT323'; font-size: 32px; letter-spacing: 4px; margin-bottom: 20px;">Congratulations to Jarawee!</div>
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
@@ -77,7 +77,7 @@
                 <button class="f-btn" onclick="setF('kodak', this)">Kodak</button>
                 <button class="f-btn" onclick="setF('bw', this)">B&W</button>
             </div>
-            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">TAKE SHOT</button>
+            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">มาถ่ายด่วนน</button>
         </div>
     </div>
 
@@ -89,8 +89,8 @@
             </div>
         </div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">SAVE PNG</button>
-            <button class="btn-save" style="background:#444; color:#fff;" onclick="location.reload()">RETAKE</button>
+            <button class="btn-save" onclick="saveImage()">เซฟด่วนพี่พี่</button>
+            <button class="btn-save" style="background:#444; color:#fff;" onclick="location.reload()">ถ่ายใหม่เถอะ</button>
         </div>
     </div>
 
@@ -156,8 +156,8 @@
             for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
 
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            ctx.font = "bold 65px 'VT323'"; ctx.fillText("OFFICIAL RECEIPT", 300, 110);
-            ctx.font = "30px 'VT323'"; ctx.fillText("Thank you, Jarawee", 300, 160);
+            ctx.font = "bold 65px 'VT323'"; ctx.fillText("Congrats!!", 300, 100);
+            ctx.font = "30px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 130);
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 195);
 
             // Order No ชิดซ้าย
@@ -171,14 +171,14 @@
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
 
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่าความน่ารัก (ชำระแล้ว)", 90, 1180);
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-) (ชำระแล้ว)", 90, 1180);
 
             // บาร์โค้ด
             for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1230, [2,4,5][Math.floor(Math.random()*3)], 80); }
 
             ctx.textAlign = "center";
             ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1370);
-            ctx.font = "18px 'VT323'"; ctx.fillText("KEEP THIS RECEIPT FOR LOVE", 300, 1420);
+            ctx.font = "18px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1420);
 
             // แปลงเป็นรูปและเริ่มอนิเมชั่นไหล
             canvas.toBlob(blob => {
