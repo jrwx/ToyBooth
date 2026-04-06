@@ -3,35 +3,227 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Black Booth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <title>Jarawee Minimal Booth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@300;400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #1a1a1a; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #eee; overflow-x: hidden; transition: background 0.5s; }
-        #camera-ui { padding-top: 30px; display: block; }
-        #booth-machine { position: relative; width: 330px; margin: 0 auto; background: #333; padding: 10px; border-radius: 15px; border: 4px solid #444; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
-        #display-box { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
-        .timer { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 50px; display: none; text-shadow: 0 0 15px rgba(0,0,0,0.8); }
-        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
-        .receipt-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 300px; padding-bottom: 50px; }
-        .receipt-paper { background: #fdfaf5; width: 100%; box-shadow: 0 0 50px rgba(0,0,0,1); position: relative; }
-        .flow-animation { animation: slideDownFull 7s cubic-bezier(0.25, 0.1, 0.25, 1) forwards; }
-        @keyframes slideDownFull { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 20px); } }
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent: #ff3e3e;
+            --text-main: #ffffff;
+            --text-dim: #a0a0a0;
+        }
+
+        body { 
+            background-color: var(--bg-color); 
+            font-family: 'Sarabun', sans-serif; 
+            text-align: center; 
+            margin: 0; 
+            padding: 0; 
+            color: var(--text-main); 
+            overflow-x: hidden;
+        }
+
+        /* Camera UI Layout */
+        #camera-ui { 
+            padding: 40px 20px; 
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .header-title {
+            font-family: 'VT323'; 
+            font-size: 28px; 
+            letter-spacing: 2px; 
+            margin-bottom: 30px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+        }
+
+        /* Booth Styling */
+        #booth-machine { 
+            position: relative; 
+            width: 100%;
+            max-width: 340px;
+            background: var(--card-bg); 
+            padding: 8px; 
+            border-radius: 24px; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        #display-box { 
+            position: relative; 
+            width: 100%;
+            aspect-ratio: 1/1;
+            background: #000; 
+            overflow: hidden; 
+            border-radius: 18px;
+        }
+
+        video { 
+            width: 100%; 
+            height: 100%; 
+            object-fit: cover; 
+            transform: scaleX(-1); 
+        }
+
+        /* Elements */
+        #flash { 
+            position: absolute; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: white; 
+            opacity: 0; 
+            z-index: 20; 
+            pointer-events: none; 
+        }
+
+        .timer { 
+            font-family: 'Press Start 2P', cursive; 
+            position: absolute; 
+            top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); 
+            color: #fff; 
+            z-index: 30; 
+            font-size: 60px; 
+            display: none;
+        }
+
+        /* Modern Controls */
+        .controls { 
+            margin-top: 40px;
+            width: 100%;
+            max-width: 340px;
+        }
+
+        .filter-group {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .f-btn { 
+            background: transparent; 
+            color: var(--text-dim); 
+            border: 1px solid #333; 
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            font-size: 8px; 
+            cursor: pointer; 
+            font-family: 'Press Start 2P'; 
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .f-btn.active { 
+            background: var(--text-main); 
+            color: #000; 
+            border-color: var(--text-main);
+            transform: scale(1.1);
+        }
+
+        .btn-snap { 
+            background: var(--accent); 
+            color: #fff; 
+            padding: 20px 40px; 
+            font-family: 'Press Start 2P'; 
+            font-size: 14px; 
+            border: none; 
+            width: 100%;
+            border-radius: 100px; 
+            cursor: pointer; 
+            box-shadow: 0 10px 20px rgba(255, 62, 62, 0.3);
+            transition: transform 0.2s;
+        }
+
+        .btn-snap:active { transform: scale(0.95); }
+
+        /* Print Page - Black Background */
+        #print-page { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100vw; 
+            height: 100vh; 
+            background: #000; 
+            z-index: 100; 
+            overflow: hidden; 
+        }
+
+        .receipt-container { 
+            position: absolute; 
+            top: 0; left: 50%; 
+            transform: translate(-50%, -100%); 
+            width: 300px; 
+        }
+
+        .receipt-paper { 
+            background: #fdfaf5; 
+            width: 100%; 
+            box-shadow: 0 0 60px rgba(0,0,0,1); 
+            position: relative; 
+        }
+
+        .flow-animation { animation: slideDownFull 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+        @keyframes slideDownFull { 
+            0% { transform: translate(-50%, -100%); } 
+            100% { transform: translate(-50%, 40px); } 
+        }
+
         #result-img { width: 100%; display: block; mix-blend-mode: multiply; }
-        .torn { width: 100%; height: 15px; background: #000; clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); }
-        .controls { margin-top: 25px; }
-        .f-btn { background: #333; color: #fff; border: 1px dashed #666; padding: 10px; font-size: 8px; cursor: pointer; font-family: 'Press Start 2P'; margin: 2px; }
-        .f-btn.active { background: #fff; color: #000; border-style: solid; }
-        .btn-snap { background: #ff3e3e; color: #fff; padding: 20px; font-family: 'Press Start 2P'; font-size: 14px; border: none; width: 280px; border-radius: 50px; cursor: pointer; box-shadow: 0 6px 0 #b32a2a; }
-        #final-actions { position: absolute; bottom: 40px; left: 0; width: 100%; display: none; text-align: center; }
-        .btn-save { background: #fff; color: #000; padding: 15px 30px; font-family: 'Press Start 2P'; font-size: 10px; border: none; border-radius: 10px; cursor: pointer; margin: 5px; box-shadow: 0 4px 0 #ccc; }
+        
+        .torn { 
+            width: 100%; 
+            height: 15px; 
+            background: #000; 
+            clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); 
+        }
+
+        /* Final Actions UI */
+        #final-actions { 
+            position: absolute; 
+            bottom: 50px; 
+            left: 0; 
+            width: 100%; 
+            display: none; 
+            text-align: center;
+            animation: fadeIn 1s ease forwards;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .btn-save { 
+            background: rgba(255, 255, 255, 0.9); 
+            color: #000; 
+            padding: 16px 32px; 
+            font-family: 'Press Start 2P'; 
+            font-size: 10px; 
+            border: none; 
+            border-radius: 100px; 
+            cursor: pointer; 
+            margin: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-retry {
+            background: rgba(40, 40, 40, 0.8);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
     </style>
 </head>
 <body>
 
     <div id="camera-ui">
-        <div style="font-family: 'VT323'; font-size: 32px; letter-spacing: 4px; margin-bottom: 20px;">Congratulations to Jarawee!</div>
+        <div class="header-title">Congratulations to Jarawee!</div>
+        
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
@@ -39,10 +231,11 @@
                 <div id="timer" class="timer">3</div>
             </div>
         </div>
+
         <div class="controls">
-            <div style="margin-bottom: 15px;">
-                <button class="f-btn active" onclick="setF('none', this)">Normal</button>
-                <button class="f-btn" onclick="setF('kodak', this)">Kodak</button>
+            <div class="filter-group">
+                <button class="f-btn active" onclick="setF('none', this)">NORM</button>
+                <button class="f-btn" onclick="setF('kodak', this)">FILM</button>
                 <button class="f-btn" onclick="setF('bw', this)">B&W</button>
             </div>
             <button class="btn-snap" id="snap-btn" onclick="takePhotos()">มาถ่ายด่วนน</button>
@@ -58,7 +251,7 @@
         </div>
         <div id="final-actions">
             <button class="btn-save" onclick="saveImage()">เซฟด่วนพี่พี่</button>
-            <button class="btn-save" style="background:#444; color:#fff; box-shadow: 0 4px 0 #222;" onclick="location.reload()">ถ่ายใหม่เถอะ</button>
+            <button class="btn-save btn-retry" onclick="location.reload()">ถ่ายใหม่เถอะ</button>
         </div>
     </div>
 
@@ -98,12 +291,16 @@
 
         async function takePhotos() {
             const pics = [];
-            document.getElementById('snap-btn').style.display = 'none';
+            document.getElementById('snap-btn').style.opacity = '0';
+            document.getElementById('snap-btn').style.pointerEvents = 'none';
+
             for(let i=0; i<2; i++) {
                 timer.style.display = 'block';
                 for(let s=3; s>0; s--) { timer.innerText = s; await new Promise(r => setTimeout(r, 1000)); }
                 timer.style.display = 'none';
+                
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
+
                 const pCanvas = document.createElement('canvas');
                 pCanvas.width = 420; pCanvas.height = 420;
                 const pCtx = pCanvas.getContext('2d');
@@ -120,24 +317,30 @@
         function buildReceipt(pics) {
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
             for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
-            ctx.fillStyle = "#111"; ctx.textAlign = "center";
             
-            // ขยายขนาด Congrats!! ตรงนี้
+            ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; 
             ctx.fillText("Congrats!!", 300, 115);
             
             ctx.font = "30px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 165);
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 195);
-            ctx.textAlign = "left"; ctx.font = "22px 'VT323'"; ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 230);
+            
+            ctx.textAlign = "left"; 
+            ctx.font = "22px 'VT323'"; 
+            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 230);
+            
             pics.forEach((p, idx) => {
                 const y = 260 + (idx * 440);
                 ctx.drawImage(p, 90, y, 420, 420);
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
+
             ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1180);
             for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1230, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            
             ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1370);
             ctx.font = "18px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1420);
+            
             canvas.toBlob(blob => {
                 finalBlob = blob;
                 resultImg.src = URL.createObjectURL(blob);
@@ -155,21 +358,11 @@
         async function saveImage() {
             if (!finalBlob) return;
             const file = new File([finalBlob], "jarawee_receipt.png", { type: "image/png" });
-            
-            // ถ้าเป็นมือถือที่รองรับ Web Share (iOS/Android) จะเด้งเมนู Save ให้เลย
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
                 try {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Congratulations to Jarawee!',
-                    });
-                } catch (err) {
-                    // ถ้ากดยกเลิกหรือไม่สำเร็จ ให้ fallback ไปโหลดแบบปกติ
-                    downloadFallback();
-                }
-            } else {
-                downloadFallback();
-            }
+                    await navigator.share({ files: [file], title: 'Congratulations to Jarawee!' });
+                } catch (err) { downloadFallback(); }
+            } else { downloadFallback(); }
         }
 
         function downloadFallback() {
