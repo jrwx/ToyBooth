@@ -74,7 +74,7 @@
             </div>
         </div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">เซฟด่วนพี่พี่</button>
+            <button class="btn-save" onclick="saveImage()">เซฟเข้าแกลลอรี่</button>
             <button class="btn-save btn-retry" onclick="location.reload()">ถ่ายใหม่เถอะ</button>
         </div>
     </div>
@@ -93,7 +93,6 @@
         const finalActions = document.getElementById('final-actions');
 
         let filterStyle = 'none';
-        let currentMode = 'none';
         let stream;
         let finalBlob = null;
 
@@ -108,7 +107,6 @@
         function setF(mode, btn) {
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            currentMode = mode;
             if(mode === 'none') filterStyle = 'none';
             else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
             else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.2)';
@@ -169,7 +167,7 @@
             
             ctx.globalAlpha = 0.5;
             ctx.fillStyle = "#111";
-            ctx.font = "32px 'VT323'"; 
+            ctx.font = "bold 32px 'VT323'"; 
             ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
             ctx.globalAlpha = 1.0;
 
@@ -199,15 +197,33 @@
             setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
         }
 
-        // ฟังก์ชันเซฟลงเครื่องโดยตรง
-        function saveImage() {
+        // เซฟเข้าแกลลอรี่โดยใช้ Web Share API (รองรับ Save Image ของมือถือ)
+        async function saveImage() {
             if (!finalBlob) return;
+            const file = new File([finalBlob], "jarawee_booth.png", { type: "image/png" });
+            
+            // ตรวจสอบว่าเครื่องรองรับการ Share File ไหม (iOS/Android ส่วนใหญ่รองรับ)
+            if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                try {
+                    await navigator.share({
+                        files: [file],
+                        title: 'Jarawee Photo Booth',
+                    });
+                } catch (err) {
+                    // ถ้ากดยกเลิกหรือไม่สำเร็จ ให้ใช้ดาวน์โหลดปกติ
+                    downloadFallback();
+                }
+            } else {
+                // ถ้าเบราว์เซอร์ไม่รองรับ Share API ให้ใช้ดาวน์โหลดปกติ
+                downloadFallback();
+            }
+        }
+
+        function downloadFallback() {
             const link = document.createElement('a');
-            link.download = `jarawee_booth_${Date.now()}.png`; // ตั้งชื่อไฟล์ตามเวลา
+            link.download = 'jarawee_booth.png';
             link.href = resultImg.src;
-            document.body.appendChild(link);
             link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>
