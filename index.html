@@ -3,117 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Congratulations to Jarawee <3 - Receipt Booth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@700&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <title>Retro Receipt - Jarawee</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f0f0f0; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 20px 0; color: #333; overflow-x: hidden; }
+        body { background-color: #d1d1d1; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 20px 0; color: #333; }
         
         #video-container { 
             position: relative; width: 300px; height: 300px; margin: 0 auto; 
-            border: 6px solid #333; border-radius: 10px; overflow: hidden; background: #000; 
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.2));
+            border: 4px solid #000; border-radius: 2px; overflow: hidden; background: #000; 
+            box-shadow: 10px 10px 0px #000;
         }
         
-        /* กล้อง Grayscale + ฟิลเตอร์หน้าเนียนบางๆ */
         video { 
             width: 100%; height: 100%; object-fit: cover; 
             transform: scaleX(-1); 
-            filter: grayscale(100%) blur(0.3px) contrast(110%); /* ทำเป็น Grayscale และใส่ blur เบาๆ ให้ผิวเนียน contrast เพิ่มความชัด */
+            filter: grayscale(100%) contrast(120%);
         }
         
         .timer { 
-            font-size: 80px; position: absolute; top: 50%; left: 50%; 
+            font-family: 'Press Start 2P', cursive; font-size: 50px; 
+            position: absolute; top: 50%; left: 50%; 
             transform: translate(-50%, -50%); display: none; 
-            font-weight: bold; z-index: 10; -webkit-text-stroke: 1px white;
+            color: #fff; z-index: 10; text-shadow: 4px 4px #000;
         }
 
         .btn { 
-            background: #333; color: white; padding: 15px 30px; font-size: 18px; 
-            border-radius: 5px; border: none; font-weight: bold; 
-            margin-top: 20px; width: 80%; cursor: pointer;
-            transition: 0.1s;
+            background: #000; color: #fff; padding: 15px 30px; 
+            font-family: 'Press Start 2P', cursive; font-size: 12px; 
+            border: none; margin-top: 30px; width: 85%; cursor: pointer;
+            box-shadow: 5px 5px 0px #555;
         }
-        .btn:active { transform: translateY(2px); }
+        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #555; }
         
         #result-area { display: none; margin-top: 20px; padding-bottom: 50px; }
-        
-        /* สไตล์กรอบรูปใบเสร็จ "รอยฉีก" */
-        #result-img-container {
-            position: relative; display: inline-block; width: 85%;
-            filter: drop-shadow(0 8px 15px rgba(0,0,0,0.15));
-        }
-        
-        #result-img { 
-            width: 100%; border-radius: 0;
-            /* เพิ่มรอยฉีกหยักๆ ด้านบนและล่างด้วย CSS mask */
-            -webkit-mask-image: linear-gradient(to bottom, transparent 4px, black 4px, black calc(100% - 4px), transparent calc(100% - 4px)),
-                                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,10 5,0 10,10 15,0 20,10" fill="black"/></svg>'),
-                                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,0 5,10 10,0 15,10 20,0" fill="black"/></svg>');
-            -webkit-mask-size: 100% 100%, 15px 8px, 15px 8px;
-            -webkit-mask-position: 0 0, 0 0, 0 100%;
-            -webkit-mask-repeat: no-repeat, repeat-x, repeat-x;
-            -webkit-mask-composite: destination-in, source-over, source-over;
-            mask-image: linear-gradient(to bottom, transparent 4px, black 4px, black calc(100% - 4px), transparent calc(100% - 4px)),
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,10 5,0 10,10 15,0 20,10" fill="black"/></svg>'),
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,0 5,10 10,0 15,10 20,0" fill="black"/></svg>');
-            mask-size: 100% 100%, 15px 8px, 15px 8px;
-            mask-position: 0 0, 0 0, 0 100%;
-            mask-repeat: no-repeat, repeat-x, repeat-x;
-            mask-composite: destination-in, source-over, source-over;
-        }
+        #result-img { width: 85%; filter: drop-shadow(5px 5px 0px rgba(0,0,0,0.2)); }
     </style>
 </head>
 <body>
 
-    <div style="font-family: 'Caveat', cursive; font-size: 30px; color: #333; margin-bottom: 5px;">Congratulations to Jarawee <3</div>
-    <div style="font-size: 14px; color: #666; margin-bottom: 20px;">SPECIAL PHOTO RECEIPT</div>
+    <div style="font-family: 'Press Start 2P', cursive; font-size: 14px; margin-bottom: 15px; line-height: 1.5;">
+        CONGRATS!<br><span style="font-size: 10px;">JARAWEE EDITION</span>
+    </div>
     
     <div id="video-container">
         <div id="timer" class="timer">3</div>
         <video id="video" autoplay playsinline muted></video>
     </div>
     
-    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายเริ่ดๆ (Grayscale)</button>
+    <button class="btn" id="btn-snap" onclick="startCapture()">[ START SNAP ]</button>
 
     <div id="result-area">
-        <div id="result-img-container">
-            <img id="result-img">
-        </div>
+        <img id="result-img">
         <br>
-        <button id="btn-share" class="btn" style="background:#28a745;" onclick="sharePhoto()">✨ SAVE TO GALLERY</button>
+        <button class="btn" style="background:#28a745;" onclick="sharePhoto()">[ SAVE PHOTO ]</button>
     </div>
 
-    <canvas id="c" width="600" height="1550" style="display:none;"></canvas>
+    <canvas id="c" width="600" height="1650" style="display:none;"></canvas>
 
     <script>
         const v = document.getElementById('video');
         let currentBlob = null;
 
-        // ฟังก์ชันเปิดกล้องอัตโนมัติแบบเสถียร (ไม่ต้องถามซ้ำ)
         async function initCamera() {
             try {
-                // ขออนุญาตกล้องแบบ Grayscale ตั้งแต่ตอนดึง Stream
-                const constraints = { 
-                    video: { 
-                        facingMode: "user",
-                        width: { ideal: 720 },
-                        height: { ideal: 720 }
-                    } 
-                };
-                const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                v.srcObject = stream;
-                // บังคับให้เล่นวิดีโอ (จำเป็นสำหรับ iOS)
-                v.setAttribute('autoplay', '');
-                v.setAttribute('muted', '');
-                v.setAttribute('playsinline', '');
-                v.play(); // สั่งให้วิดีโอเล่นทันที
-            } catch (err) { 
-                console.error("initCamera error: ", err);
-                alert("เปิดกล้องไม่ได้! กรุณาเช็คการอนุญาตกล้องบน Safari/Chrome นะจ๊ะ"); 
-            }
+                const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                v.srcObject = s;
+                v.play();
+            } catch (err) { alert("Camera Error: " + err); }
         }
-        
-        // เริ่มกล้องทันทีที่เปิดเว็บ
         initCamera();
 
         async function startCapture() {
@@ -124,86 +81,54 @@
             document.getElementById('btn-snap').style.display = 'none';
             document.getElementById('result-area').style.display = 'none';
 
-            // --- วาดพื้นหลังใบเสร็จ (ขาว sạch) ---
+            // วาดใบเสร็จ
             ctx.fillStyle = "white"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             ctx.fillStyle = "black";
             ctx.textAlign = "center";
             
-            // หัวข้อลายมือ Caveat
-            ctx.font = "700 50px Caveat";
-            ctx.fillText("Congratulations to Jarawee <3", 300, 100);
+            // ส่วนหัว: CONGRATULATIONS (ตัวใหญ่)
+            ctx.font = "38px 'Press Start 2P'";
+            ctx.fillText("CONGRATULATIONS", 300, 100);
             
-           
-            // เส้นคั่นตาราง
-            ctx.lineWidth = 2;
-            ctx.beginPath(); ctx.moveTo(50, 170); ctx.lineTo(550, 170); ctx.stroke();
+            // ส่วนหัว: to jarawee (ตัวเล็ก)
+            ctx.font = "20px 'Press Start 2P'";
+            ctx.fillText("to jarawee <3", 300, 150);
+            
+            ctx.font = "20px monospace";
+            ctx.fillText("==============================", 300, 190);
 
             for (let i = 0; i < 2; i++) {
                 timer.style.display = 'block';
-                const colors = ["#004AAD", "#E63946", "#FFD700"];
                 for (let j = 3; j > 0; j--) {
                     timer.innerText = j;
-                    timer.style.color = colors[j-1];
                     await new Promise(r => setTimeout(r, 1000));
                 }
-                timer.innerText = "GO!"; timer.style.color = "green";
-                await new Promise(r => setTimeout(r, 400));
+                timer.innerText = "!"; 
+                await new Promise(r => setTimeout(r, 300));
                 timer.style.display = 'none';
 
-                // ถ่ายรูป Grayscale 1:1 + ฟิลเตอร์หน้าเนียน (Grayscale เท่านั้น)
-                const pSize = 480; const x = 60; const y = (i * 510) + 210;
+                const pSize = 480; const x = 60; const y = (i * 510) + 220;
                 ctx.save();
                 ctx.translate(x + pSize, y); ctx.scale(-1, 1);
-                
-                // ใช้ filter Grayscale 100% ตั้งแต่ตอนถ่าย
-                ctx.filter = 'grayscale(100%)';
-                
+                ctx.filter = 'grayscale(100%) contrast(130%)';
                 const min = Math.min(v.videoWidth, v.videoHeight);
-                const sx = (v.videoWidth - min) / 2;
-                const sy = (v.videoHeight - min) / 2;
-                
-                ctx.drawImage(v, sx, sy, min, min, 0, 0, pSize, pSize);
+                ctx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, pSize, pSize);
                 ctx.restore();
             }
 
-            // --- ส่วนท้ายใบเสร็จ (ทางการ) ---
+            // ส่วนท้าย
             ctx.textAlign = "center";
-            ctx.font = "400 20px Sarabun";
-            ctx.fillText("--------------------------------------------------", 300, 1260);
+            ctx.font = "20px monospace";
+            ctx.fillText("==============================", 300, 1260);
             
-            ctx.textAlign = "left"; ctx.font = "700 30px Sarabun";
-            // ข้อความในบรรทัดเดียวกันเป๊ะๆ
-            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บูด", 70, 1310);
+            ctx.textAlign = "left";
+            ctx.font = "700 28px Sarabun";
+            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บาท", 65, 1310);
             
-            ctx.textAlign = "center";
-            ctx.font = "italic 18px Sarabun";
-            ctx.fillText("THANK YOU FOR BEING TOGETHER", 300, 1370);
-            
-            // วันที่/เวลา
-            const d = new Date(); ctx.font = "400 16px Sarabun";
-            ctx.fillText("ออกเมื่อ: " + d.toLocaleString('th-TH'), 300, 1420);
-
-            // แสดงผลรูปภาพ
-            canvas.toBlob((b) => {
-                currentBlob = b;
-                document.getElementById('result-img').src = URL.createObjectURL(b);
-                document.getElementById('result-area').style.display = 'block';
-                document.getElementById('btn-snap').style.display = 'inline-block';
-                document.getElementById('btn-snap').innerText = "ถ่ายใหม่อีกรอบ";
-            }, 'image/jpeg', 0.95);
-        }
-
-        async function sharePhoto() {
-            if (!currentBlob) return;
-            const f = new File([currentBlob], "receipt-jarawee.jpg", {type:"image/jpeg"});
-            if (navigator.share) {
-                try { await navigator.share({ files: [f], title: 'Congrats Jarawee' }); } catch (e) {}
-            } else {
-                const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "receipt-jarawee.jpg"; a.click();
-            }
-        }
-    </script>
-</body>
-</html>
+            // --- วาดบาร์โค้ด ---
+            ctx.fillStyle = "black";
+            const barcodeX = 140;
+            const barcodeY = 1360;
+            // ว
