@@ -14,202 +14,36 @@
             --text-dim: #a0a0a0;
         }
 
-        body { 
-            background-color: var(--bg-color); 
-            font-family: 'Sarabun', sans-serif; 
-            text-align: center; 
-            margin: 0; 
-            padding: 0; 
-            color: var(--text-main); 
-            overflow-x: hidden;
-        }
+        body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: var(--text-main); overflow-x: hidden; }
 
-        #camera-ui { 
-            padding: 40px 20px; 
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-        }
+        #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 30px; color: var(--text-dim); text-transform: uppercase; }
 
-        .header-title {
-            font-family: 'VT323'; 
-            font-size: 28px; 
-            letter-spacing: 2px; 
-            margin-bottom: 30px;
-            color: var(--text-dim);
-            text-transform: uppercase;
-        }
+        #booth-machine { position: relative; width: 100%; max-width: 340px; background: var(--card-bg); padding: 8px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
+        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 18px; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
-        #booth-machine { 
-            position: relative; 
-            width: 100%;
-            max-width: 340px;
-            background: var(--card-bg); 
-            padding: 8px; 
-            border-radius: 24px; 
-            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        }
+        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
+        .timer { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 60px; display: none; }
 
-        #display-box { 
-            position: relative; 
-            width: 100%;
-            aspect-ratio: 1/1;
-            background: #000; 
-            overflow: hidden; 
-            border-radius: 18px;
-        }
+        .controls { margin-top: 40px; width: 100%; max-width: 340px; }
+        .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .f-btn { background: transparent; color: var(--text-dim); border: 1px solid #333; width: 60px; height: 60px; border-radius: 50%; font-size: 8px; cursor: pointer; font-family: 'Press Start 2P'; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; }
+        .f-btn.active { background: var(--text-main); color: #000; border-color: var(--text-main); transform: scale(1.1); }
+        .btn-snap { background: var(--accent); color: #fff; padding: 20px 40px; font-family: 'Press Start 2P'; font-size: 14px; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 62, 62, 0.3); transition: transform 0.2s; }
 
-        video { 
-            width: 100%; 
-            height: 100%; 
-            object-fit: cover; 
-            transform: scaleX(-1); 
-        }
-
-        #flash { 
-            position: absolute; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: white; 
-            opacity: 0; 
-            z-index: 20; 
-            pointer-events: none; 
-        }
-
-        .timer { 
-            font-family: 'Press Start 2P', cursive; 
-            position: absolute; 
-            top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); 
-            color: #fff; 
-            z-index: 30; 
-            font-size: 60px; 
-            display: none;
-        }
-
-        .controls { 
-            margin-top: 40px;
-            width: 100%;
-            max-width: 340px;
-        }
-
-        .filter-group {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .f-btn { 
-            background: transparent; 
-            color: var(--text-dim); 
-            border: 1px solid #333; 
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            font-size: 8px; 
-            cursor: pointer; 
-            font-family: 'Press Start 2P'; 
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .f-btn.active { 
-            background: var(--text-main); 
-            color: #000; 
-            border-color: var(--text-main);
-            transform: scale(1.1);
-        }
-
-        .btn-snap { 
-            background: var(--accent); 
-            color: #fff; 
-            padding: 20px 40px; 
-            font-family: 'Press Start 2P'; 
-            font-size: 14px; 
-            border: none; 
-            width: 100%;
-            border-radius: 100px; 
-            cursor: pointer; 
-            box-shadow: 0 10px 20px rgba(255, 62, 62, 0.3);
-            transition: transform 0.2s;
-        }
-
-        #print-page { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100vw; 
-            height: 100vh; 
-            background: #000; 
-            z-index: 100; 
-            overflow: hidden; 
-        }
-
-        .receipt-container { 
-            position: absolute; 
-            top: 0; left: 50%; 
-            transform: translate(-50%, -100%); 
-            width: 300px; 
-        }
-
-        .receipt-paper { 
-            background: #fdfaf5; 
-            width: 100%; 
-            box-shadow: 0 0 60px rgba(0,0,0,1); 
-            position: relative; 
-        }
-
+        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
+        .receipt-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 300px; }
+        .receipt-paper { width: 100%; box-shadow: 0 0 60px rgba(0,0,0,1); position: relative; }
         .flow-animation { animation: slideDownFull 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideDownFull { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } }
 
-        @keyframes slideDownFull { 
-            0% { transform: translate(-50%, -100%); } 
-            100% { transform: translate(-50%, 40px); } 
-        }
-
-        #result-img { width: 100%; display: block; mix-blend-mode: multiply; }
-        
-        /* ขอบหยักแบบไม่ถี่มาก */
-        .torn { 
-            width: 100%; 
-            height: 20px; 
-            background: #000; 
-            clip-path: polygon(0% 100%, 10% 20%, 20% 100%, 30% 25%, 40% 100%, 50% 15%, 60% 100%, 70% 30%, 80% 100%, 90% 20%, 100% 100%); 
-        }
-
-        #final-actions { 
-            position: absolute; 
-            bottom: 50px; 
-            left: 0; 
-            width: 100%; 
-            display: none; 
-            text-align: center;
-            animation: fadeIn 1s ease forwards;
-        }
-
+        #result-img { width: 100%; display: block; }
+        #final-actions { position: absolute; bottom: 50px; left: 0; width: 100%; display: none; text-align: center; animation: fadeIn 1s ease forwards; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        .btn-save { 
-            background: rgba(255, 255, 255, 0.9); 
-            color: #000; 
-            padding: 16px 32px; 
-            font-family: 'Press Start 2P'; 
-            font-size: 10px; 
-            border: none; 
-            border-radius: 100px; 
-            cursor: pointer; 
-            margin: 8px;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-retry {
-            background: rgba(40, 40, 40, 0.8);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
+        .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-family: 'Press Start 2P'; font-size: 10px; border: none; border-radius: 100px; cursor: pointer; margin: 8px; backdrop-filter: blur(10px); }
+        .btn-retry { background: rgba(40, 40, 40, 0.8); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
@@ -237,7 +71,6 @@
         <div class="receipt-container" id="receipt-cont">
             <div class="receipt-paper">
                 <img id="result-img">
-                <div class="torn"></div>
             </div>
         </div>
         <div id="final-actions">
@@ -260,6 +93,7 @@
         const finalActions = document.getElementById('final-actions');
 
         let filterStyle = 'none';
+        let currentMode = 'none';
         let stream;
         let finalBlob = null;
 
@@ -274,9 +108,11 @@
         function setF(mode, btn) {
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            if(mode === 'none') filterStyle = 'none';
-            else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
-            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.2)';
+            currentMode = mode;
+            // ปรับฟิลเตอร์หน้าจอ พร้อมเบลอผิวเล็กน้อย (Smoothing)
+            if(mode === 'none') filterStyle = 'blur(0.4px)';
+            else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1) blur(0.4px)';
+            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.2) blur(0.4px)';
             video.style.filter = filterStyle;
         }
 
@@ -295,12 +131,25 @@
                 pCanvas.width = 420; pCanvas.height = 420;
                 const pCtx = pCanvas.getContext('2d');
                 
-                // ใช้ filterStyle ณ ตอนที่กดถ่ายจริง
-                pCtx.filter = filterStyle;
+                // ใช้ filter จริงที่เลือก
+                let drawFilter = 'none';
+                if(currentMode === 'none') drawFilter = 'blur(0.8px)';
+                else if(currentMode === 'kodak') drawFilter = 'contrast(1.2) saturate(1.4) sepia(0.1) blur(0.8px)';
+                else if(currentMode === 'bw') drawFilter = 'grayscale(1) contrast(1.2) blur(0.8px)';
                 
+                pCtx.filter = drawFilter;
                 pCtx.translate(420, 0); pCtx.scale(-1, 1);
                 const size = Math.min(video.videoWidth, video.videoHeight);
+                
+                // วาดภาพหลัก
                 pCtx.drawImage(video, (video.videoWidth-size)/2, (video.videoHeight-size)/2, size, size, 0, 0, 420, 420);
+                
+                // เพิ่ม Layer หน้าเนียนซ้อน (Soft Glow)
+                pCtx.globalAlpha = 0.3;
+                pCtx.filter = 'blur(4px)';
+                pCtx.drawImage(pCanvas, 0, 0);
+                pCtx.globalAlpha = 1.0;
+
                 pics.push(pCanvas);
                 if(i==0) await new Promise(r => setTimeout(r, 1000));
             }
@@ -308,40 +157,55 @@
         }
 
         function buildReceipt(pics) {
-            // เคลียร์ Canvas ก่อนเริ่มวาดใหม่
             ctx.clearRect(0,0,600,1520);
-            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
+            
+            // วาดตัวใบเสร็จ (ไม่วาดเต็มเพื่อเหลือพื้นที่รอยฉีก)
+            ctx.fillStyle = "#fdfaf5"; 
+            ctx.fillRect(0, 0, 600, 1480);
+            
+            // วาดเม็ดกระดาษ Noise
+            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1480, 1, 1); }
             
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; 
             ctx.fillText("Congrats!!", 300, 115);
             
-            // ขยาย To Jarawee
-            ctx.font = "45px 'VT323'"; 
+            ctx.font = "48px 'VT323'"; 
             ctx.fillText("To Jarawee <3", 300, 175);
             
-            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 210);
+            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
             
+            // ขยาย Order ID ให้ใหญ่ขึ้นอีก
             ctx.textAlign = "left"; 
-            ctx.font = "22px 'VT323'"; 
-            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 245);
+            ctx.font = "bold 32px 'VT323'"; 
+            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
             
             pics.forEach((p, idx) => {
-                const y = 280 + (idx * 440);
+                const y = 300 + (idx * 440);
                 ctx.drawImage(p, 90, y, 420, 420);
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
 
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1180);
-            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1230, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
+            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
             
-            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1370);
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
             
-            // ขยาย Thank you for being together
-            ctx.font = "28px 'VT323'"; 
-            ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1430);
-            
+            ctx.font = "bold 32px 'VT323'"; 
+            ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
+
+            // วาดรอยฉีก (Torn Edge) ลงในเนื้อภาพ PNG เลย
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.moveTo(0, 1480);
+            let step = 60; // ความห่างรอยฉีก
+            for(let x=0; x<=600; x+=step) {
+                ctx.lineTo(x + step/2, 1450 + (Math.random()*20));
+                ctx.lineTo(x + step, 1480);
+            }
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
+
             canvas.toBlob(blob => {
                 finalBlob = blob;
                 resultImg.src = URL.createObjectURL(blob);
