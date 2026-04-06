@@ -3,26 +3,111 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Congrats Sao Jang - 3000 นะจ๊ะ</title>
+    <title>CONGRATS SAO JANG</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #f0f0f0; font-family: 'Space Mono', 'Kanit', monospace; text-align: center; margin: 0; padding: 20px 0; color: #333; overflow-x: hidden; }
-        h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        #video-container { position: relative; width: 320px; height: 320px; margin: 0 auto; border: 4px solid #333; border-radius: 10px; overflow: hidden; background: #000; }
+        body { background-color: #f0f0f0; font-family: 'Kanit', sans-serif; text-align: center; margin: 0; padding: 20px 0; }
+        #video-container { position: relative; width: 300px; height: 300px; margin: 0 auto; border: 5px solid #333; border-radius: 15px; overflow: hidden; background: #000; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(100%); }
-        
-        .timer { 
-            font-size: 90px; position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); display: none; 
-            font-weight: bold; z-index: 10; -webkit-text-stroke: 2px white;
+        .timer { font-size: 80px; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; font-weight: bold; z-index: 10; -webkit-text-stroke: 2px white; }
+        .btn { background: #333; color: white; padding: 15px 30px; font-size: 18px; border-radius: 50px; border: none; font-weight: bold; margin-top: 20px; width: 80%; cursor: pointer; }
+        #result-area { display: none; margin-top: 20px; }
+        #result-img { width: 85%; border-radius: 5px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+    <h2 style="margin-bottom:0;">CONGRATULATIONS</h2>
+    <h2 style="margin-top:0;">SAO JANG</h2>
+    
+    <div id="video-container">
+        <div id="timer" class="timer">3</div>
+        <video id="video" autoplay playsinline muted></video>
+    </div>
+    
+    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายรูป (3000 นะจ๊ะ)</button>
+
+    <div id="result-area">
+        <img id="result-img">
+        <br>
+        <button class="btn" style="background:#28a745;" onclick="sharePhoto()">✨ บันทึกรูปเริ่ดๆ</button>
+    </div>
+
+    <canvas id="c" width="600" height="1550" style="display:none;"></canvas>
+
+    <script>
+        const v = document.getElementById('video');
+        let currentBlob = null;
+
+        // ฟังก์ชันขออนุญาตกล้องแบบเข้มงวด
+        async function init() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ 
+                    video: { facingMode: "user" }, 
+                    audio: false 
+                });
+                v.srcObject = stream;
+                v.play(); // สั่งให้วิดีโอเล่นทันที
+            } catch (e) {
+                alert("เข้าถึงกล้องไม่ได้! กรุณากด 'อนุญาต' หรือเปิดใน Safari/Chrome นะครับ");
+            }
         }
 
-        #next-alert {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            background: rgba(0,0,0,0.8); color: #FFD700; padding: 10px;
-            border-radius: 10px; font-size: 20px; display: none; z-index: 11; width: 80%;
+        // เรียกใช้งานทันที
+        init();
+
+        async function startCapture() {
+            const canvas = document.getElementById('c');
+            const ctx = canvas.getContext('2d');
+            const timer = document.getElementById('timer');
+            
+            document.getElementById('btn-snap').style.display = 'none';
+            document.getElementById('result-area').style.display = 'none';
+
+            // วาดหัวใบเสร็จ
+            ctx.fillStyle = "white"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "black"; ctx.textAlign = "center";
+            ctx.font = "bold 40px Kanit"; ctx.fillText("CONGRATULATIONS", 300, 80);
+            ctx.fillText("SAO JANG", 300, 130);
+            ctx.font = "25px Kanit"; ctx.textAlign = "left";
+            ctx.fillText("ITEM: ค่ารักเอ็ง", 50, 200);
+            ctx.textAlign = "right"; ctx.font = "bold 35px Kanit";
+            ctx.fillText("TOTAL: 3000 นะจ๊ะ", 550, 250);
+
+            for (let i = 0; i < 2; i++) {
+                timer.style.display = 'block';
+                const colors = ["#004AAD", "#E63946", "#FFD700"];
+                for (let j = 3; j > 0; j--) {
+                    timer.innerText = j;
+                    timer.style.color = colors[j-1];
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                timer.innerText = "GO!"; timer.style.color = "green";
+                await new Promise(r => setTimeout(r, 500));
+                timer.style.display = 'none';
+
+                // วาดภาพขาวดำ
+                ctx.save();
+                ctx.translate(550, (i * 550) + 310); ctx.scale(-1, 1);
+                ctx.filter = 'grayscale(100%)';
+                ctx.drawImage(v, 0, 0, v.videoWidth, v.videoHeight, 0, 0, 500, 500);
+                ctx.restore();
+            }
+
+            canvas.toBlob((b) => {
+                currentBlob = b;
+                document.getElementById('result-img').src = URL.createObjectURL(b);
+                document.getElementById('result-area').style.display = 'block';
+                document.getElementById('btn-snap').style.display = 'inline-block';
+            }, 'image/jpeg', 0.9);
         }
 
-        .btn { background: #333; color: white; padding: 15px 35px; font-size: 18px; border-radius: 30px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 0 #1a1a1a; width: 85%; max-width: 320px; }
-        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1a1a1a; }
-        .btn-save { background: #28a745; box-
+        async function sharePhoto() {
+            if (!currentBlob) return;
+            const f = new File([currentBlob], "receipt.jpg", {type:"image/jpeg"});
+            if (navigator.share) { await navigator.share({ files: [f] }); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "receipt.jpg"; a.click(); }
+        }
+    </script>
+</body>
+</html>
