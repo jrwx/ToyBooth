@@ -3,59 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Retro Receipt - Jarawee</title>
+    <title>Jarawee Retro Receipt</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #d1d1d1; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 20px 0; color: #333; }
-        
         #video-container { 
             position: relative; width: 300px; height: 300px; margin: 0 auto; 
-            border: 4px solid #000; border-radius: 2px; overflow: hidden; background: #000; 
-            box-shadow: 10px 10px 0px #000;
+            border: 4px solid #000; background: #000; box-shadow: 8px 8px 0px #000;
         }
-        
-        video { 
-            width: 100%; height: 100%; object-fit: cover; 
-            transform: scaleX(-1); 
-            filter: grayscale(100%) contrast(120%);
-        }
-        
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(100%) contrast(110%); }
         .timer { 
-            font-family: 'Press Start 2P', cursive; font-size: 50px; 
-            position: absolute; top: 50%; left: 50%; 
-            transform: translate(-50%, -50%); display: none; 
-            color: #fff; z-index: 10; text-shadow: 4px 4px #000;
+            font-family: 'Press Start 2P', cursive; font-size: 50px; position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; color: white; z-index: 10;
         }
-
         .btn { 
-            background: #000; color: #fff; padding: 15px 30px; 
-            font-family: 'Press Start 2P', cursive; font-size: 12px; 
-            border: none; margin-top: 30px; width: 85%; cursor: pointer;
-            box-shadow: 5px 5px 0px #555;
+            background: #000; color: #fff; padding: 15px; font-family: 'Press Start 2P', cursive; 
+            font-size: 12px; border: none; margin-top: 25px; width: 85%; cursor: pointer; box-shadow: 4px 4px 0px #555;
         }
-        .btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #555; }
-        
-        #result-area { display: none; margin-top: 20px; padding-bottom: 50px; }
+        #result-area { display: none; margin-top: 20px; padding-bottom: 80px; }
         #result-img { width: 85%; filter: drop-shadow(5px 5px 0px rgba(0,0,0,0.2)); }
     </style>
 </head>
 <body>
 
-    <div style="font-family: 'Press Start 2P', cursive; font-size: 14px; margin-bottom: 15px; line-height: 1.5;">
-        CONGRATS!<br><span style="font-size: 10px;">JARAWEE EDITION</span>
-    </div>
+    <div style="font-family: 'Press Start 2P', cursive; font-size: 12px; margin-bottom: 15px;">PRESS START TO SNAP</div>
     
     <div id="video-container">
         <div id="timer" class="timer">3</div>
         <video id="video" autoplay playsinline muted></video>
     </div>
     
-    <button class="btn" id="btn-snap" onclick="startCapture()">[ START SNAP ]</button>
+    <button class="btn" id="btn-snap" onclick="startCapture()">[ มากถ่ายกันเต๊อะ! ]</button>
 
     <div id="result-area">
         <img id="result-img">
         <br>
-        <button class="btn" style="background:#28a745;" onclick="sharePhoto()">[ SAVE PHOTO ]</button>
+        <button class="btn" style="background:#28a745;" onclick="sharePhoto()">[ โหลดรูปด่วน ]</button>
     </div>
 
     <canvas id="c" width="600" height="1650" style="display:none;"></canvas>
@@ -64,13 +47,24 @@
         const v = document.getElementById('video');
         let currentBlob = null;
 
+        // ฟังก์ชันเปิดกล้องที่เสถียรที่สุด
         async function initCamera() {
+            const constraints = {
+                video: { facingMode: "user", width: 720, height: 720 },
+                audio: false
+            };
             try {
-                const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
-                v.srcObject = s;
-                v.play();
-            } catch (err) { alert("Camera Error: " + err); }
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                v.srcObject = stream;
+                // บังคับเล่นสำหรับ iOS
+                v.onloadedmetadata = () => { v.play(); };
+            } catch (err) {
+                console.error("Camera access denied:", err);
+                alert("เปิดกล้องไม่ได้! กรุณาเช็คว่าใช้ https:// และกด 'อนุญาต' กล้องนะครับ");
+            }
         }
+        
+        // เรียกใช้งานทันที
         initCamera();
 
         async function startCapture() {
@@ -81,23 +75,20 @@
             document.getElementById('btn-snap').style.display = 'none';
             document.getElementById('result-area').style.display = 'none';
 
-            // วาดใบเสร็จ
+            // เตรียมพื้นหลังใบเสร็จ
             ctx.fillStyle = "white"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
             ctx.fillStyle = "black";
             ctx.textAlign = "center";
             
-            // ส่วนหัว: CONGRATULATIONS (ตัวใหญ่)
+            // หัวข้อตามสั่ง: CONGRATULATIONS ใหญ่ / to jarawee เล็ก
             ctx.font = "38px 'Press Start 2P'";
             ctx.fillText("CONGRATULATIONS", 300, 100);
-            
-            // ส่วนหัว: to jarawee (ตัวเล็ก)
             ctx.font = "20px 'Press Start 2P'";
             ctx.fillText("to jarawee <3", 300, 150);
             
             ctx.font = "20px monospace";
-            ctx.fillText("==============================", 300, 190);
+            ctx.fillText("----------------------------", 300, 190);
 
             for (let i = 0; i < 2; i++) {
                 timer.style.display = 'block';
@@ -112,23 +103,51 @@
                 const pSize = 480; const x = 60; const y = (i * 510) + 220;
                 ctx.save();
                 ctx.translate(x + pSize, y); ctx.scale(-1, 1);
-                ctx.filter = 'grayscale(100%) contrast(130%)';
+                ctx.filter = 'grayscale(100%) contrast(120%)';
                 const min = Math.min(v.videoWidth, v.videoHeight);
                 ctx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, pSize, pSize);
                 ctx.restore();
             }
 
-            // ส่วนท้าย
-            ctx.textAlign = "center";
-            ctx.font = "20px monospace";
-            ctx.fillText("==============================", 300, 1260);
-            
+            // บรรทัดเดียวกันเป๊ะ
             ctx.textAlign = "left";
             ctx.font = "700 28px Sarabun";
-            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บาท", 65, 1310);
+            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บูด", 65, 1310);
             
-            // --- วาดบาร์โค้ด ---
+            // บาร์โค้ดสุ่มเส้น
             ctx.fillStyle = "black";
-            const barcodeX = 140;
-            const barcodeY = 1360;
-            // ว
+            const bX = 140; const bY = 1350;
+            for(let k=0; k<65; k++) {
+                let w = Math.random() > 0.5 ? 4 : 2;
+                ctx.fillRect(bX + (k*5), bY, w, 70);
+            }
+            ctx.textAlign = "center";
+            ctx.font = "20px 'Press Start 2P'";
+            ctx.fillText("0648173604", 300, 1460);
+            
+            ctx.font = "16px monospace";
+            ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1510);
+            ctx.fillText("THANK YOU FOR THE LOVE", 300, 1540);
+
+            // รอยหยักท้ายบิล
+            ctx.beginPath(); ctx.moveTo(0, 1650);
+            for(let m=0; m<600; m+=20) { ctx.lineTo(m+10, 1635); ctx.lineTo(m+20, 1650); }
+            ctx.fillStyle = "#d1d1d1"; ctx.fill();
+
+            canvas.toBlob((b) => {
+                currentBlob = b;
+                document.getElementById('result-img').src = URL.createObjectURL(b);
+                document.getElementById('result-area').style.display = 'block';
+                document.getElementById('btn-snap').style.display = 'inline-block';
+            }, 'image/jpeg', 0.9);
+        }
+
+        async function sharePhoto() {
+            if (!currentBlob) return;
+            const f = new File([currentBlob], "receipt.jpg", {type:"image/jpeg"});
+            if (navigator.share) { await navigator.share({ files: [f] }); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "receipt.jpg"; a.click(); }
+        }
+    </script>
+</body>
+</html>
