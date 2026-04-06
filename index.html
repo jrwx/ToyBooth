@@ -3,31 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Perfect Receipt</title>
+    <title>Jarawee Real Machine Print</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <style>
         body { background-color: #a5a5a5; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 10px 0; color: #333; overflow-x: hidden; }
-        #booth-machine { position: relative; width: 330px; margin: 20px auto; background: #222; padding: 10px; border-radius: 12px; border: 5px solid #000; box-shadow: 0 25px 50px rgba(0,0,0,0.6); z-index: 10; }
-        #video-container { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; border: 4px solid #111; }
+        
+        /* ตัวเครื่อง Booth */
+        #booth-machine { position: relative; width: 330px; margin: 20px auto; background: #222; padding: 10px; border-radius: 12px; border: 5px solid #000; box-shadow: 0 25px 50px rgba(0,0,0,0.6); z-index: 10; overflow: hidden; }
+        
+        /* ช่องจอหลักที่จะเปลี่ยนจากกล้องเป็นที่ปริ้นท์ */
+        #main-display { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; border: 4px solid #111; }
+        
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        
         #shutter-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
-        .timer-overlay { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; z-index: 10; text-shadow: 0 0 10px #000; text-align: center; width: 100%; }
+        
+        .timer-overlay { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; z-index: 30; text-shadow: 0 0 10px #000; text-align: center; width: 100%; pointer-events: none;}
         #timer-num { font-size: 50px; display: none; }
         #timer-msg { font-size: 10px; display: none; background: rgba(0,0,0,0.8); padding: 10px; border: 2px solid white; }
-        #printer-slot { width: 280px; height: 12px; background: #000; margin: 10px auto 0; border-radius: 20px; border-bottom: 4px solid #333; position: relative; z-index: 5; }
-        #print-area { position: relative; width: 100%; display: none; justify-content: center; margin-top: -5px; z-index: 1; overflow: hidden; }
-        .receipt-paper { position: relative; width: 260px; background: #fdfaf5; box-shadow: 0 5px 20px rgba(0,0,0,0.3); transform: translateY(-100%); }
-        .printing-act { animation: slideOut 5.5s linear forwards; }
-        @keyframes slideOut { 0% { transform: translateY(-100%); } 100% { transform: translateY(0); } }
-        #result-img { width: 100%; display: block; filter: contrast(1.1); mix-blend-mode: multiply; opacity: 0.95; }
-        .torn-edge { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: #a5a5a5; clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); }
+
+        /* พื้นที่ปริ้นท์ใบเสร็จ (มาแทนที่กล้อง) */
+        #print-output { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; z-index: 40; background: #000; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+        #print-output::-webkit-scrollbar { display: none; }
+
+        .receipt-paper { position: relative; width: 260px; background: #fdfaf5; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform: translateY(-100%); margin-bottom: 20px; }
+        .printing-act { animation: slideOut 6s linear forwards; }
+        
+        @keyframes slideOut { 
+            0% { transform: translateY(-100%); } 
+            100% { transform: translateY(0); } 
+        }
+
+        #result-img { width: 100%; display: block; filter: contrast(1.1); mix-blend-mode: multiply; }
+        .torn-edge { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: #000; clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); }
+
         .filter-nav { display: flex; justify-content: center; gap: 5px; margin: 15px 0; flex-wrap: wrap; }
         .f-btn { background: #eee; border: 1px solid #444; padding: 10px 12px; font-size: 9px; cursor: pointer; font-family: 'Press Start 2P', cursive; border-radius: 4px; }
         .f-btn.active { background: #000; color: #fff; }
+        
         .btn-main { background: #d00; color: #fff; padding: 18px; font-family: 'Press Start 2P', cursive; font-size: 11px; border: none; margin-top: 15px; width: 85%; cursor: pointer; border-radius: 50px; box-shadow: 0 6px 0 #800; transition: 0.1s; }
+        .btn-main:active { transform: translateY(4px); box-shadow: 0 2px 0 #800; }
+        
         #action-buttons { display: none; margin-top: 25px; padding-bottom: 100px; }
-        #qr-hidden { display: none; }
     </style>
 </head>
 <body>
@@ -35,21 +52,23 @@
     <div style="font-family: 'VT323', monospace; font-size: 30px; margin-top: 20px; color: #eee; letter-spacing: 3px;">JARAWEE PHOTO SERVICE</div>
 
     <div id="booth-machine">
-        <div id="video-container">
-            <div id="shutter-flash"></div>
+        <div id="main-display">
+            <div id="camera-view">
+                <div id="shutter-flash"></div>
+                <video id="video" autoplay playsinline muted></video>
+            </div>
+            
+            <div id="print-output">
+                <div class="receipt-paper" id="receipt-paper">
+                    <img id="result-img">
+                    <div class="torn-edge"></div>
+                </div>
+            </div>
+
             <div class="timer-overlay">
                 <div id="timer-msg">READY?</div>
                 <div id="timer-num">3</div>
             </div>
-            <video id="video" autoplay playsinline muted></video>
-        </div>
-        <div id="printer-slot"></div>
-    </div>
-
-    <div id="print-area">
-        <div class="receipt-paper" id="receipt-paper">
-            <img id="result-img">
-            <div class="torn-edge"></div>
         </div>
     </div>
 
@@ -63,23 +82,21 @@
     <button class="btn-main" id="btn-snap" onclick="startCapture()">ถ่ายรูปกันเล้ย</button>
 
     <div id="action-buttons">
-        <button class="btn-main" style="background:#222; box-shadow: 0 6px 0 #000;" onclick="sharePhoto()">เซฟด่วนนน</button>
+        <button class="btn-main" style="background:#222; box-shadow: 0 6px 0 #000;" onclick="sharePhoto()">เซฟด่วนนน (PNG)</button>
         <br>
         <button class="btn-main" style="background:#666; box-shadow: 0 6px 0 #333;" onclick="resetBooth()">ถ่ายใหม่เถอะ</button>
     </div>
 
-    <canvas id="c" width="600" height="1580" style="display:none;"></canvas>
-    <div id="qr-hidden"></div>
+    <canvas id="c" width="600" height="1500" style="display:none;"></canvas>
 
     <script>
-        const API_KEY = "3f31cbee62aa2c7e372e60bb7d139393"; 
         const v = document.getElementById('video');
         const flash = document.getElementById('shutter-flash');
         const tNum = document.getElementById('timer-num');
         const tMsg = document.getElementById('timer-msg');
         const canvas = document.getElementById('c');
         const ctx = canvas.getContext('2d');
-        const printArea = document.getElementById('print-area');
+        const printOutput = document.getElementById('print-output');
         const receiptPaper = document.getElementById('receipt-paper');
         const actionButtons = document.getElementById('action-buttons');
         
@@ -127,6 +144,7 @@
                 const min = Math.min(v.videoWidth, v.videoHeight);
                 tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 420, 420);
                 
+                // Thermal Noise
                 tCtx.globalCompositeOperation = 'source-atop';
                 tCtx.fillStyle = 'rgba(0,0,0,0.05)';
                 for(let y=0; y<420; y+=2) { for(let x=0; x<420; x+=2) { if(Math.random()>0.9) tCtx.fillRect(x,y,1,1); } }
@@ -135,95 +153,84 @@
                 photos.push(tmp);
                 if(i === 0) await new Promise(r => setTimeout(r, 1000)); 
             }
-            v.style.opacity = "0"; if(stream) stream.getTracks().forEach(track => track.stop());
+            if(stream) stream.getTracks().forEach(track => track.stop());
             generateFinalReceipt(photos);
         }
 
-        async function generateFinalReceipt(photos) {
+        function generateFinalReceipt(photos) {
             const orderNo = Math.floor(100000 + Math.random() * 900000);
             
-            // วาดพื้นหลัง
+            // วาดพื้นหลังกระดาษ
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            for(let i=0; i<8000; i++) { ctx.fillStyle = `rgba(0,0,0,0.06)`; ctx.fillRect(Math.random()*600, Math.random()*1580, 1.2, 1.2); }
+            for(let i=0; i<8000; i++) { ctx.fillStyle = `rgba(0,0,0,0.06)`; ctx.fillRect(Math.random()*600, Math.random()*1500, 1.2, 1.2); }
 
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            // Header: Congrats!! ตัวใหญ่ และ To Jarawee <3
+            // Header
             ctx.font = "bold 65px 'VT323'"; ctx.fillText("Congrats!!", 300, 100);
             ctx.font = "30px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 145);
             ctx.font = "20px monospace"; ctx.fillText("==============================", 300, 180);
 
+            // Order No อยู่ใต้เส้นประ (เหนือรูปภาพ)
+            ctx.font = "18px 'VT323'"; ctx.fillText("Order No: #" + orderNo, 300, 210);
+
+            // วาดรูปถ่าย
             photos.forEach((img, i) => {
-                const y = (i * 440) + 210;
+                const y = (i * 440) + 240;
                 ctx.drawImage(img, 90, y, 420, 420);
                 ctx.strokeStyle = "#333"; ctx.lineWidth = 1; ctx.strokeRect(90, y, 420, 420);
             });
 
-            // รายการบรรทัดเดียว & Order No
+            // รายการบรรทัดเดียวท้ายภาพ
             ctx.textAlign = "left"; 
-            ctx.font = "bold 24px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ฮี่ๆๆ ;-)", 90, 1120);
-            ctx.font = "18px 'VT323'"; ctx.fillText("Order No: #" + orderNo, 90, 1155);
+            ctx.font = "bold 24px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ฮี่ๆๆ ;-)", 90, 1150);
+            
+            // บาร์โค้ดแนวยาว (ลบ QR ออกแล้ว)
+            ctx.fillStyle = "#111"; const bx = 90; const by = 1200;
+            for(let k=0; k<70; k++) { let w = [2, 4, 6][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 80); }
+            
+            ctx.textAlign = "center"; 
+            ctx.font = "bold 28px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1340);
+            ctx.font = "18px 'VT323'"; ctx.fillText("*** THANK YOU - LOVE YOU ***", 300, 1390);
 
-            // อัปโหลดเพื่อทำ QR Code (ใช้รูปใบเสร็จนั่นแหละ)
-            const dataUrl = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
-            let downloadLink = window.location.href;
-            try {
-                const formData = new FormData(); formData.append("image", dataUrl);
-                const response = await fetch(`https://api.imgbb.com/1/upload?key=${API_KEY}`, { method: "POST", body: formData });
-                const result = await response.json();
-                if(result.success) downloadLink = result.data.url;
-            } catch (e) {}
+            // สร้างรอยฉีก PNG
+            const tornCanvas = document.createElement('canvas');
+            tornCanvas.width = canvas.width; tornCanvas.height = canvas.height;
+            const tCtx = tornCanvas.getContext('2d');
+            tCtx.beginPath(); tCtx.moveTo(0, 0);
+            for (let i = 0; i < tornCanvas.width; i += 12) {
+                tCtx.lineTo(i + 6, tornCanvas.height - 15);
+                tCtx.lineTo(i + 12, tornCanvas.height);
+            }
+            tCtx.lineTo(tornCanvas.width, tornCanvas.height); tCtx.lineTo(tornCanvas.width, 0);
+            tCtx.closePath(); tCtx.clip();
+            tCtx.drawImage(canvas, 0, 0);
 
-            const qrContainer = document.getElementById('qr-hidden'); qrContainer.innerHTML = "";
-            new QRCode(qrContainer, { text: downloadLink, width: 130, height: 130, colorDark : "#111", colorLight : "#fdfaf5" });
-
-            setTimeout(() => {
-                const qrImg = qrContainer.querySelector('img');
-                if (qrImg) {
-                    ctx.drawImage(qrImg, 380, 1200, 130, 130);
-                    ctx.font = "bold 14px 'VT323'"; ctx.fillText("SCAN ME", 380, 1350);
-                }
-                // บาร์โค้ดแนวยาวใต้ภาพ
-                ctx.fillStyle = "#111"; const bx = 90; const by = 1200;
-                for(let k=0; k<42; k++) { let w = [2, 4, 7][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 80); }
-                
-                ctx.textAlign = "center"; 
-                ctx.font = "bold 28px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1440);
-                ctx.font = "18px 'VT323'"; ctx.fillText("*** THANK YOU - LOVE YOU ***", 300, 1485);
-
-                // แปลงเป็น PNG แบบรอยหยัก
-                const tornCanvas = document.createElement('canvas');
-                tornCanvas.width = canvas.width; tornCanvas.height = canvas.height;
-                const tCtx = tornCanvas.getContext('2d');
-                tCtx.beginPath(); tCtx.moveTo(0, 0);
-                for (let i = 0; i < tornCanvas.width; i += 12) {
-                    tCtx.lineTo(i + 6, tornCanvas.height - 15);
-                    tCtx.lineTo(i + 12, tornCanvas.height);
-                }
-                tCtx.lineTo(tornCanvas.width, tornCanvas.height); tCtx.lineTo(tornCanvas.width, 0);
-                tCtx.closePath(); tCtx.clip();
-                tCtx.drawImage(canvas, 0, 0);
-
-                tornCanvas.toBlob((b) => {
-                    currentBlob = b;
-                    document.getElementById('result-img').src = URL.createObjectURL(b);
-                    startPrinting();
-                }, 'image/png');
-            }, 800);
+            tornCanvas.toBlob((b) => {
+                currentBlob = b;
+                document.getElementById('result-img').src = URL.createObjectURL(b);
+                startPrinting();
+            }, 'image/png');
         }
 
         function startPrinting() {
-            printArea.style.display = 'flex';
+            // สลับโหมด: ซ่อนกล้อง แสดงที่ปริ้นท์
+            document.getElementById('camera-view').style.display = 'none';
+            printOutput.style.display = 'flex';
             receiptPaper.classList.add('printing-act');
-            setTimeout(() => { actionButtons.style.display = 'block'; actionButtons.scrollIntoView({ behavior: 'smooth' }); }, 5700);
+            
+            setTimeout(() => { 
+                actionButtons.style.display = 'block'; 
+                actionButtons.scrollIntoView({ behavior: 'smooth' }); 
+            }, 6000);
         }
 
         function resetBooth() { location.reload(); }
 
         async function sharePhoto() {
             if (!currentBlob) return;
-            const f = new File([currentBlob], "jarawee_perfect.png", {type:"image/png"});
+            const f = new File([currentBlob], "jarawee_receipt.png", {type:"image/png"});
             if (navigator.share) await navigator.share({ files: [f] });
-            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_perfect.png"; a.click(); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_receipt.png"; a.click(); }
         }
     </script>
 </body>
