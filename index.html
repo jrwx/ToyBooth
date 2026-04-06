@@ -1,9 +1,9 @@
-<!DOCTYPE html>
+<!DOCTYPE html><!DOCTYPE html>
 <html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Real Machine Print</title>
+    <title>Jarawee Left-Aligned Receipt</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
         body { background-color: #a5a5a5; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 10px 0; color: #333; overflow-x: hidden; }
@@ -11,7 +11,7 @@
         /* ตัวเครื่อง Booth */
         #booth-machine { position: relative; width: 330px; margin: 20px auto; background: #222; padding: 10px; border-radius: 12px; border: 5px solid #000; box-shadow: 0 25px 50px rgba(0,0,0,0.6); z-index: 10; overflow: hidden; }
         
-        /* ช่องจอหลักที่จะเปลี่ยนจากกล้องเป็นที่ปริ้นท์ */
+        /* ช่องจอหลัก */
         #main-display { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; border: 4px solid #111; }
         
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
@@ -22,14 +22,16 @@
         #timer-num { font-size: 50px; display: none; }
         #timer-msg { font-size: 10px; display: none; background: rgba(0,0,0,0.8); padding: 10px; border: 2px solid white; }
 
-        /* พื้นที่ปริ้นท์ใบเสร็จ (มาแทนที่กล้อง) */
+        /* พื้นที่ปริ้นท์ (แทนที่กล้อง) */
         #print-output { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; z-index: 40; background: #000; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
         #print-output::-webkit-scrollbar { display: none; }
 
-        .receipt-paper { position: relative; width: 260px; background: #fdfaf5; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform: translateY(-100%); margin-bottom: 20px; }
-        .printing-act { animation: slideOut 6s linear forwards; }
+        .receipt-paper { position: relative; width: 260px; background: #fdfaf5; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform: translateY(-100%); margin-bottom: 50px; }
         
-        @keyframes slideOut { 
+        /* การไหลที่สมูท */
+        .printing-act { animation: slideOutSmooth 6.5s linear forwards; }
+        
+        @keyframes slideOutSmooth { 
             0% { transform: translateY(-100%); } 
             100% { transform: translateY(0); } 
         }
@@ -87,7 +89,7 @@
         <button class="btn-main" style="background:#666; box-shadow: 0 6px 0 #333;" onclick="resetBooth()">ถ่ายใหม่เถอะ</button>
     </div>
 
-    <canvas id="c" width="600" height="1500" style="display:none;"></canvas>
+    <canvas id="c" width="600" height="1520" style="display:none;"></canvas>
 
     <script>
         const v = document.getElementById('video');
@@ -144,7 +146,6 @@
                 const min = Math.min(v.videoWidth, v.videoHeight);
                 tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 420, 420);
                 
-                // Thermal Noise
                 tCtx.globalCompositeOperation = 'source-atop';
                 tCtx.fillStyle = 'rgba(0,0,0,0.05)';
                 for(let y=0; y<420; y+=2) { for(let x=0; x<420; x+=2) { if(Math.random()>0.9) tCtx.fillRect(x,y,1,1); } }
@@ -159,19 +160,18 @@
 
         function generateFinalReceipt(photos) {
             const orderNo = Math.floor(100000 + Math.random() * 900000);
-            
-            // วาดพื้นหลังกระดาษ
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            for(let i=0; i<8000; i++) { ctx.fillStyle = `rgba(0,0,0,0.06)`; ctx.fillRect(Math.random()*600, Math.random()*1500, 1.2, 1.2); }
+            for(let i=0; i<8000; i++) { ctx.fillStyle = `rgba(0,0,0,0.06)`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1.2, 1.2); }
 
+            // Header (ตรงกลาง)
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            // Header
             ctx.font = "bold 65px 'VT323'"; ctx.fillText("Congrats!!", 300, 100);
             ctx.font = "30px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 145);
             ctx.font = "20px monospace"; ctx.fillText("==============================", 300, 180);
 
-            // Order No อยู่ใต้เส้นประ (เหนือรูปภาพ)
-            ctx.font = "18px 'VT323'"; ctx.fillText("Order No: #" + orderNo, 300, 210);
+            // Order No (ชิดซ้าย) - แก้ตรงนี้
+            ctx.textAlign = "left"; 
+            ctx.font = "18px 'VT323'"; ctx.fillText("Order No: #" + orderNo, 90, 215);
 
             // วาดรูปถ่าย
             photos.forEach((img, i) => {
@@ -180,19 +180,19 @@
                 ctx.strokeStyle = "#333"; ctx.lineWidth = 1; ctx.strokeRect(90, y, 420, 420);
             });
 
-            // รายการบรรทัดเดียวท้ายภาพ
+            // รายการบรรทัดเดียว (ชิดซ้าย)
             ctx.textAlign = "left"; 
             ctx.font = "bold 24px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ฮี่ๆๆ ;-)", 90, 1150);
             
-            // บาร์โค้ดแนวยาว (ลบ QR ออกแล้ว)
-            ctx.fillStyle = "#111"; const bx = 90; const by = 1200;
+            // บาร์โค้ด
+            ctx.fillStyle = "#111"; const bx = 90; const by = 1220;
             for(let k=0; k<70; k++) { let w = [2, 4, 6][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 80); }
             
+            // Footer (ตรงกลาง)
             ctx.textAlign = "center"; 
-            ctx.font = "bold 28px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1340);
-            ctx.font = "18px 'VT323'"; ctx.fillText("*** THANK YOU - LOVE YOU ***", 300, 1390);
+            ctx.font = "bold 28px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1360);
+            ctx.font = "18px 'VT323'"; ctx.fillText("*** THANK YOU - LOVE YOU ***", 300, 1410);
 
-            // สร้างรอยฉีก PNG
             const tornCanvas = document.createElement('canvas');
             tornCanvas.width = canvas.width; tornCanvas.height = canvas.height;
             const tCtx = tornCanvas.getContext('2d');
@@ -213,7 +213,6 @@
         }
 
         function startPrinting() {
-            // สลับโหมด: ซ่อนกล้อง แสดงที่ปริ้นท์
             document.getElementById('camera-view').style.display = 'none';
             printOutput.style.display = 'flex';
             receiptPaper.classList.add('printing-act');
@@ -221,16 +220,16 @@
             setTimeout(() => { 
                 actionButtons.style.display = 'block'; 
                 actionButtons.scrollIntoView({ behavior: 'smooth' }); 
-            }, 6000);
+            }, 6800);
         }
 
         function resetBooth() { location.reload(); }
 
         async function sharePhoto() {
             if (!currentBlob) return;
-            const f = new File([currentBlob], "jarawee_receipt.png", {type:"image/png"});
+            const f = new File([currentBlob], "jarawee_print.png", {type:"image/png"});
             if (navigator.share) await navigator.share({ files: [f] });
-            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_receipt.png"; a.click(); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_print.png"; a.click(); }
         }
     </script>
 </body>
