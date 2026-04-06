@@ -73,7 +73,7 @@
         <video id="video" autoplay playsinline muted></video>
     </div>
     
-    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายใบเสร็จเริ่ดๆ (Grayscale)</button>
+    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายเริ่ดๆ (Grayscale)</button>
 
     <div id="result-area">
         <div id="result-img-container">
@@ -135,10 +135,7 @@
             ctx.font = "700 50px Caveat";
             ctx.fillText("Congratulations to Jarawee <3", 300, 100);
             
-            // ข้อมูลทางการ
-            ctx.font = "700 24px Sarabun";
-            ctx.fillText("SAO JANG CELEBRATION RECEIPT", 300, 150);
-            
+           
             // เส้นคั่นตาราง
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.moveTo(50, 170); ctx.lineTo(550, 170); ctx.stroke();
@@ -178,7 +175,7 @@
             
             ctx.textAlign = "left"; ctx.font = "700 30px Sarabun";
             // ข้อความในบรรทัดเดียวกันเป๊ะๆ
-            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บาท", 70, 1310);
+            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บูด", 70, 1310);
             
             ctx.textAlign = "center";
             ctx.font = "italic 18px Sarabun";
