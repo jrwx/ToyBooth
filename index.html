@@ -3,15 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Thermal Printer Booth</title>
+    <title>Jarawee Retro Thermal Booth</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #a5a5a5; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 10px 0; color: #333; overflow-x: hidden; }
         
-        #profile-pic { width: 80px; height: 80px; border-radius: 50%; border: 4px solid #111; margin: 10px auto 10px; object-fit: cover; display: block; box-shadow: 0 4px 10px rgba(0,0,0,0.3); }
-
-        /* ตัวเครื่องถ่ายรูป */
-        #booth-machine { position: relative; width: 330px; margin: 0 auto; background: #333; padding: 10px; border-radius: 10px; border: 4px solid #111; box-shadow: 0 20px 40px rgba(0,0,0,0.5); }
+        #booth-machine { position: relative; width: 330px; margin: 20px auto; background: #333; padding: 10px; border-radius: 10px; border: 4px solid #111; box-shadow: 0 20px 40px rgba(0,0,0,0.5); z-index: 10; }
 
         #video-container { 
             position: relative; width: 310px; height: 310px; margin: 0 auto; 
@@ -19,7 +16,6 @@
         }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); transition: opacity 0.5s; }
         
-        /* เอฟเฟกต์แฟลช */
         #shutter-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
 
         .timer-overlay { 
@@ -30,32 +26,32 @@
         #timer-num { font-size: 50px; display: none; }
         #timer-msg { font-size: 10px; display: none; background: rgba(0,0,0,0.7); padding: 8px; border: 2px solid white; }
 
-        /* ช่องปริ้นท์ใบเสร็จ (Printer Slot) */
         #printer-slot {
             width: 280px; height: 15px; background: #111; margin: 10px auto 0;
             border-radius: 10px; border-bottom: 3px solid #444; position: relative; z-index: 5;
         }
 
-        /* พื้นที่ปริ้นท์ */
+        /* พื้นที่แสดงใบเสร็จ */
         #print-area { 
             position: relative; width: 100%; display: none; justify-content: center; 
-            margin-top: -5px; z-index: 1; overflow: hidden; height: 0; transition: height 0.5s;
+            margin-top: -5px; z-index: 1; overflow: hidden;
         }
 
         .receipt-paper {
-            position: relative; width: 260px; background: #fdfdfd;
+            position: relative; width: 260px; 
+            background: #f4f1ea; /* สีครีมอ่อนแบบกระดาษวินเทจ */
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transform: translateY(-100%); /* ซ่อนอยู่ในช่องปริ้นท์ */
+            transform: translateY(-100%);
         }
 
-        /* อนิเมชันปริ้นท์รูป */
-        .printing-act { animation: slideOut 5s ease-out forwards; }
+        .printing-act { animation: slideOut 6s linear forwards; }
         @keyframes slideOut {
             0% { transform: translateY(-100%); }
             100% { transform: translateY(0); }
         }
         
-        #result-img { width: 100%; display: block; mix-blend-mode: multiply; }
+        #result-img { width: 100%; display: block; mix-blend-mode: multiply; filter: contrast(1.1); }
+        
         .torn-edge {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: #a5a5a5;
             clip-path: polygon(0% 100%, 5% 20%, 10% 100%, 15% 20%, 20% 100%, 25% 20%, 30% 100%, 35% 20%, 40% 100%, 45% 20%, 50% 100%, 55% 20%, 60% 100%, 65% 20%, 70% 100%, 75% 20%, 80% 100%, 85% 20%, 90% 100%, 95% 20%, 100% 100%);
@@ -76,7 +72,7 @@
 </head>
 <body>
 
-    <img id="profile-pic" src="YOUR_IMAGE_URL_HERE" alt="Profile">
+    <div style="font-family: 'Press Start 2P', cursive; font-size: 12px; margin-top: 20px;">[ JARAWEE FILM BOOTH ]</div>
 
     <div id="booth-machine">
         <div id="video-container">
@@ -114,8 +110,6 @@
 
     <canvas id="c" width="600" height="1580" style="display:none;"></canvas>
 
-    <audio id="bg-music" loop src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"></audio>
-
     <script>
         const v = document.getElementById('video');
         const flash = document.getElementById('shutter-flash');
@@ -126,18 +120,52 @@
         const printArea = document.getElementById('print-area');
         const receiptPaper = document.getElementById('receipt-paper');
         const actionButtons = document.getElementById('action-buttons');
-        const bgMusic = document.getElementById('bg-music');
         
         let currentBlob = null;
         let currentFilterStyle = 'none';
         let stream = null;
 
+        // --- ระบบเสียง ---
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playShutterSound() {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'noise'; // สร้างเสียงรบกวนสีขาวจำลองชัตเตอร์
+            if (osc.type !== 'noise') osc.type = 'square';
+            osc.frequency.setValueAtTime(150, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.1);
+        }
+
+        function playPrintSound() {
+            const duration = 5.5; 
+            const interval = 0.15;
+            for (let i = 0; i < duration; i += interval) {
+                setTimeout(() => {
+                    const osc = audioCtx.createOscillator();
+                    const gain = audioCtx.createGain();
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(80, audioCtx.currentTime);
+                    gain.gain.setValueAtTime(0.03, audioCtx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.1);
+                    osc.connect(gain);
+                    gain.connect(audioCtx.destination);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                }, i * 1000);
+            }
+        }
+
         async function init() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 v.srcObject = stream;
-                v.style.opacity = "1";
-            } catch (e) { alert("กรุณาเปิดกล้องนะจ๊ะ!"); }
+            } catch (e) { alert("กรุณาอนุญาตการเข้าถึงกล้อง!"); }
         }
         init();
 
@@ -153,14 +181,14 @@
         }
 
         async function startCapture() {
-            bgMusic.play(); // เริ่มเพลงประกอบ
+            if (audioCtx.state === 'suspended') audioCtx.resume();
             const photos = [];
             document.getElementById('btn-snap').style.display = 'none';
             document.getElementById('filter-box').style.opacity = '0';
 
             for (let i = 0; i < 2; i++) {
                 tMsg.style.display = 'block';
-                tMsg.innerText = i === 0 ? "เตรียมตัว: รูปที่ 1" : "เตรียมตัว: รูปที่ 2";
+                tMsg.innerText = i === 0 ? "POSE 1" : "POSE 2";
                 await new Promise(r => setTimeout(r, 1500));
                 tMsg.style.display = 'none';
 
@@ -171,14 +199,17 @@
                 }
                 tNum.style.display = 'none';
 
+                // แฟลช + เสียงชัตเตอร์
+                playShutterSound();
                 flash.style.opacity = '1';
                 setTimeout(() => flash.style.opacity = '0', 150);
 
                 const tmp = document.createElement('canvas');
                 tmp.width = 480; tmp.height = 480;
                 const tCtx = tmp.getContext('2d');
-                tCtx.translate(480, 0); tCtx.scale(-1, 1);
                 tCtx.filter = currentFilterStyle;
+                tCtx.translate(480, 0); 
+                tCtx.scale(-1, 1);
                 const min = Math.min(v.videoWidth, v.videoHeight);
                 tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 480, 480);
                 photos.push(tmp);
@@ -186,7 +217,6 @@
                 if(i === 0) await new Promise(r => setTimeout(r, 1200)); 
             }
             
-            // ถ่ายเสร็จแล้ว ปิดกล้องทันที!
             v.style.opacity = "0";
             if(stream) stream.getTracks().forEach(track => track.stop());
             
@@ -194,23 +224,32 @@
         }
 
         function generateReceipt(photos) {
-            ctx.fillStyle = "#fdfdfd"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            for (let i = 0; i < 5000; i++) {
-                ctx.fillStyle = `rgba(0,0,0,0.05)`; ctx.fillRect(Math.random() * 600, Math.random() * 1580, 1, 1);
+            // สีครีมกระดาษวินเทจ
+            ctx.fillStyle = "#f4f1ea"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // เพิ่ม Texture เม็ดกระดาษ (Noise)
+            for (let i = 0; i < 8000; i++) {
+                ctx.fillStyle = `rgba(0,0,0,0.07)`;
+                ctx.fillRect(Math.random() * 600, Math.random() * 1580, 1.2, 1.2);
             }
-            ctx.fillStyle = "black"; ctx.textAlign = "center";
-            ctx.font = "36px 'Press Start 2P'"; ctx.fillText("CONGRATULATIONS", 300, 110);
+
+            ctx.fillStyle = "#222"; ctx.textAlign = "center";
+            ctx.font = "36px 'Press Start 2P'"; ctx.fillText("MEMORIES", 300, 110);
             ctx.font = "20px 'Press Start 2P'"; ctx.fillText("to jarawee <3", 300, 165);
             ctx.font = "20px monospace"; ctx.fillText("----------------------------", 300, 210);
 
             photos.forEach((img, i) => {
                 const y = (i * 510) + 250;
                 ctx.drawImage(img, 60, y, 480, 480);
+                // ขอบรูปจางๆ แบบใบเสร็จ
+                ctx.strokeStyle = "rgba(0,0,0,0.1)";
+                ctx.strokeRect(60, y, 480, 480);
             });
 
             ctx.textAlign = "left"; ctx.font = "700 30px Sarabun";
-            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บาท", 65, 1285);
-            ctx.fillStyle = "black";
+            ctx.fillText("รายการ: บันทึกความทรงจำ", 65, 1285);
+            ctx.fillStyle = "#333";
             const bx = 135; const by = 1325;
             for(let k=0; k<66; k++) {
                 let w = [1.5, 3, 5][Math.floor(Math.random()*3)];
@@ -218,38 +257,35 @@
             }
             ctx.textAlign = "center"; ctx.font = "14px monospace";
             ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1465);
-            ctx.fillText("THANK YOU FOR YOUR LOVE", 300, 1495);
+            ctx.fillText("KEEP IT FOREVER", 300, 1495);
 
             canvas.toBlob((b) => {
                 currentBlob = b;
                 document.getElementById('result-img').src = URL.createObjectURL(b);
                 startPrinting();
-            }, 'image/jpeg', 0.95);
+            }, 'image/jpeg', 0.9);
         }
 
         function startPrinting() {
             printArea.style.display = 'flex';
-            printArea.style.height = 'auto';
             receiptPaper.classList.add('printing-act');
-            
-            // เปลี่ยนเพลงเป็นเสียงปริ้นท์เบาๆ (ถ้าต้องการ) หรือหรี่เพลงลง
-            bgMusic.volume = 0.2;
+            playPrintSound(); // เล่นเสียงปริ้นท์ ครืดๆ
 
             setTimeout(() => {
                 actionButtons.style.display = 'block';
                 actionButtons.scrollIntoView({ behavior: 'smooth' });
-            }, 5200);
+            }, 6200);
         }
 
         function resetBooth() {
-            location.reload(); // วิธีที่ง่ายที่สุดในการเปิดกล้องใหม่และรีเซ็ตทุกอย่าง
+            location.reload();
         }
 
         async function sharePhoto() {
             if (!currentBlob) return;
-            const f = new File([currentBlob], "jarawee.jpg", {type:"image/jpeg"});
+            const f = new File([currentBlob], "jarawee_print.jpg", {type:"image/jpeg"});
             if (navigator.share) await navigator.share({ files: [f] });
-            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee.jpg"; a.click(); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_print.jpg"; a.click(); }
         }
     </script>
 </body>
