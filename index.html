@@ -3,46 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Full Print Booth</title>
+    <title>Jarawee Final Receipt</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #1a1a1a; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #eee; overflow: hidden; }
+        body { background-color: #1a1a1a; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #eee; overflow-x: hidden; }
         
-        /* 1. ส่วนของตัวเครื่องและกล้อง (รูปแบบเดิมที่พี่ชอบ) */
-        #booth-machine { position: relative; width: 340px; margin: 20px auto; background: #333; padding: 12px; border-radius: 15px; border: 4px solid #555; box-shadow: 0 30px 60px rgba(0,0,0,0.8); z-index: 10; }
-        
+        /* --- หน้าแรก: โหมดกล้องดิจิทัล --- */
+        #camera-page { display: block; padding-top: 20px; }
+        #booth-machine { position: relative; width: 340px; margin: 0 auto; background: #333; padding: 12px; border-radius: 15px; border: 4px solid #555; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
         #main-display { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; border: 2px solid #000; }
-        
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
-        /* Camera UI Overlays */
-        #camera-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 20; font-family: 'VT323', monospace; color: #fff; }
-        .cam-top-left { position: absolute; top: 10px; left: 10px; display: flex; gap: 5px; }
+        .cam-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; font-family: 'VT323', monospace; color: #fff; }
         .cam-top-right { position: absolute; top: 10px; right: 10px; color: #f00; animation: blink 1s infinite; }
         .cam-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr; opacity: 0.2; }
         .cam-grid div { border: 0.5px solid #fff; }
-        
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-        #shutter-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 100; pointer-events: none; }
 
-        /* 2. ส่วนใบเสร็จไหลเต็มจอ (ไหลมาจากขอบบนสุดของ Browser) */
-        #print-overlay { 
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; 
-            display: none; justify-content: center; z-index: 999; 
-            background: rgba(0,0,0,0.8); overflow-y: auto; scrollbar-width: none;
-        }
-        #print-overlay::-webkit-scrollbar { display: none; }
+        #shutter-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
+        .timer-overlay { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 50px; display: none; }
+
+        /* --- หน้าสอง: โหมดใบเสร็จ (ลบทุกอย่างออก) --- */
+        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999; overflow-y: auto; scrollbar-width: none; }
+        #print-page::-webkit-scrollbar { display: none; }
 
         .receipt-paper { 
-            position: relative; width: 100%; max-width: 450px; /* ขยายให้เกือบเต็มหน้าจอ */
-            background: #fdfaf5; transform: translateY(-100%); 
-            box-shadow: 0 0 50px rgba(0,0,0,1); 
+            position: relative; 
+            width: 90%; max-width: 500px; /* ขยายขนาดใบเสร็จขึ้น */
+            background: #fdfaf5; 
+            margin: 0 auto 50px auto;
+            transform: translateY(-100%); 
+            box-shadow: 0 0 40px rgba(0,0,0,0.5);
         }
         
-        /* Animation การไหลลื่นสมูท */
-        .printing-act { animation: fullSlideDown 7s linear forwards; }
+        /* อนิเมชั่นไหลลื่น 6.5 วินาที */
+        .printing-act { animation: slideDownSmooth 6.5s linear forwards; }
         
-        @keyframes fullSlideDown { 
+        @keyframes slideDownSmooth { 
             0% { transform: translateY(-100%); } 
             100% { transform: translateY(0); } 
         }
@@ -50,53 +47,42 @@
         #result-img { width: 100%; display: block; mix-blend-mode: multiply; }
         .torn-edge { width: 100%; height: 20px; background: #000; clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); }
 
-        /* ปุ่มควบคุม */
-        .timer-overlay { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 110; }
-        #timer-num { font-size: 60px; display: none; }
-        
-        #controls { margin-top: 20px; }
-        .btn-main { background: #ff3e3e; color: #fff; padding: 18px; font-family: 'Press Start 2P', cursive; font-size: 11px; border: none; width: 280px; cursor: pointer; border-radius: 10px; box-shadow: 0 6px 0 #b32a2a; }
-        
-        #action-buttons { display: none; position: relative; z-index: 1000; padding: 40px 0 100px 0; }
+        /* ปุ่มกด */
+        .controls { margin-top: 30px; }
+        .btn-snap { background: #ff3e3e; color: #fff; padding: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; border: none; width: 250px; cursor: pointer; border-radius: 50px; box-shadow: 0 6px 0 #b32a2a; }
+        .btn-save { background: #fff; color: #000; padding: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; border: none; width: 280px; margin-top: 20px; cursor: pointer; border-radius: 10px; box-shadow: 0 6px 0 #ccc; display: none; }
     </style>
 </head>
 <body>
 
-    <div style="font-family: 'VT323', monospace; font-size: 28px; margin-top: 20px;">DIGITAL CAM BOOTH</div>
-
-    <div id="booth-machine">
-        <div id="main-display">
-            <div id="camera-ui">
-                <div class="cam-top-left"><span>[🔋]</span><span>FULL</span></div>
-                <div class="cam-top-right">● REC</div>
-                <div class="cam-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+    <div id="camera-page">
+        <div style="font-family: 'VT323', monospace; font-size: 28px; margin-bottom: 15px;">DIGITAL CAM SERVICE</div>
+        <div id="booth-machine">
+            <div id="main-display">
+                <div class="cam-ui">
+                    <div class="cam-top-right">● REC</div>
+                    <div class="cam-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+                </div>
+                <div id="shutter-flash"></div>
+                <video id="video" autoplay playsinline muted></video>
+                <div id="timer-num" class="timer-overlay">3</div>
             </div>
-            <div id="shutter-flash"></div>
-            <video id="video" autoplay playsinline muted></video>
-            <div class="timer-overlay"><div id="timer-num">3</div></div>
+        </div>
+        <div class="controls">
+            <button class="btn-snap" id="btn-snap" onclick="startCapture()">SHOT</button>
         </div>
     </div>
 
-    <div id="controls">
-        <button class="btn-main" id="btn-snap" onclick="startCapture()">TAKE PHOTO</button>
-    </div>
-
-    <div id="print-overlay">
-        <div id="receipt-container" style="width: 100%; display: flex; flex-direction: column; align-items: center;">
-            <div class="receipt-paper" id="receipt-paper">
-                <img id="result-img">
-                <div class="torn-edge"></div>
-            </div>
-            
-            <div id="action-buttons">
-                <button class="btn-main" style="background:#fff; color:#000; box-shadow: 0 6px 0 #ccc;" onclick="sharePhoto()">SAVE RECEIPT</button>
-                <br><br>
-                <button class="btn-main" style="background:#444; box-shadow: 0 6px 0 #222;" onclick="location.reload()">RETAKE</button>
-            </div>
+    <div id="print-page">
+        <div class="receipt-paper" id="receipt-paper">
+            <img id="result-img">
+            <div class="torn-edge"></div>
         </div>
+        <button class="btn-save" id="btn-save" onclick="sharePhoto()">SAVE RECEIPT</button>
+        <div style="height: 50px;"></div>
     </div>
 
-    <canvas id="c" width="600" height="1520" style="display:none;"></canvas>
+    <canvas id="c" width="800" height="2000" style="display:none;"></canvas>
 
     <script>
         const v = document.getElementById('video');
@@ -104,9 +90,10 @@
         const tNum = document.getElementById('timer-num');
         const canvas = document.getElementById('c');
         const ctx = canvas.getContext('2d');
-        const printOverlay = document.getElementById('print-overlay');
+        const camPage = document.getElementById('camera-page');
+        const printPage = document.getElementById('print-page');
         const receiptPaper = document.getElementById('receipt-paper');
-        const actionButtons = document.getElementById('action-buttons');
+        const btnSave = document.getElementById('btn-save');
         
         let currentBlob = null;
         let stream = null;
@@ -115,7 +102,7 @@
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 v.srcObject = stream;
-            } catch (e) { alert("เปิดกล้องไม่ได้ครับ"); }
+            } catch (e) { alert("Camera error!"); }
         }
         init();
 
@@ -130,11 +117,11 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const tmp = document.createElement('canvas');
-                tmp.width = 420; tmp.height = 420;
+                tmp.width = 600; tmp.height = 600; // ขยายขนาดรูปถ่าย
                 const tCtx = tmp.getContext('2d');
-                tCtx.translate(420, 0); tCtx.scale(-1, 1);
+                tCtx.translate(600, 0); tCtx.scale(-1, 1);
                 const min = Math.min(v.videoWidth, v.videoHeight);
-                tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 420, 420);
+                tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 600, 600);
                 
                 photos.push(tmp);
                 if(i === 0) await new Promise(r => setTimeout(r, 1200)); 
@@ -147,30 +134,31 @@
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             
             // Texture
-            for(let i=0; i<5000; i++) { ctx.fillStyle = `rgba(0,0,0,0.05)`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1.2, 1.2); }
+            for(let i=0; i<10000; i++) { ctx.fillStyle = `rgba(0,0,0,0.04)`; ctx.fillRect(Math.random()*800, Math.random()*2000, 1.5, 1.5); }
 
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            ctx.font = "bold 60px 'VT323'"; ctx.fillText("JARAWEE BOOTH", 300, 100);
-            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 160);
+            ctx.font = "bold 80px 'VT323'"; ctx.fillText("JARAWEE BOOTH", 400, 120);
+            ctx.font = "30px monospace"; ctx.fillText("===========================", 400, 180);
 
             // Order No ชิดซ้าย
             ctx.textAlign = "left"; 
-            ctx.font = "22px 'VT323'"; ctx.fillText("Order: #" + orderNo, 90, 200);
+            ctx.font = "30px 'VT323'"; ctx.fillText("Order: #" + orderNo, 100, 230);
 
+            // วาดรูปถ่าย (ขนาดใหญ่ขึ้น)
             photos.forEach((img, i) => {
-                const y = (i * 440) + 240;
-                ctx.drawImage(img, 90, y, 420, 420);
-                ctx.strokeStyle = "#000"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
+                const y = (i * 640) + 280;
+                ctx.drawImage(img, 100, y, 600, 600);
+                ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.strokeRect(100, y, 600, 600);
             });
 
-            ctx.font = "bold 24px Sarabun"; ctx.fillText("รายการ: ความรักความหล่อ 100%", 90, 1150);
+            ctx.font = "bold 35px Sarabun"; ctx.fillText("รายการ: ค่าความน่ารัก (Full Ver.)", 100, 1620);
             
             // Barcode
-            ctx.fillStyle = "#111"; const bx = 90; const by = 1220;
-            for(let k=0; k<70; k++) { let w = [2, 4, 7][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 80); }
+            ctx.fillStyle = "#111"; const bx = 100; const by = 1700;
+            for(let k=0; k<100; k++) { let w = [3, 5, 8][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 100); }
             
             ctx.textAlign = "center"; 
-            ctx.font = "bold 24px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1360);
+            ctx.font = "bold 30px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 400, 1880);
 
             canvas.toBlob((b) => {
                 currentBlob = b;
@@ -180,21 +168,22 @@
         }
 
         function startPrinting() {
-            // โชว์แผ่นปริ้นท์ทับทั้งหน้าจอ
-            printOverlay.style.display = 'flex';
+            // สลับหน้า: ซ่อนกล้อง โชว์ปริ้นท์
+            camPage.style.display = 'none';
+            printPage.style.display = 'block';
             receiptPaper.classList.add('printing-act');
             
-            // เมื่อปริ้นท์เสร็จค่อยโชว์ปุ่ม
+            // ปุ่ม Save มาหลังจากไหลเสร็จ
             setTimeout(() => { 
-                actionButtons.style.display = 'block';
-            }, 7200);
+                btnSave.style.display = 'inline-block';
+            }, 6800);
         }
 
         async function sharePhoto() {
             if (!currentBlob) return;
-            const f = new File([currentBlob], "receipt.png", {type:"image/png"});
+            const f = new File([currentBlob], "jarawee_full.png", {type:"image/png"});
             if (navigator.share) await navigator.share({ files: [f] });
-            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "receipt.png"; a.click(); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_full.png"; a.click(); }
         }
     </script>
 </body>
