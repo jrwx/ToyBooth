@@ -5,87 +5,98 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toy Story Photobooth</title>
     <style>
-        body { 
-            background-color: #71C5EE; /* สีฟ้าห้อง Andy */
-            font-family: 'Arial Rounded MT Bold', sans-serif;
-            text-align: center; margin: 0; overflow-x: hidden;
-        }
-        /* สร้างลายเมฆจำลอง */
-        .cloud { background: white; width: 100px; height: 40px; border-radius: 50px; position: absolute; z-index: -1; opacity: 0.8; }
-        
-        #video { width: 90%; max-width: 400px; border: 8px solid #FFD700; border-radius: 15px; margin-top: 20px; background: #000; }
-        
-        #result-canvas { display: none; width: 300px; border: 10px solid white; margin: 20px auto; box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
-        
-        .timer { font-size: 80px; color: #E63946; -webkit-text-stroke: 2px #FFD700; font-weight: bold; position: absolute; top: 30%; left: 50%; transform: translate(-50%, -50%); display: none; }
-        
-        .btn-start { 
-            background: #FFD700; color: #004AAD; border: 4px solid #004AAD; padding: 15px 40px; 
-            font-size: 24px; border-radius: 50px; cursor: pointer; font-weight: bold; margin-top: 20px;
-        }
+        body { background-color: #71C5EE; font-family: sans-serif; text-align: center; margin: 0; color: white; }
+        #video { width: 90%; max-width: 400px; border: 10px solid #FFD700; border-radius: 20px; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .timer { font-size: 80px; font-weight: bold; color: #E63946; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); display: none; text-shadow: 3px 3px 0 #FFD700; z-index: 10; }
+        .btn { background: #E63946; color: white; padding: 20px 40px; font-size: 24px; border-radius: 50px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 0 #A61D24; }
+        #result { display: none; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 90%; }
     </style>
 </head>
 <body>
-
-    <h1 style="color: #004AAD; text-shadow: 2px 2px white;">TOY STORY BOOTH</h1>
-    
+    <h1>🎬 TOY STORY BOOTH</h1>
     <div id="timer" class="timer">3</div>
     <video id="video" autoplay playsinline></video>
-    <canvas id="temp-canvas" width="600" height="600" style="display:none;"></canvas>
+    
+    <canvas id="c" width="800" height="1600" style="display:none;"></canvas>
     
     <br>
-    <button class="btn-start" id="startBtn" onclick="startProcess()">เริ่มถ่ายรูป!</button>
-    
-    <div id="output-area">
-        <canvas id="result-canvas"></canvas>
-        <p id="instruction" style="display:none; color: #004AAD;"><b>กดค้างที่รูปเพื่อบันทึก แล้วนำไปปริ้นท์ได้เลย!</b></p>
-    </div>
+    <button class="btn" id="btn" onclick="start()">กดเพื่อถ่ายรูป (2 ช่อง)</button>
+    <br>
+    <img id="result">
+    <p id="msg" style="display:none; color: #004AAD;"><b>เสร็จแล้ว! กดค้างที่รูปเพื่อบันทึกไปปริ้นท์</b></p>
 
     <script>
-        const video = document.getElementById('video');
-        const timerEl = document.getElementById('timer');
-        const resultCanvas = document.getElementById('result-canvas');
-        const tempCanvas = document.getElementById('temp-canvas');
-        const ctx = tempCanvas.getContext('2d');
-        const resCtx = resultCanvas.getContext('2d');
+        const v = document.getElementById('video');
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+        const timer = document.getElementById('timer');
+        const resImg = document.getElementById('result');
+        const btn = document.getElementById('btn');
 
-        // ตั้งค่าขนาดรูป 2 ช่อง (กว้าง 600 สูง 1200)
-        resultCanvas.width = 600;
-        resultCanvas.height = 1250;
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => v.srcObject = s);
 
-        // เปิดกล้อง
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" }, audio: false })
-            .then(stream => { video.srcObject = stream; })
-            .catch(err => alert("กรุณากดอนุญาตให้ใช้กล้อง"));
-
-        async function startProcess() {
-            document.getElementById('startBtn').style.display = 'none';
-            document.getElementById('result-canvas').style.display = 'none';
+        async function start() {
+            btn.style.display = 'none';
+            resImg.style.display = 'none';
+            document.getElementById('msg').style.display = 'none';
             
+            // 1. เคลียร์ Canvas และวาดพื้นหลังกรอบ (สีขาว)
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // 2. ถ่ายรูป 2 รอบ
             for (let i = 0; i < 2; i++) {
-                // นับถอยหลัง 3 วิ
-                timerEl.style.display = 'block';
+                timer.style.display = 'block';
                 for (let j = 3; j > 0; j--) {
-                    timerEl.innerText = j;
+                    timer.innerText = j;
                     await new Promise(r => setTimeout(r, 1000));
                 }
-                timerEl.innerText = "แชะ!";
+                timer.innerText = "แชะ!";
                 
-                // ถ่ายภาพลง Canvas ลับ
-                ctx.drawImage(video, 0, 0, 600, 600);
-                
-                // เอารูปไปแปะในหน้าผลลัพธ์ (บน หรือ ล่าง)
-                resCtx.drawImage(tempCanvas, 0, i * 625, 600, 600);
+                // ถ่ายรูปแปะลง Canvas (เว้นที่ว่างด้านบน 150px และด้านซ้าย 100px)
+                // รูปที่ 1 อยู่ที่ความสูง 150, รูปที่ 2 อยู่ที่ความสูง 850
+                ctx.drawImage(v, 100, (i * 700) + 150, 600, 600); 
                 
                 await new Promise(r => setTimeout(r, 500));
-                timerEl.style.display = 'none';
+                timer.style.display = 'none';
             }
+            
+            // 3. --- ขั้นตอนสำคัญ: วาดกรอบด้วยโค้ด ---
+            
+            // วาดเส้นขอบนอกสุด (สีน้ำเงิน)
+            ctx.lineWidth = 15;
+            ctx.strokeStyle = "#004AAD";
+            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
 
+            // วาดเส้นขอบใน (สีเหลือง Woody)
+            ctx.lineWidth = 30;
+            ctx.strokeStyle = "#FFD700";
+            ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
+
+            // วาดเส้นแบ่งรูป 2 ช่อง (สีแดง)
+            ctx.lineWidth = 10;
+            ctx.strokeStyle = "#E63946";
+            ctx.beginPath();
+            ctx.moveTo(100, 800);
+            ctx.lineTo(700, 800);
+            ctx.stroke();
+
+            // ใส่ตัวหนังสือ "TOY STORY" ด้านบน
+            ctx.fillStyle = "#004AAD"; // สีน้ำเงิน
+            ctx.font = "bold 60px Arial Rounded MT Bold";
+            ctx.textAlign = "center";
+            ctx.fillText("TOY STORY", 400, 100);
+
+            // ใส่ตัวหนังสือ "PHOT0BOOTH" ด้านล่าง
+            ctx.font = "bold 40px Arial Rounded MT Bold";
+            ctx.fillText("PHOT0BOOTH", 400, canvas.height - 70);
+            
             // แสดงผลลัพธ์
-            document.getElementById('result-canvas').style.display = 'block';
-            document.getElementById('instruction').style.display = 'block';
-            document.getElementById('startBtn').innerText = "ถ่ายใหม่";
-            document.getElementById('startBtn').style.display = 'inline-block';
+            resImg.src = canvas.toDataURL('image/jpeg', 0.8);
+            resImg.style.display = 'inline-block';
+            document.getElementById('msg').style.display = 'block';
+            btn.style.display = 'inline-block';
+            btn.innerText = "ถ่ายใหม่";
         }
     </script>
 </body>
