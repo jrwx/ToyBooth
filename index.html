@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Minimal Booth</title>
+    <title>Jarawee Pro Booth</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@300;400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -109,10 +109,10 @@
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             currentMode = mode;
-            // ปรับฟิลเตอร์หน้าจอ พร้อมเบลอผิวเล็กน้อย (Smoothing)
-            if(mode === 'none') filterStyle = 'blur(0.4px)';
-            else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1) blur(0.4px)';
-            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.2) blur(0.4px)';
+            // ปรับฟิลเตอร์หน้าจอ (ลบ blur ออกไปแล้วจ้า)
+            if(mode === 'none') filterStyle = 'none';
+            else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
+            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.2)';
             video.style.filter = filterStyle;
         }
 
@@ -131,25 +131,13 @@
                 pCanvas.width = 420; pCanvas.height = 420;
                 const pCtx = pCanvas.getContext('2d');
                 
-                // ใช้ filter จริงที่เลือก
-                let drawFilter = 'none';
-                if(currentMode === 'none') drawFilter = 'blur(0.8px)';
-                else if(currentMode === 'kodak') drawFilter = 'contrast(1.2) saturate(1.4) sepia(0.1) blur(0.8px)';
-                else if(currentMode === 'bw') drawFilter = 'grayscale(1) contrast(1.2) blur(0.8px)';
+                // ใช้ filter จริงที่เลือก (ลบ blur ออกไปแล้วจ้า)
+                pCtx.filter = filterStyle;
                 
-                pCtx.filter = drawFilter;
                 pCtx.translate(420, 0); pCtx.scale(-1, 1);
                 const size = Math.min(video.videoWidth, video.videoHeight);
-                
-                // วาดภาพหลัก
                 pCtx.drawImage(video, (video.videoWidth-size)/2, (video.videoHeight-size)/2, size, size, 0, 0, 420, 420);
                 
-                // เพิ่ม Layer หน้าเนียนซ้อน (Soft Glow)
-                pCtx.globalAlpha = 0.3;
-                pCtx.filter = 'blur(4px)';
-                pCtx.drawImage(pCanvas, 0, 0);
-                pCtx.globalAlpha = 1.0;
-
                 pics.push(pCanvas);
                 if(i==0) await new Promise(r => setTimeout(r, 1000));
             }
@@ -175,7 +163,6 @@
             
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
             
-            // ขยาย Order ID ให้ใหญ่ขึ้นอีก
             ctx.textAlign = "left"; 
             ctx.font = "bold 32px 'VT323'"; 
             ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
@@ -191,10 +178,14 @@
             
             ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
             
+            // ลดความเข้ม Thank you โดยใช้ globalAlpha
+            ctx.globalAlpha = 0.5; // ปรับความโปร่งใสเป็น 50%
+            ctx.fillStyle = "#111";
             ctx.font = "bold 32px 'VT323'"; 
             ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
+            ctx.globalAlpha = 1.0; // รีเซ็ต globalAlpha กลับมาเป็นปกติ
 
-            // วาดรอยฉีก (Torn Edge) ลงในเนื้อภาพ PNG เลย
+            // วาดรอยฉีก (Torn Edge)
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath();
             ctx.moveTo(0, 1480);
@@ -220,7 +211,7 @@
             setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
         }
 
-        async function saveImage() {
+        async function sharePhoto() {
             if (!finalBlob) return;
             const file = new File([finalBlob], "jarawee_receipt.png", { type: "image/png" });
             if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -230,7 +221,8 @@
             } else { downloadFallback(); }
         }
 
-        function downloadFallback() {
+        function saveImage() {
+            if (!finalBlob) return;
             const link = document.createElement('a');
             link.download = 'jarawee_receipt.png';
             link.href = resultImg.src;
