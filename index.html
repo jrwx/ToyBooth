@@ -56,4 +56,157 @@
         
         .torn-edge {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 18px; background: #a5a5a5;
-            clip-path: polygon(0% 100%, 3% 30%, 6% 100%, 9% 30%, 12% 100%, 15% 30%, 18% 100%, 21% 30%, 24% 100%,
+            clip-path: polygon(0% 100%, 3% 30%, 6% 100%, 9% 30%, 12% 100%, 15% 30%, 18% 100%, 21% 30%, 24% 100%, 27% 30%, 30% 100%, 33% 30%, 36% 100%, 39% 30%, 42% 100%, 45% 30%, 48% 100%, 51% 30%, 54% 100%, 57% 30%, 60% 100%, 63% 30%, 66% 100%, 69% 30%, 72% 100%, 75% 30%, 78% 100%, 81% 30%, 84% 100%, 87% 30%, 90% 100%, 93% 30%, 96% 100%, 100% 30%, 100% 100%);
+        }
+    </style>
+</head>
+<body>
+
+    <div style="font-size: 24px; margin: 15px 0;">📸 ตู้ถ่ายรูปของ Jarawee 📸</div>
+    
+    <div id="video-container">
+        <div id="shutter-flash"></div>
+        <div class="timer-overlay">
+            <div id="timer-msg">พร้อมนะ!</div>
+            <div id="timer-num">3</div>
+        </div>
+        <video id="video" autoplay playsinline muted></video>
+    </div>
+
+    <div class="filter-nav">
+        <button class="f-btn active" onclick="updateFilter('none', this)">ปกติ</button>
+        <button class="f-btn" onclick="updateFilter('kodak', this)">ฟิล์มโกดัก</button>
+        <button class="f-btn" onclick="updateFilter('fuji', this)">ฟิล์มฟูจิ</button>
+        <button class="f-btn" onclick="updateFilter('bw', this)">ขาวดำ</button>
+    </div>
+    
+    <button class="btn-main" id="btn-snap" onclick="startCapture()">✨ เริ่มถ่ายรูปเลย! ✨</button>
+
+    <div id="result-area">
+        <div class="receipt-paper">
+            <img id="result-img">
+            <div class="torn-edge"></div>
+        </div>
+        <br>
+        <button class="btn-main" style="background:#28a745; box-shadow: 0 5px 0 #1c7430;" onclick="sharePhoto()">✅ บันทึกใบเสร็จนี้ ✅</button>
+    </div>
+
+    <canvas id="c" width="600" height="1580" style="display:none;"></canvas>
+
+    <script>
+        const v = document.getElementById('video');
+        const flash = document.getElementById('shutter-flash');
+        const tNum = document.getElementById('timer-num');
+        const tMsg = document.getElementById('timer-msg');
+        const canvas = document.getElementById('c');
+        const ctx = canvas.getContext('2d');
+        let currentBlob = null;
+        let currentFilterStyle = 'none';
+
+        async function init() {
+            try {
+                const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
+                v.srcObject = s;
+                v.play();
+            } catch (e) { alert("น้องๆ อย่าลืมกดอนุญาตให้ใช้กล้องนะจ๊ะ!"); }
+        }
+        init();
+
+        function updateFilter(mode, btn) {
+            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            let fs = 'none';
+            if(mode === 'kodak') fs = 'contrast(1.2) saturate(1.4) sepia(0.2)';
+            else if(mode === 'fuji') fs = 'contrast(1.1) hue-rotate(-15deg) saturate(1.2) brightness(1.05)';
+            else if(mode === 'bw') fs = 'grayscale(1) contrast(1.3)';
+            v.style.filter = fs;
+            currentFilterStyle = fs;
+        }
+
+        async function startCapture() {
+            const photos = [];
+            document.getElementById('btn-snap').style.display = 'none';
+            document.getElementById('result-area').style.display = 'none';
+
+            for (let i = 0; i < 2; i++) {
+                tMsg.style.display = 'block';
+                tMsg.innerText = i === 0 ? "เริ่มรูปที่ 1... ยิ้มมม!" : "เตรียมตัวนะ! รูปที่ 2";
+                await new Promise(r => setTimeout(r, 1500));
+                tMsg.style.display = 'none';
+
+                tNum.style.display = 'block';
+                for (let j = 3; j > 0; j--) {
+                    tNum.innerText = j;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                tNum.style.display = 'none';
+
+                // แฟลชแวบ!
+                flash.style.opacity = '1';
+                setTimeout(() => flash.style.opacity = '0', 150);
+
+                const tmp = document.createElement('canvas');
+                tmp.width = 480; tmp.height = 480;
+                const tCtx = tmp.getContext('2d');
+                tCtx.translate(480, 0); tCtx.scale(-1, 1);
+                tCtx.filter = currentFilterStyle;
+                const min = Math.min(v.videoWidth, v.videoHeight);
+                tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 480, 480);
+                photos.push(tmp);
+
+                if(i === 0) await new Promise(r => setTimeout(r, 1200)); 
+            }
+            drawReceipt(photos);
+        }
+
+        function drawReceipt(photos) {
+            ctx.fillStyle = "#fdfdfd"; ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ลายกระดาษ
+            for (let i = 0; i < 5000; i++) {
+                ctx.fillStyle = `rgba(0,0,0,0.05)`;
+                ctx.fillRect(Math.random() * 600, Math.random() * 1580, 1, 1);
+            }
+
+            ctx.fillStyle = "black"; ctx.textAlign = "center";
+            ctx.font = "38px 'Press Start 2P'"; ctx.fillText("CONGRATULATIONS", 300, 110);
+            ctx.font = "22px 'Press Start 2P'"; ctx.fillText("to jarawee <3", 300, 165);
+            ctx.font = "20px monospace"; ctx.fillText("----------------------------", 300, 210);
+
+            photos.forEach((img, i) => {
+                const y = (i * 510) + 250;
+                ctx.drawImage(img, 60, y, 480, 480);
+                ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.strokeRect(60, y, 480, 480);
+            });
+
+            ctx.textAlign = "left"; ctx.font = "700 30px 'Sarabun'";
+            ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บาท", 65, 1285);
+            
+            ctx.fillStyle = "black";
+            const bx = 135; const by = 1325;
+            for(let k=0; k<66; k++) {
+                let w = [1.5, 3, 5][Math.floor(Math.random()*3)];
+                ctx.fillRect(bx + (k*5), by, w, 85);
+            }
+            
+            ctx.textAlign = "center"; ctx.font = "14px monospace";
+            ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1465);
+            ctx.fillText("ขอบคุณที่รักกันนะจ๊ะ", 300, 1500);
+
+            canvas.toBlob((b) => {
+                currentBlob = b;
+                document.getElementById('result-img').src = URL.createObjectURL(b);
+                document.getElementById('result-area').style.display = 'block';
+                document.getElementById('btn-snap').style.display = 'inline-block';
+                document.getElementById('btn-snap').innerText = "✨ ถ่ายใหม่อีกรอบ ✨";
+            }, 'image/jpeg', 0.95);
+        }
+
+        async function sharePhoto() {
+            if (!currentBlob) return;
+            const f = new File([currentBlob], "jarawee.jpg", {type:"image/jpeg"});
+            if (navigator.share) await navigator.share({ files: [f] });
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee.jpg"; a.click(); }
+        }
+    </script>
+</body>
+</html>
