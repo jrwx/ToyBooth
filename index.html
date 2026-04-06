@@ -4,73 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Toy Story Photobooth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Kanit:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #71C5EE; 
-            font-family: 'Kanit', 'Fredoka One', sans-serif; 
-            text-align: center; margin: 0; color: white; overflow-x: hidden; 
-        }
-        
-        /* สไตล์ฟอนต์หัวข้อแบบ Toy Story (เหลืองขอบน้ำเงิน) */
-        h1 {
-            font-size: 50px;
-            color: #FFD700; /* สีเหลือง */
-            margin-top: 30px;
-            text-transform: uppercase;
-            /* เทคนิคสร้างขอบหลายชั้นด้วย Text Shadow */
-            text-shadow: 
-                3px 3px 0 #004AAD, 
-                -3px -3px 0 #004AAD,  
-                3px -3px 0 #004AAD,
-                -3px 3px 0 #004AAD,
-                5px 5px 10px rgba(0,0,0,0.3);
-        }
-
-        #video { 
-            width: 85%; max-width: 400px; 
-            border: 12px solid #FFD700; 
-            border-radius: 30px; 
-            margin-top: 10px; 
-            box-shadow: 0 0 0 5px #004AAD; /* ขอบสองชั้นที่กล้อง */
-        }
-
-        .timer { 
-            font-size: 100px; font-weight: bold; color: #E63946; 
-            position: fixed; top: 45%; left: 50%; 
-            transform: translate(-50%, -50%); display: none; 
-            text-shadow: 4px 4px 0 #FFD700; z-index: 10; 
-        }
-
-        .btn { 
-            background: #E63946; /* สีแดงแบบหมวก Woody */
-            color: white; padding: 20px 45px; 
-            font-size: 26px; border-radius: 50px; 
-            border: 5px solid #FFD700; 
-            font-weight: bold; margin-top: 25px; 
-            cursor: pointer; 
-            box-shadow: 0 6px 0 #A61D24;
-            transition: 0.2s;
-        }
-        .btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #A61D24; }
-
-        #result-area { display: none; margin-top: 25px; padding-bottom: 30px; }
-        #result-img { max-width: 85%; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
+        body { background-color: #71C5EE; font-family: 'Kanit', sans-serif; text-align: center; margin: 0; color: white; }
+        h1 { font-size: 35px; color: #FFD700; text-shadow: 3px 3px 0 #004AAD, -2px -2px 0 #004AAD, 2px -2px 0 #004AAD, -2px 2px 0 #004AAD; margin-top: 15px; }
+        #video { width: 85%; max-width: 400px; border: 8px solid #FFD700; border-radius: 20px; box-shadow: 0 0 0 4px #004AAD; }
+        .timer { font-size: 100px; color: #E63946; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); display: none; text-shadow: 4px 4px 0 #FFD700; z-index: 100; }
+        .btn { background: #E63946; color: white; padding: 15px 30px; font-size: 20px; border-radius: 50px; border: 4px solid #FFD700; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 0 #A61D24; }
+        .btn-download { background: #28a745; border-color: #ffffff; box-shadow: 0 4px 0 #1e7e34; margin-top: 10px; text-decoration: none; display: none; }
+        #result-area { display: none; margin-top: 15px; padding-bottom: 50px; }
+        #result-img { max-width: 80%; border-radius: 10px; border: 5px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
     </style>
 </head>
 <body>
     <h1>Toy Booth</h1>
-    
     <div id="timer" class="timer">3</div>
-    <video id="video" autoplay playsinline></video>
+    
+    <video id="video" autoplay playsinline muted></video>
     <canvas id="c" width="800" height="1600" style="display:none;"></canvas>
     
     <br>
-    <button class="btn" id="btn" onclick="start()">เริ่มถ่ายรูป</button>
+    <button class="btn" id="btn-snap" onclick="startCapture()">เริ่มถ่ายรูป</button>
     
     <div id="result-area">
         <img id="result-img">
-        <p style="color: #004AAD; font-size: 20px;"><b>✨ บันทึกรูปแล้วไปปริ้นท์ได้เลย! ✨</b></p>
+        <br>
+        <a id="download-link" class="btn btn-download">💾 บันทึกรูปลงมือถือ</a>
+        <p style="color: #004AAD; font-size: 14px; margin-top: 10px;"><b>เมื่อเซฟแล้ว ให้เข้าแอป Fun Print ไปปริ้นท์นะ!</b></p>
     </div>
 
     <script>
@@ -80,22 +40,22 @@
         const timer = document.getElementById('timer');
         const resArea = document.getElementById('result-area');
         const resImg = document.getElementById('result-img');
-        const btn = document.getElementById('btn');
+        const btnSnap = document.getElementById('btn-snap');
+        const dlLink = document.getElementById('download-link');
 
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => v.srcObject = s);
 
-        async function start() {
-            btn.style.display = 'none';
+        async function startCapture() {
+            btnSnap.style.display = 'none';
             resArea.style.display = 'none';
             
-            // วาดกรอบพื้นหลังสีฟ้าลายเมฆ
+            // วาดพื้นหลังลายเมฆ
             ctx.fillStyle = "#71C5EE";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            // วาดเมฆจำลอง
             ctx.fillStyle = "white";
-            const clouds = [[150,150,100], [600,400,140], [200,800,120], [550,1100,130], [250,1450,110]];
-            clouds.forEach(c => drawCloud(ctx, c[0], c[1], c[2]));
+            [ [150,150,100], [600,400,140], [200,800,120], [550,1100,130], [300,1400,110] ].forEach(cl => {
+                ctx.beginPath(); ctx.arc(cl[0], cl[1], cl[2], 0, Math.PI*2); ctx.fill();
+            });
 
             for (let i = 0; i < 2; i++) {
                 timer.style.display = 'block';
@@ -103,29 +63,39 @@
                     timer.innerText = j;
                     await new Promise(r => setTimeout(r, 1000));
                 }
+                
+                // เปลี่ยนเป็นคำว่า เริ่ด!
                 timer.innerText = "เริ่ด!";
                 
                 const photoSize = 700;
                 const x = 50;
-                const y = (i * 750) + 100;
+                const y = (i * 750) + 120;
                 
-                // ขอบขาวรอบรูป
                 ctx.fillStyle = "white";
                 ctx.fillRect(x - 10, y - 10, photoSize + 20, photoSize + 20);
                 ctx.drawImage(v, x, y, photoSize, photoSize); 
                 
-                await new Promise(r => setTimeout(r, 500));
+                await new Promise(r => setTimeout(r, 800)); // ค้างคำว่าเริ่ดไว้นิดนึง
                 timer.style.display = 'none';
             }
             
-            // วาดตัวอักษรบนกรอบ (Style Toy Story)
+            // วาดชื่อ Toy Booth บนกรอบรูป
             ctx.textAlign = "center";
-            ctx.font = "bold 70px Kanit";
-            
-            // วาดเงา/ขอบตัวอักษรบนกรอบรูป
-            ctx.fillStyle = "#004AAD"; // ขอบนอกสีน้ำเงิน
-            ctx.fillText("TOY BOOTH", canvas.width/2 + 4, 84);
-            ctx.fillStyle = "#FFD700"; // ตัวอักษรสีเหลือง
+            ctx.font = "bold 60px Kanit";
+            ctx.fillStyle = "#004AAD";
             ctx.fillText("TOY BOOTH", canvas.width/2, 80);
 
-            resImg.src = canvas.toDataURL('image/jpeg',
+            const dataUrl = canvas.toDataURL('image/jpeg', 0.9);
+            resImg.src = dataUrl;
+            resArea.style.display = 'block';
+            
+            dlLink.href = dataUrl;
+            dlLink.download = "toy-booth-photo.jpg";
+            dlLink.style.display = 'inline-block';
+            
+            btnSnap.style.display = 'inline-block';
+            btnSnap.innerText = "ถ่ายใหม่อีกรอบ";
+        }
+    </script>
+</body>
+</html>
