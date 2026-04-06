@@ -6,9 +6,9 @@
     <title>Toy Story Photobooth</title>
     <style>
         body { background-color: #71C5EE; font-family: sans-serif; text-align: center; margin: 0; color: white; }
-        #video { width: 90%; max-width: 400px; border: 10px solid #FFD700; border-radius: 20px; margin-top: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #video { width: 90%; max-width: 400px; border: 10px solid #FFD700; border-radius: 20px; margin-top: 20px; }
         .timer { font-size: 80px; font-weight: bold; color: #E63946; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); display: none; text-shadow: 3px 3px 0 #FFD700; z-index: 10; }
-        .btn { background: #E63946; color: white; padding: 20px 40px; font-size: 24px; border-radius: 50px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 0 #A61D24; }
+        .btn { background: #FFD700; color: #004AAD; padding: 20px 40px; font-size: 24px; border-radius: 50px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 5px 0 #b89b00; }
         #result { display: none; margin-top: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); max-width: 90%; }
     </style>
 </head>
@@ -33,6 +33,13 @@
         const resImg = document.getElementById('result');
         const btn = document.getElementById('btn');
 
+        // --- ตั้งค่ารูปกรอบของคุณที่นี่ ---
+        // ถ้าคุณอัปโหลดไฟล์ชื่อ frame.png ไว้ใน GitHub ที่เดียวกัน ให้ใช้ "./frame.png"
+        const frameSrc = "./frame.png"; 
+        
+        const frameImg = new Image();
+        frameImg.src = frameSrc;
+
         navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => v.srcObject = s);
 
         async function start() {
@@ -40,11 +47,9 @@
             resImg.style.display = 'none';
             document.getElementById('msg').style.display = 'none';
             
-            // 1. เคลียร์ Canvas และวาดพื้นหลังกรอบ (สีขาว)
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // เคลียร์ Canvas เก่า
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // 2. ถ่ายรูป 2 รอบ
             for (let i = 0; i < 2; i++) {
                 timer.style.display = 'block';
                 for (let j = 3; j > 0; j--) {
@@ -53,43 +58,21 @@
                 }
                 timer.innerText = "แชะ!";
                 
-                // ถ่ายรูปแปะลง Canvas (เว้นที่ว่างด้านบน 150px และด้านซ้าย 100px)
-                // รูปที่ 1 อยู่ที่ความสูง 150, รูปที่ 2 อยู่ที่ความสูง 850
+                // ถ่ายรูปแปะลง Canvas (ปรับตำแหน่งความสูงตามต้องการ)
+                // รูปที่ 1 อยู่ที่ความสูง 150, รูปที่ 2 อยู่ที่ความสูง 850 (เว้นที่ว่างให้กรอบ)
                 ctx.drawImage(v, 100, (i * 700) + 150, 600, 600); 
                 
                 await new Promise(r => setTimeout(r, 500));
                 timer.style.display = 'none';
             }
             
-            // 3. --- ขั้นตอนสำคัญ: วาดกรอบด้วยโค้ด ---
-            
-            // วาดเส้นขอบนอกสุด (สีน้ำเงิน)
-            ctx.lineWidth = 15;
-            ctx.strokeStyle = "#004AAD";
-            ctx.strokeRect(10, 10, canvas.width - 20, canvas.height - 20);
-
-            // วาดเส้นขอบใน (สีเหลือง Woody)
-            ctx.lineWidth = 30;
-            ctx.strokeStyle = "#FFD700";
-            ctx.strokeRect(40, 40, canvas.width - 80, canvas.height - 80);
-
-            // วาดเส้นแบ่งรูป 2 ช่อง (สีแดง)
-            ctx.lineWidth = 10;
-            ctx.strokeStyle = "#E63946";
-            ctx.beginPath();
-            ctx.moveTo(100, 800);
-            ctx.lineTo(700, 800);
-            ctx.stroke();
-
-            // ใส่ตัวหนังสือ "TOY STORY" ด้านบน
-            ctx.fillStyle = "#004AAD"; // สีน้ำเงิน
-            ctx.font = "bold 60px Arial Rounded MT Bold";
-            ctx.textAlign = "center";
-            ctx.fillText("TOY STORY", 400, 100);
-
-            // ใส่ตัวหนังสือ "PHOT0BOOTH" ด้านล่าง
-            ctx.font = "bold 40px Arial Rounded MT Bold";
-            ctx.fillText("PHOT0BOOTH", 400, canvas.height - 70);
+            // --- ขั้นตอนสำคัญ: แปะกรอบทับ ---
+            // รอให้รูปกรอบโหลดเสร็จก่อน (ปกติโหลดเสร็จตั้งแต่เปิดเว็บ)
+            if (frameImg.complete) {
+                ctx.drawImage(frameImg, 0, 0, canvas.width, canvas.height);
+            } else {
+                alert("รูปกรอบยังโหลดไม่เสร็จ กรุณารอสักครู่แล้วลองใหม่");
+            }
             
             // แสดงผลลัพธ์
             resImg.src = canvas.toDataURL('image/jpeg', 0.8);
