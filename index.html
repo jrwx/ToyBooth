@@ -2,18 +2,19 @@
 <html lang="th">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Toy Story Photobooth</title>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #71C5EE; font-family: 'Kanit', sans-serif; text-align: center; margin: 0; color: white; }
-        h1 { font-size: 35px; color: #FFD700; text-shadow: 3px 3px 0 #004AAD, -2px -2px 0 #004AAD, 2px -2px 0 #004AAD, -2px 2px 0 #004AAD; margin-top: 15px; }
-        #video { width: 85%; max-width: 400px; border: 8px solid #FFD700; border-radius: 20px; box-shadow: 0 0 0 4px #004AAD; }
+        body { background-color: #71C5EE; font-family: 'Kanit', sans-serif; text-align: center; margin: 0; color: white; -webkit-touch-callout: none; }
+        h1 { font-size: 35px; color: #FFD700; text-shadow: 3px 3px 0 #004AAD, -2px -2px 0 #004AAD; margin: 15px 0; }
+        #video { width: 85%; max-width: 400px; border: 8px solid #FFD700; border-radius: 20px; background: #000; }
         .timer { font-size: 100px; color: #E63946; position: fixed; top: 40%; left: 50%; transform: translate(-50%, -50%); display: none; text-shadow: 4px 4px 0 #FFD700; z-index: 100; }
-        .btn { background: #E63946; color: white; padding: 15px 30px; font-size: 20px; border-radius: 50px; border: 4px solid #FFD700; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 0 #A61D24; }
-        .btn-download { background: #28a745; border-color: #ffffff; box-shadow: 0 4px 0 #1e7e34; margin-top: 10px; text-decoration: none; display: none; }
-        #result-area { display: none; margin-top: 15px; padding-bottom: 50px; }
-        #result-img { max-width: 80%; border-radius: 10px; border: 5px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.3); }
+        .btn { background: #E63946; color: white; padding: 15px 35px; font-size: 22px; border-radius: 50px; border: 4px solid #FFD700; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 4px 0 #A61D24; }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn-download { background: #28a745; border-color: #ffffff; box-shadow: 0 4px 0 #1e7e34; text-decoration: none; display: none; }
+        #result-area { display: none; margin-top: 15px; padding-bottom: 60px; }
+        #result-img { max-width: 80%; border: 6px solid white; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -29,8 +30,8 @@
     <div id="result-area">
         <img id="result-img">
         <br>
-        <a id="download-link" class="btn btn-download">💾 บันทึกรูปลงมือถือ</a>
-        <p style="color: #004AAD; font-size: 14px; margin-top: 10px;"><b>เมื่อเซฟแล้ว ให้เข้าแอป Fun Print ไปปริ้นท์นะ!</b></p>
+        <a id="download-link" class="btn btn-download">💾 บันทึกรูปเริ่ดๆ</a>
+        <p style="color: #004AAD; font-size: 14px;">เซฟแล้วไปปริ้นท์ในแอป <b>Fun Print</b> นะ!</p>
     </div>
 
     <script>
@@ -43,7 +44,14 @@
         const btnSnap = document.getElementById('btn-snap');
         const dlLink = document.getElementById('download-link');
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } }).then(s => v.srcObject = s);
+        // ฟังก์ชันเปิดกล้อง
+        function openCamera() {
+            navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+            .then(s => { v.srcObject = s; })
+            .catch(e => alert("กรุณากดอนุญาตให้เข้าถึงกล้องก่อนใช้งานครับ"));
+        }
+
+        openCamera();
 
         async function startCapture() {
             btnSnap.style.display = 'none';
@@ -53,7 +61,7 @@
             ctx.fillStyle = "#71C5EE";
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             ctx.fillStyle = "white";
-            [ [150,150,100], [600,400,140], [200,800,120], [550,1100,130], [300,1400,110] ].forEach(cl => {
+            [ [150,150,100], [600,400,140], [200,800,120], [550,1100,130] ].forEach(cl => {
                 ctx.beginPath(); ctx.arc(cl[0], cl[1], cl[2], 0, Math.PI*2); ctx.fill();
             });
 
@@ -64,7 +72,6 @@
                     await new Promise(r => setTimeout(r, 1000));
                 }
                 
-                // เปลี่ยนเป็นคำว่า เริ่ด!
                 timer.innerText = "เริ่ด!";
                 
                 const photoSize = 700;
@@ -75,11 +82,10 @@
                 ctx.fillRect(x - 10, y - 10, photoSize + 20, photoSize + 20);
                 ctx.drawImage(v, x, y, photoSize, photoSize); 
                 
-                await new Promise(r => setTimeout(r, 800)); // ค้างคำว่าเริ่ดไว้นิดนึง
+                await new Promise(r => setTimeout(r, 800));
                 timer.style.display = 'none';
             }
             
-            // วาดชื่อ Toy Booth บนกรอบรูป
             ctx.textAlign = "center";
             ctx.font = "bold 60px Kanit";
             ctx.fillStyle = "#004AAD";
