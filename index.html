@@ -3,35 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Toy Story Booth 1:1</title>
+    <title>Toy Story Booth - Fix</title>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Kanit:wght@700&display=swap" rel="stylesheet">
     <style>
         body { background-color: #71C5EE; font-family: 'Fredoka One', 'Kanit', sans-serif; text-align: center; margin: 0; color: white; overflow-x: hidden; }
-        
-        h1 {
-            font-size: 40px; color: #FFD700; margin: 15px 0; text-transform: uppercase;
-            text-shadow: 3px 3px 0 #004AAD, -2px -2px 0 #004AAD, 2px -2px 0 #004AAD, -2px 2px 0 #004AAD;
-        }
-
+        h1 { font-size: 40px; color: #FFD700; margin: 15px 0; text-transform: uppercase; text-shadow: 3px 3px 0 #004AAD, -2px -2px 0 #004AAD, 2px -2px 0 #004AAD, -2px 2px 0 #004AAD; }
         #video-container { position: relative; width: 320px; height: 320px; margin: 10px auto; border: 8px solid #FFD700; border-radius: 20px; overflow: hidden; background: #000; }
-        
-        /* ฟลิปกล้องหน้าจอ Preview */
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-
-        /* ตัวเลขย้ายมาไว้ข้างบน ไม่ให้บังหน้า */
-        .timer { 
-            font-size: 80px; color: #E63946; position: absolute; top: 10px; left: 50%; 
-            transform: translateX(-50%); display: none; text-shadow: 4px 4px 0 #FFD700; z-index: 10; 
-        }
-
-        .btn { 
-            background: #E63946; color: white; padding: 15px 35px; font-size: 20px; 
-            border-radius: 50px; border: 4px solid #FFD700; font-weight: bold; 
-            margin-top: 15px; cursor: pointer; box-shadow: 0 4px 0 #A61D24; width: 85%;
-        }
-
+        .timer { font-size: 80px; color: #E63946; position: absolute; top: 10px; left: 50%; transform: translateX(-50%); display: none; text-shadow: 4px 4px 0 #FFD700; z-index: 10; }
+        .btn { background: #E63946; color: white; padding: 15px 35px; font-size: 22px; border-radius: 50px; border: 4px solid #FFD700; font-weight: bold; margin-top: 15px; cursor: pointer; box-shadow: 0 6px 0 #A61D24; width: 85%; }
+        .btn:disabled { background: #888; box-shadow: none; }
         #result-area { display: none; margin-top: 15px; padding-bottom: 60px; }
-        #result-img { max-width: 80%; border: 6px solid white; border-radius: 10px; }
+        #result-img { max-width: 80%; border: 8px solid white; border-radius: 10px; }
     </style>
 </head>
 <body>
@@ -43,12 +26,12 @@
         <video id="video" autoplay playsinline muted></video>
     </div>
     
-    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายรูปเริ่ดๆ (1:1)</button>
+    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายรูปเริ่ดๆ</button>
 
     <div id="result-area">
         <img id="result-img">
         <br>
-        <a id="download-link" class="btn" style="background:#28a745; text-decoration:none; display:inline-block;">💾 บันทึกรูปไปปริ้นท์</a>
+        <button id="btn-share" class="btn" style="background:#28a745;" onclick="sharePhoto()">✨ บันทึกรูปเริ่ดๆ</button>
     </div>
 
     <canvas id="c" width="800" height="1600" style="display:none;"></canvas>
@@ -56,20 +39,92 @@
     <script>
         const v = document.getElementById('video');
         const btnSnap = document.getElementById('btn-snap');
+        let currentBlob = null;
 
-        async function initCamera() {
+        // ฟังก์ชันเปิดกล้องที่เสถียรที่สุด
+        async function startCamera() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", width: 720, height: 720 }, 
-                    audio: false 
+                    video: { facingMode: "user", width: { ideal: 720 }, height: { ideal: 720 } }
                 });
                 v.srcObject = stream;
             } catch (err) {
-                alert("กรุณาเปิดใน Safari/Chrome และอนุญาตกล้องนะครับ");
+                alert("กล้องไม่ยอมทำงาน! ลองปิด Tab แล้วเปิดใหม่ หรือเช็คการอนุญาตกล้องนะครับ");
             }
         }
 
-        initCamera();
+        // เริ่มกล้องทันทีที่เปิดเว็บ
+        startCamera();
 
         async function startCapture() {
+            if (!v.srcObject) { await startCamera(); } // ถ้ากล้องหาย ให้ลองเรียกใหม่
+            
             const canvas = document.getElementById('c');
+            const ctx = canvas.getContext('2d');
+            const timerEl = document.getElementById('timer');
+            const resArea = document.getElementById('result-area');
+            const resImg = document.getElementById('result-img');
+
+            btnSnap.disabled = true;
+            resArea.style.display = 'none';
+
+            // พื้นหลังเมฆ
+            ctx.fillStyle = "#71C5EE";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "white";
+            [ [100,100,80], [650,250,130], [200,800,90], [550,1100,120], [300,1450,100] ].forEach(cl => {
+                ctx.beginPath(); ctx.arc(cl[0], cl[1], cl[2], 0, Math.PI*2); ctx.fill();
+            });
+
+            for (let i = 0; i < 2; i++) {
+                timerEl.style.display = 'block';
+                for (let j = 3; j > 0; j--) {
+                    timerEl.innerText = j;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                timerEl.innerText = "เริ่ด!";
+                
+                const pSize = 700; const x = 50; const y = (i * 750) + 120;
+                ctx.fillStyle = "white";
+                ctx.fillRect(x-10, y-10, pSize+20, pSize+20);
+                
+                ctx.save();
+                ctx.translate(x + pSize, y); 
+                ctx.scale(-1, 1); 
+                const min = Math.min(v.videoWidth, v.videoHeight);
+                const sx = (v.videoWidth - min) / 2;
+                const sy = (v.videoHeight - min) / 2;
+                ctx.drawImage(v, sx, sy, min, min, 0, 0, pSize, pSize);
+                ctx.restore();
+                
+                await new Promise(r => setTimeout(r, 800));
+                timerEl.style.display = 'none';
+            }
+
+            ctx.textAlign = "center"; ctx.font = "bold 65px Fredoka One, Kanit"; ctx.fillStyle = "#004AAD";
+            ctx.fillText("TOY BOOTH", canvas.width/2, 80);
+
+            canvas.toBlob((b) => {
+                currentBlob = b;
+                resImg.src = URL.createObjectURL(b);
+                resArea.style.display = 'block';
+                btnSnap.disabled = false;
+                btnSnap.innerText = "ถ่ายใหม่อีกรอบ";
+            }, 'image/jpeg', 0.9);
+        }
+
+        async function sharePhoto() {
+            if (!currentBlob) return;
+            const f = new File([currentBlob], "toy-booth.jpg", {type:"image/jpeg"});
+            if (navigator.share) {
+                try { await navigator.share({ files: [f] }); } catch (e) {}
+            } else {
+                const a = document.createElement('a');
+                a.href = URL.createObjectURL(currentBlob);
+                a.download = "toy-booth.jpg";
+                a.click();
+            }
+        }
+    </script>
+</body>
+</html>
