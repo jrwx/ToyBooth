@@ -3,164 +3,218 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Final Receipt</title>
+    <title>Jarawee Custom Receipt</title>
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #1a1a1a; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #eee; overflow-x: hidden; }
+        body { background-color: #a5a5a5; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 10px 0; color: #333; overflow-x: hidden; }
         
-        /* --- หน้าแรก: โหมดกล้องดิจิทัล --- */
-        #camera-page { display: block; padding-top: 20px; }
-        #booth-machine { position: relative; width: 340px; margin: 0 auto; background: #333; padding: 12px; border-radius: 15px; border: 4px solid #555; box-shadow: 0 30px 60px rgba(0,0,0,0.8); }
-        #main-display { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; border: 2px solid #000; }
+        /* ตัวเครื่อง Booth */
+        #booth-machine { position: relative; width: 330px; margin: 20px auto; background: #222; padding: 10px; border-radius: 12px; border: 5px solid #000; box-shadow: 0 25px 50px rgba(0,0,0,0.6); z-index: 10; overflow: hidden; }
+        
+        /* ช่องจอหลัก */
+        #main-display { position: relative; width: 310px; height: 310px; margin: 0 auto; background: #000; overflow: hidden; border: 4px solid #111; }
+        
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         
-        .cam-ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; font-family: 'VT323', monospace; color: #fff; }
-        .cam-top-right { position: absolute; top: 10px; right: 10px; color: #f00; animation: blink 1s infinite; }
-        .cam-grid { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: grid; grid-template: 1fr 1fr 1fr / 1fr 1fr 1fr; opacity: 0.2; }
-        .cam-grid div { border: 0.5px solid #fff; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
         #shutter-flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
-        .timer-overlay { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 50px; display: none; }
-
-        /* --- หน้าสอง: โหมดใบเสร็จ (ลบทุกอย่างออก) --- */
-        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 999; overflow-y: auto; scrollbar-width: none; }
-        #print-page::-webkit-scrollbar { display: none; }
-
-        .receipt-paper { 
-            position: relative; 
-            width: 90%; max-width: 500px; /* ขยายขนาดใบเสร็จขึ้น */
-            background: #fdfaf5; 
-            margin: 0 auto 50px auto;
-            transform: translateY(-100%); 
-            box-shadow: 0 0 40px rgba(0,0,0,0.5);
-        }
         
-        /* อนิเมชั่นไหลลื่น 6.5 วินาที */
-        .printing-act { animation: slideDownSmooth 6.5s linear forwards; }
+        .timer-overlay { font-family: 'Press Start 2P', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: white; z-index: 30; text-shadow: 0 0 10px #000; text-align: center; width: 100%; pointer-events: none;}
+        #timer-num { font-size: 50px; display: none; }
+        #timer-msg { font-size: 10px; display: none; background: rgba(0,0,0,0.8); padding: 10px; border: 2px solid white; }
+
+        /* พื้นที่ปริ้นท์ (แทนที่กล้อง) */
+        #print-output { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; z-index: 40; background: #000; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; }
+        #print-output::-webkit-scrollbar { display: none; }
+
+        .receipt-paper { position: relative; width: 260px; background: #fdfaf5; box-shadow: 0 0 20px rgba(0,0,0,0.5); transform: translateY(-100%); margin-bottom: 50px; }
         
-        @keyframes slideDownSmooth { 
+        /* การไหลที่สมูท */
+        .printing-act { animation: slideOutSmooth 6.5s linear forwards; }
+        
+        @keyframes slideOutSmooth { 
             0% { transform: translateY(-100%); } 
             100% { transform: translateY(0); } 
         }
 
-        #result-img { width: 100%; display: block; mix-blend-mode: multiply; }
-        .torn-edge { width: 100%; height: 20px; background: #000; clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); }
+        #result-img { width: 100%; display: block; filter: contrast(1.1); mix-blend-mode: multiply; }
+        .torn-edge { position: absolute; bottom: 0; left: 0; width: 100%; height: 12px; background: #000; clip-path: polygon(0% 100%, 5% 15%, 10% 100%, 15% 20%, 20% 100%, 25% 15%, 30% 100%, 35% 25%, 40% 100%, 45% 15%, 50% 100%, 55% 20%, 60% 100%, 65% 15%, 70% 100%, 75% 25%, 80% 100%, 85% 15%, 90% 100%, 95% 20%, 100% 100%); }
 
-        /* ปุ่มกด */
-        .controls { margin-top: 30px; }
-        .btn-snap { background: #ff3e3e; color: #fff; padding: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; border: none; width: 250px; cursor: pointer; border-radius: 50px; box-shadow: 0 6px 0 #b32a2a; }
-        .btn-save { background: #fff; color: #000; padding: 20px; font-family: 'Press Start 2P', cursive; font-size: 14px; border: none; width: 280px; margin-top: 20px; cursor: pointer; border-radius: 10px; box-shadow: 0 6px 0 #ccc; display: none; }
+        .filter-nav { display: flex; justify-content: center; gap: 5px; margin: 15px 0; flex-wrap: wrap; }
+        .f-btn { background: #eee; border: 1px solid #444; padding: 10px 12px; font-size: 9px; cursor: pointer; font-family: 'Press Start 2P', cursive; border-radius: 4px; }
+        .f-btn.active { background: #000; color: #fff; }
+        
+        .btn-main { background: #d00; color: #fff; padding: 18px; font-family: 'Press Start 2P', cursive; font-size: 11px; border: none; margin-top: 15px; width: 85%; cursor: pointer; border-radius: 50px; box-shadow: 0 6px 0 #800; transition: 0.1s; }
+        .btn-main:active { transform: translateY(4px); box-shadow: 0 2px 0 #800; }
+        
+        #action-buttons { display: none; margin-top: 25px; padding-bottom: 100px; }
     </style>
 </head>
 <body>
 
-    <div id="camera-page">
-        <div style="font-family: 'VT323', monospace; font-size: 28px; margin-bottom: 15px;">DIGITAL CAM SERVICE</div>
-        <div id="booth-machine">
-            <div id="main-display">
-                <div class="cam-ui">
-                    <div class="cam-top-right">● REC</div>
-                    <div class="cam-grid"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
-                </div>
+    <div style="font-family: 'VT323', monospace; font-size: 30px; margin-top: 20px; color: #eee; letter-spacing: 3px;">JARAWEE PHOTO SERVICE</div>
+
+    <div id="booth-machine">
+        <div id="main-display">
+            <div id="camera-view">
                 <div id="shutter-flash"></div>
                 <video id="video" autoplay playsinline muted></video>
-                <div id="timer-num" class="timer-overlay">3</div>
+            </div>
+            
+            <div id="print-output">
+                <div class="receipt-paper" id="receipt-paper">
+                    <img id="result-img">
+                    <div class="torn-edge"></div>
+                </div>
+            </div>
+
+            <div class="timer-overlay">
+                <div id="timer-msg">READY?</div>
+                <div id="timer-num">3</div>
             </div>
         </div>
-        <div class="controls">
-            <button class="btn-snap" id="btn-snap" onclick="startCapture()">SHOT</button>
-        </div>
     </div>
 
-    <div id="print-page">
-        <div class="receipt-paper" id="receipt-paper">
-            <img id="result-img">
-            <div class="torn-edge"></div>
-        </div>
-        <button class="btn-save" id="btn-save" onclick="sharePhoto()">SAVE RECEIPT</button>
-        <div style="height: 50px;"></div>
+    <div class="filter-nav" id="filter-box">
+        <button class="f-btn active" onclick="updateFilter('none', this)">ปกติ</button>
+        <button class="f-btn" onclick="updateFilter('kodak', this)">โกดัก</button>
+        <button class="f-btn" onclick="updateFilter('bw', this)">ขาวดำ</button>
+        <button class="f-btn" onclick="updateFilter('vintage', this)">ซีเปีย</button>
+    </div>
+    
+    <button class="btn-main" id="btn-snap" onclick="startCapture()">ถ่ายรูปกันเล้ย</button>
+
+    <div id="action-buttons">
+        <button class="btn-main" style="background:#222; box-shadow: 0 6px 0 #000;" onclick="sharePhoto()">เซฟด่วนนน (PNG)</button>
+        <br>
+        <button class="btn-main" style="background:#666; box-shadow: 0 6px 0 #333;" onclick="resetBooth()">ถ่ายใหม่เถอะ</button>
     </div>
 
-    <canvas id="c" width="800" height="2000" style="display:none;"></canvas>
+    <canvas id="c" width="600" height="1520" style="display:none;"></canvas>
 
     <script>
         const v = document.getElementById('video');
         const flash = document.getElementById('shutter-flash');
         const tNum = document.getElementById('timer-num');
+        const tMsg = document.getElementById('timer-msg');
         const canvas = document.getElementById('c');
         const ctx = canvas.getContext('2d');
-        const camPage = document.getElementById('camera-page');
-        const printPage = document.getElementById('print-page');
+        const printOutput = document.getElementById('print-output');
         const receiptPaper = document.getElementById('receipt-paper');
-        const btnSave = document.getElementById('btn-save');
+        const actionButtons = document.getElementById('action-buttons');
         
         let currentBlob = null;
+        let currentFilterStyle = 'none';
         let stream = null;
 
         async function init() {
             try {
                 stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 v.srcObject = stream;
-            } catch (e) { alert("Camera error!"); }
+            } catch (e) { alert("กรุณาเปิดกล้องนะจ๊ะ!"); }
         }
         init();
+
+        function updateFilter(mode, btn) {
+            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            let fs = 'none';
+            if(mode === 'kodak') fs = 'contrast(1.2) saturate(1.5) sepia(0.1)';
+            else if(mode === 'bw') fs = 'grayscale(1) contrast(1.4)';
+            else if(mode === 'vintage') fs = 'sepia(0.8) contrast(1.1) saturate(0.8)';
+            v.style.filter = fs;
+            currentFilterStyle = fs;
+        }
 
         async function startCapture() {
             const photos = [];
             document.getElementById('btn-snap').style.display = 'none';
+            document.getElementById('filter-box').style.opacity = '0';
 
             for (let i = 0; i < 2; i++) {
-                tNum.style.display = 'block';
+                tMsg.style.display = 'block'; tMsg.innerText = i === 0 ? "POSE 1" : "POSE 2";
+                await new Promise(r => setTimeout(r, 1500));
+                tMsg.style.display = 'none'; tNum.style.display = 'block';
                 for (let j = 3; j > 0; j--) { tNum.innerText = j; await new Promise(r => setTimeout(r, 1000)); }
                 tNum.style.display = 'none';
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const tmp = document.createElement('canvas');
-                tmp.width = 600; tmp.height = 600; // ขยายขนาดรูปถ่าย
+                tmp.width = 420; tmp.height = 420;
                 const tCtx = tmp.getContext('2d');
-                tCtx.translate(600, 0); tCtx.scale(-1, 1);
+                tCtx.filter = currentFilterStyle;
+                tCtx.translate(420, 0); tCtx.scale(-1, 1);
                 const min = Math.min(v.videoWidth, v.videoHeight);
-                tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 600, 600);
+                tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 420, 420);
+                
+                // เอฟเฟกต์เม็ดกระดาษเล็กน้อยแต่ยังคงสีเดิม
+                tCtx.globalCompositeOperation = 'source-atop';
+                tCtx.fillStyle = 'rgba(0,0,0,0.05)';
+                for(let y=0; y<420; y+=2) { for(let x=0; x<420; x+=2) { if(Math.random()>0.9) tCtx.fillRect(x,y,1,1); } }
+                tCtx.globalCompositeOperation = 'source-over';
                 
                 photos.push(tmp);
-                if(i === 0) await new Promise(r => setTimeout(r, 1200)); 
+                if(i === 0) await new Promise(r => setTimeout(r, 1000)); 
             }
+            if(stream) stream.getTracks().forEach(track => track.stop());
             generateFinalReceipt(photos);
         }
 
         function generateFinalReceipt(photos) {
             const orderNo = Math.floor(100000 + Math.random() * 900000);
-            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, canvas.width, canvas.height);
             
-            // Texture
-            for(let i=0; i<10000; i++) { ctx.fillStyle = `rgba(0,0,0,0.04)`; ctx.fillRect(Math.random()*800, Math.random()*2000, 1.5, 1.5); }
+            // พื้นหลังกระดาษ
+            ctx.fillStyle = "#fdfaf5"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
+            // Texture กระดาษ
+            for(let i=0; i<8000; i++) { ctx.fillStyle = `rgba(0,0,0,0.06)`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1.2, 1.2); }
 
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            ctx.font = "bold 80px 'VT323'"; ctx.fillText("JARAWEE BOOTH", 400, 120);
-            ctx.font = "30px monospace"; ctx.fillText("===========================", 400, 180);
+            // Header ใหญ่ขึ้น
+            ctx.font = "bold 65px 'VT323'"; ctx.fillText("Congrats!!", 300, 100);
+            ctx.font = "30px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 145);
+            ctx.font = "20px monospace"; ctx.fillText("==============================", 300, 180);
+            
+            ctx.font = "18px 'VT323'"; ctx.fillText("Order No: #" + orderNo, 300, 210);
 
-            // Order No ชิดซ้าย
-            ctx.textAlign = "left"; 
-            ctx.font = "30px 'VT323'"; ctx.fillText("Order: #" + orderNo, 100, 230);
-
-            // วาดรูปถ่าย (ขนาดใหญ่ขึ้น)
+            // วาดรูปถ่าย (สีตามฟิลเตอร์)
             photos.forEach((img, i) => {
-                const y = (i * 640) + 280;
-                ctx.drawImage(img, 100, y, 600, 600);
-                ctx.strokeStyle = "#000"; ctx.lineWidth = 3; ctx.strokeRect(100, y, 600, 600);
+                const y = (i * 440) + 240;
+                ctx.drawImage(img, 90, y, 420, 420);
+                ctx.strokeStyle = "#333"; ctx.lineWidth = 1; ctx.strokeRect(90, y, 420, 420);
             });
 
-            ctx.font = "bold 35px Sarabun"; ctx.fillText("รายการ: ค่าความน่ารัก (Full Ver.)", 100, 1620);
+            // รายการบรรทัดเดียว
+            ctx.textAlign = "left"; 
+            ctx.font = "700 24px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ฮี่ๆๆ ;-)", 90, 1150); 
             
-            // Barcode
-            ctx.fillStyle = "#111"; const bx = 100; const by = 1700;
-            for(let k=0; k<100; k++) { let w = [3, 5, 8][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 100); }
+            // บาร์โค้ดแบบดั้งเดิม (แทนที่ QR)
+            ctx.fillStyle = "#111"; const bx = 90; const by = 1220;
+            for(let k=0; k<70; k++) { let w = [2, 4, 6][Math.floor(Math.random()*3)]; ctx.fillRect(bx + (k*6), by, w, 80); }
             
             ctx.textAlign = "center"; 
-            ctx.font = "bold 30px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 400, 1880);
+            ctx.font = "bold 28px 'VT323'"; ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1360);
+            ctx.font = "18px 'VT323'"; ctx.fillText("*** THANK YOU - LOVE YOU ***", 300, 1410);
 
-            canvas.toBlob((b) => {
+            // สร้างเอฟเฟกต์ขอบหยักตอนเซฟ (PNG)
+            const tornCanvas = document.createElement('canvas');
+            tornCanvas.width = canvas.width; tornCanvas.height = canvas.height;
+            const tCtx = tornCanvas.getContext('2d');
+            
+            // วาด Path ขอบหยักด้านล่าง
+            tCtx.beginPath();
+            tCtx.moveTo(0, 0);
+            tCtx.lineTo(canvas.width, 0);
+            tCtx.lineTo(canvas.width, canvas.height - 15);
+            for (let i = canvas.width; i > 0; i -= 12) {
+                tCtx.lineTo(i - 6, canvas.height);
+                tCtx.lineTo(i - 12, canvas.height - 15);
+            }
+            tCtx.closePath();
+            tCtx.clip();
+            tCtx.drawImage(canvas, 0, 0);
+
+            tornCanvas.toBlob((b) => {
                 currentBlob = b;
                 document.getElementById('result-img').src = URL.createObjectURL(b);
                 startPrinting();
@@ -168,22 +222,23 @@
         }
 
         function startPrinting() {
-            // สลับหน้า: ซ่อนกล้อง โชว์ปริ้นท์
-            camPage.style.display = 'none';
-            printPage.style.display = 'block';
+            document.getElementById('camera-view').style.display = 'none';
+            printOutput.style.display = 'flex';
             receiptPaper.classList.add('printing-act');
             
-            // ปุ่ม Save มาหลังจากไหลเสร็จ
             setTimeout(() => { 
-                btnSave.style.display = 'inline-block';
+                actionButtons.style.display = 'block'; 
+                actionButtons.scrollIntoView({ behavior: 'smooth' }); 
             }, 6800);
         }
 
+        function resetBooth() { location.reload(); }
+
         async function sharePhoto() {
             if (!currentBlob) return;
-            const f = new File([currentBlob], "jarawee_full.png", {type:"image/png"});
+            const f = new File([currentBlob], "jarawee_print.png", {type:"image/png"});
             if (navigator.share) await navigator.share({ files: [f] });
-            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_full.png"; a.click(); }
+            else { const a = document.createElement('a'); a.href = URL.createObjectURL(currentBlob); a.download = "jarawee_print.png"; a.click(); }
         }
     </script>
 </body>
