@@ -3,246 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Receipt JubJub Booth</title>
+    <title>Congrats Sao Jang - 3000 นะจ๊ะ</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Mono&family=Kanit:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { 
-            background-color: #f0f0f0; /* สีพื้นหลังเว็บนวลๆ */
-            font-family: 'Space Mono', 'Kanit', monospace; 
-            text-align: center; margin: 0; padding: 20px 0; color: #333; overflow-x: hidden; 
-        }
+        body { background-color: #f0f0f0; font-family: 'Space Mono', 'Kanit', monospace; text-align: center; margin: 0; padding: 20px 0; color: #333; overflow-x: hidden; }
+        h1 { font-size: 20px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
+        #video-container { position: relative; width: 320px; height: 320px; margin: 0 auto; border: 4px solid #333; border-radius: 10px; overflow: hidden; background: #000; }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); filter: grayscale(100%); }
         
-        h1 { font-size: 24px; font-weight: bold; margin-bottom: 5px; }
-        p.subtitle { font-size: 14px; margin: 0 0 20px 0; color: #666; }
-
-        /* จอกล้องแบบสี่เหลี่ยมจตุรัส */
-        #video-container { 
-            position: relative; width: 320px; height: 320px; margin: 0 auto; 
-            border: 4px solid #333; border-radius: 10px; overflow: hidden; 
-            background: #000; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        /* ฟลิปกล้อง Preview และทำให้เป็นขาวดำ */
-        video { 
-            width: 100%; height: 100%; object-fit: cover; 
-            transform: scaleX(-1); 
-            filter: grayscale(100%); /* ทำ Preview เป็นขาวดำ */
-        }
-
-        /* ตัวนับถอยหลัง */
         .timer { 
-            font-size: 80px; color: #E63946; position: absolute; top: 10px; left: 50%; 
-            transform: translateX(-50%); display: none; text-shadow: 2px 2px 0 white; z-index: 10; 
+            font-size: 90px; position: absolute; top: 50%; left: 50%; 
+            transform: translate(-50%, -50%); display: none; 
+            font-weight: bold; z-index: 10; -webkit-text-stroke: 2px white;
         }
 
-        /* สไตล์ปุ่มกด */
-        .btn { 
-            background: #333; color: white; padding: 15px 35px; font-size: 18px; 
-            border-radius: 30px; border: none; font-weight: bold; 
-            margin-top: 20px; cursor: pointer; box-shadow: 0 4px 0 #1a1a1a;
-            transition: 0.1s; width: 85%; max-width: 320px;
+        #next-alert {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8); color: #FFD700; padding: 10px;
+            border-radius: 10px; font-size: 20px; display: none; z-index: 11; width: 80%;
         }
+
+        .btn { background: #333; color: white; padding: 15px 35px; font-size: 18px; border-radius: 30px; border: none; font-weight: bold; margin-top: 20px; cursor: pointer; box-shadow: 0 4px 0 #1a1a1a; width: 85%; max-width: 320px; }
         .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 #1a1a1a; }
-        .btn-save { background: #28a745; box-shadow: 0 4px 0 #1e7e34; text-decoration: none; display: inline-block; }
-        .btn-save:active { box-shadow: 0 2px 0 #1e7e34; }
-
-        #result-area { display: none; margin-top: 25px; padding-bottom: 60px; }
-        
-        /* สไตล์การแสดงผลรูปใบเสร็จ */
-        #result-img-container {
-            position: relative;
-            display: inline-block;
-            max-width: 85%;
-            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-        }
-        
-        #result-img { 
-            width: 100%; 
-            border-radius: 2px;
-            /* เพิ่มรอยฉีกหยักๆ ด้านบนและล่างด้วย CSS mask */
-            -webkit-mask-image: linear-gradient(to bottom, transparent 5px, black 5px, black calc(100% - 5px), transparent calc(100% - 5px)),
-                                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,10 5,0 10,10 15,0 20,10" fill="black"/></svg>'),
-                                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,0 5,10 10,0 15,10 20,0" fill="black"/></svg>');
-            -webkit-mask-size: 100% 100%, 20px 10px, 20px 10px;
-            -webkit-mask-position: 0 0, 0 0, 0 100%;
-            -webkit-mask-repeat: no-repeat, repeat-x, repeat-x;
-            -webkit-mask-composite: destination-in, source-over, source-over;
-            mask-image: linear-gradient(to bottom, transparent 5px, black 5px, black calc(100% - 5px), transparent calc(100% - 5px)),
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,10 5,0 10,10 15,0 20,10" fill="black"/></svg>'),
-                        url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 10"><polygon points="0,0 5,10 10,0 15,10 20,0" fill="black"/></svg>');
-            mask-size: 100% 100%, 20px 10px, 20px 10px;
-            mask-position: 0 0, 0 0, 0 100%;
-            mask-repeat: no-repeat, repeat-x, repeat-x;
-            mask-composite: destination-in, source-over, source-over;
-        }
-    </style>
-</head>
-<body>
-
-    <h1>Receipt JubJub</h1>
-    <p class="subtitle">Please take your photo receipt.</p>
-    
-    <div id="video-container">
-        <div id="timer" class="timer">3</div>
-        <video id="video" autoplay playsinline muted></video>
-    </div>
-    
-    <button class="btn" id="btn-snap" onclick="startCapture()">📸 ถ่ายใบเสร็จ (2 รูป)</button>
-
-    <div id="result-area">
-        <div id="result-img-container">
-            <img id="result-img">
-        </div>
-        <br>
-        <button id="btn-share" class="btn btn-save" onclick="sharePhoto()">✨ บันทึกใบเสร็จ JubJub</button>
-        <p style="font-size: 12px; color: #666; margin-top: 15px;">เมื่อเซฟแล้ว ให้ไปปริ้นท์ในแอป <b>Fun Print</b> นะครับ</p>
-    </div>
-
-    <canvas id="c" width="600" height="1500" style="display:none;"></canvas>
-
-    <script>
-        const v = document.getElementById('video');
-        const btnSnap = document.getElementById('btn-snap');
-        let currentBlob = null;
-
-        // เปิดกล้อง
-        async function initCamera() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: "user", width: 720, height: 720 }, 
-                    audio: false 
-                });
-                v.srcObject = stream;
-            } catch (err) {
-                alert("กรุณาเปิดใน Safari/Chrome และอนุญาตกล้องนะครับ");
-            }
-        }
-
-        initCamera();
-
-        async function startCapture() {
-            const canvas = document.getElementById('c');
-            const ctx = canvas.getContext('2d');
-            const timerEl = document.getElementById('timer');
-            const resArea = document.getElementById('result-area');
-            const resImg = document.getElementById('result-img');
-
-            btnSnap.style.display = 'none';
-            resArea.style.display = 'none';
-
-            // --- วาดพื้นหลังใบเสร็จ (สีขาวนวล) ---
-            ctx.fillStyle = "#fff";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // --- วาดหัวข้อใบเสร็จ ---
-            ctx.textAlign = "center";
-            ctx.fillStyle = "#000"; // สีดำ
-            
-            // หัวข้อหลัก
-            ctx.font = "bold 40px Kanit";
-            ctx.fillText("Receipt JubJub", canvas.width / 2, 80);
-            
-            // เส้นคั่น
-            ctx.font = "20px 'Space Mono'";
-            ctx.fillText("----------------------------", canvas.width / 2, 110);
-            
-            // วันที่และเวลา (จำลอง)
-            const now = new Date();
-            const dateStr = now.toLocaleDateString('th-TH') + " " + now.toLocaleTimeString('th-TH');
-            ctx.font = "20px Kanit";
-            ctx.fillText("วันที่: " + dateStr, canvas.width / 2, 140);
-            ctx.fillText("----------------------------", canvas.width / 2, 160);
-
-            // --- ถ่ายรูป 2 รูป (ขาวดำ 1:1) ---
-            for (let i = 0; i < 2; i++) {
-                timerEl.style.display = 'block';
-                for (let j = 3; j > 0; j--) {
-                    timerEl.innerText = j;
-                    await new Promise(r => setTimeout(r, 1000));
-                }
-                
-                timerEl.innerText = "แชะ!";
-                
-                const photoSize = 500; // ขนาดรูปถ่ายในใบเสร็จ
-                const x = (canvas.width - photoSize) / 2; // กึ่งกลาง
-                const y = (i * 550) + 190; // ตำแหน่งแนวตั้ง
-                
-                // --- คำนวณตัดภาพเป็น 1:1, ฟลิปรูป, และทำเป็นขาวดำ ---
-                ctx.save();
-                
-                // ฟลิปแนวนอน (Mirror)
-                ctx.translate(x + photoSize, y); 
-                ctx.scale(-1, 1); 
-                
-                // ตั้งค่า Filter เป็นขาวดำ
-                ctx.filter = 'grayscale(100%)';
-                
-                // คำนวณหาจุดกึ่งกลางของวิดีโอเพื่อ Crop เป็นจตุรัส
-                const minSide = Math.min(v.videoWidth, v.videoHeight);
-                const sx = (v.videoWidth - minSide) / 2;
-                const sy = (v.videoHeight - minSide) / 2;
-                
-                // วาดรูปที่ Crop และ Filter แล้วลง Canvas
-                ctx.drawImage(v, sx, sy, minSide, minSide, 0, 0, photoSize, photoSize);
-                
-                ctx.restore(); // คืนค่า Filter และการ Transform
-                
-                await new Promise(r => setTimeout(r, 800));
-                timerEl.style.display = 'none';
-            }
-
-            // --- วาดรายละเอียดค่าใช้จ่าย ---
-            ctx.textAlign = "left";
-            ctx.fillStyle = "#000";
-            ctx.font = "bold 25px Kanit";
-            
-            ctx.fillText("----------------------------", 50, 1310);
-            ctx.fillText("รายการ:", 50, 1350);
-            ctx.fillText("ค่ารักเอ็ง", 160, 1350);
-            
-            ctx.textAlign = "right";
-            ctx.fillText("ราคา:", 450, 1390);
-            ctx.font = "bold 30px Kanit";
-            ctx.fillText("3,000 บาท", 550, 1390);
-            
-            ctx.textAlign = "center";
-            ctx.font = "20px 'Space Mono'";
-            ctx.fillText("----------------------------", canvas.width / 2, 1430);
-            ctx.font = "italic 20px Kanit";
-            ctx.fillText("THANK YOU JUBJUB", canvas.width / 2, 1460);
-
-            // --- แปลงเป็น Blob เพื่อแสดงผลและแชร์ ---
-            canvas.toBlob((blob) => {
-                currentBlob = blob;
-                resImg.src = URL.createObjectURL(blob);
-                resArea.style.display = 'block';
-                btnSnap.style.display = 'inline-block';
-                btnSnap.innerText = "ถ่ายใหม่";
-            }, 'image/jpeg', 0.9);
-        }
-
-        // ฟังก์ชันแชร์/เซฟรูป
-        async function sharePhoto() {
-            if (!currentBlob) return;
-            const file = new File([currentBlob], "receipt-jubjub.jpg", { type: "image/jpeg" });
-            
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: 'Receipt JubJub',
-                    });
-                } catch (err) {
-                    console.log("Share failed", err);
-                }
-            } else {
-                // ถ้าไม่รองรับการแชร์ (เช่นในคอม) จะใช้วิธีดาวน์โหลดปกติ
-                const link = document.createElement('a');
-                link.href = URL.createObjectURL(currentBlob);
-                link.download = "receipt-jubjub.jpg";
-                link.click();
-            }
-        }
-    </script>
-</body>
-</html>
+        .btn-save { background: #28a745; box-
