@@ -3,47 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ตู้ถ่ายรูปของ Jarawee</title>
-    <link href="https://fonts.googleapis.com/css2?family=Itim&family=Press+Start+2P&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
+    <title>Jarawee Retro Film Booth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Sarabun:wght@400;700&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #a5a5a5; font-family: 'Itim', cursive; text-align: center; margin: 0; padding: 10px 0; color: #333; overflow-x: hidden; }
+        body { background-color: #a5a5a5; font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 10px 0; color: #333; overflow-x: hidden; }
         
         #video-container { 
             position: relative; width: 310px; height: 310px; margin: 0 auto; 
             border: 6px solid #111; background: #000; overflow: hidden;
             box-shadow: 0 10px 30px rgba(0,0,0,0.4);
         }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); transition: filter 0.2s; }
         
-        /* เอฟเฟกต์แฟลช */
+        /* เอฟเฟกต์แฟลชกระพริบ */
         #shutter-flash {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: white; opacity: 0; z-index: 20; pointer-events: none; transition: opacity 0.1s;
+            background: white; opacity: 0; z-index: 20; pointer-events: none;
         }
 
         .timer-overlay { 
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-            color: white; z-index: 10; text-shadow: 0 2px 10px #000; text-align: center; width: 100%;
+            font-family: 'Press Start 2P', cursive; position: absolute; 
+            top: 50%; left: 50%; transform: translate(-50%, -50%); 
+            color: white; z-index: 10; text-shadow: 0 0 10px #000; text-align: center; width: 100%;
         }
-        #timer-num { font-family: 'Press Start 2P', cursive; font-size: 60px; display: none; }
-        #timer-msg { font-size: 24px; display: none; background: rgba(0,0,0,0.6); padding: 10px; border-radius: 10px; }
+        #timer-num { font-size: 50px; display: none; }
+        #timer-msg { font-size: 10px; display: none; background: rgba(0,0,0,0.6); padding: 8px; }
 
-        /* ปุ่มเลือกฟิลเตอร์ */
-        .filter-nav { display: flex; justify-content: center; gap: 6px; margin: 15px 0; flex-wrap: wrap; }
+        .filter-nav { display: flex; justify-content: center; gap: 4px; margin: 15px 0; flex-wrap: wrap; }
         .f-btn { 
-            background: #fff; border: 2px solid #222; padding: 10px 14px; font-size: 16px; 
-            cursor: pointer; font-family: 'Itim', cursive; border-radius: 50px; transition: 0.2s;
+            background: #fff; border: 2px solid #222; padding: 8px 10px; font-size: 8px; 
+            cursor: pointer; font-family: 'Press Start 2P', cursive;
         }
-        .f-btn.active { background: #ff69b4; color: #fff; border-color: #ff69b4; transform: scale(1.1); }
+        .f-btn.active { background: #000; color: #fff; transform: scale(1.05); }
 
         .btn-main { 
-            background: #111; color: #fff; padding: 16px; font-family: 'Itim', cursive; 
-            font-size: 20px; border: none; margin-top: 15px; width: 85%; cursor: pointer;
-            box-shadow: 0 5px 0 #000; border-radius: 15px;
+            background: #111; color: #fff; padding: 16px; font-family: 'Press Start 2P', cursive; 
+            font-size: 11px; border: none; margin-top: 15px; width: 85%; cursor: pointer;
+            box-shadow: 0 5px 0 #000;
         }
         .btn-main:active { transform: translateY(3px); box-shadow: 0 2px 0 #000; }
 
-        /* การแสดงผลใบเสร็จ */
         #result-area { display: none; margin-top: 30px; padding-bottom: 80px; }
         .receipt-paper {
             position: relative; display: inline-block; width: 90%; max-width: 450px;
@@ -53,7 +52,6 @@
             padding-bottom: 30px;
         }
         #result-img { width: 100%; display: block; mix-blend-mode: multiply; }
-        
         .torn-edge {
             position: absolute; bottom: 0; left: 0; width: 100%; height: 18px; background: #a5a5a5;
             clip-path: polygon(0% 100%, 3% 30%, 6% 100%, 9% 30%, 12% 100%, 15% 30%, 18% 100%, 21% 30%, 24% 100%, 27% 30%, 30% 100%, 33% 30%, 36% 100%, 39% 30%, 42% 100%, 45% 30%, 48% 100%, 51% 30%, 54% 100%, 57% 30%, 60% 100%, 63% 30%, 66% 100%, 69% 30%, 72% 100%, 75% 30%, 78% 100%, 81% 30%, 84% 100%, 87% 30%, 90% 100%, 93% 30%, 96% 100%, 100% 30%, 100% 100%);
@@ -62,12 +60,12 @@
 </head>
 <body>
 
-    <div style="font-size: 24px; margin: 15px 0;">📸 ตู้ถ่ายรูปของ Jarawee 📸</div>
+    <div style="font-family: 'Press Start 2P', cursive; font-size: 10px; margin: 15px 0;">[ JARAWEE FILM BOOTH ]</div>
     
     <div id="video-container">
         <div id="shutter-flash"></div>
         <div class="timer-overlay">
-            <div id="timer-msg">พร้อมนะ!</div>
+            <div id="timer-msg">READY?</div>
             <div id="timer-num">3</div>
         </div>
         <video id="video" autoplay playsinline muted></video>
@@ -75,12 +73,12 @@
 
     <div class="filter-nav">
         <button class="f-btn active" onclick="updateFilter('none', this)">ปกติ</button>
-        <button class="f-btn" onclick="updateFilter('kodak', this)">ฟิล์มโกดัก</button>
-        <button class="f-btn" onclick="updateFilter('fuji', this)">ฟิล์มฟูจิ</button>
+        <button class="f-btn" onclick="updateFilter('kodak', this)">โกดัก</button>
+        <button class="f-btn" onclick="updateFilter('fuji', this)">ฟูจิ</button>
         <button class="f-btn" onclick="updateFilter('bw', this)">ขาวดำ</button>
     </div>
     
-    <button class="btn-main" id="btn-snap" onclick="startCapture()">✨ เริ่มถ่ายรูปเลย! ✨</button>
+    <button class="btn-main" id="btn-snap" onclick="startCapture()">[ เริ่มถ่ายรูป ]</button>
 
     <div id="result-area">
         <div class="receipt-paper">
@@ -88,7 +86,7 @@
             <div class="torn-edge"></div>
         </div>
         <br>
-        <button class="btn-main" style="background:#28a745; box-shadow: 0 5px 0 #1c7430;" onclick="sharePhoto()">✅ บันทึกใบเสร็จนี้ ✅</button>
+        <button class="btn-main" style="background:#28a745; box-shadow: 0 5px 0 #1c7430;" onclick="sharePhoto()">[ เซฟด่วนนน ]</button>
     </div>
 
     <canvas id="c" width="600" height="1580" style="display:none;"></canvas>
@@ -108,7 +106,7 @@
                 const s = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } });
                 v.srcObject = s;
                 v.play();
-            } catch (e) { alert("น้องๆ อย่าลืมกดอนุญาตให้ใช้กล้องนะจ๊ะ!"); }
+            } catch (e) { alert("เกิดข้อผิดพลาดในการเปิดกล้อง"); }
         }
         init();
 
@@ -130,7 +128,7 @@
 
             for (let i = 0; i < 2; i++) {
                 tMsg.style.display = 'block';
-                tMsg.innerText = i === 0 ? "เริ่มรูปที่ 1... ยิ้มมม!" : "เตรียมตัวนะ! รูปที่ 2";
+                tMsg.innerText = i === 0 ? "เตรียมตัว: รูปที่ 1" : "เตรียมตัว: รูปที่ 2";
                 await new Promise(r => setTimeout(r, 1500));
                 tMsg.style.display = 'none';
 
@@ -141,7 +139,7 @@
                 }
                 tNum.style.display = 'none';
 
-                // แฟลชแวบ!
+                // เอฟเฟกต์ชัตเตอร์
                 flash.style.opacity = '1';
                 setTimeout(() => flash.style.opacity = '0', 150);
 
@@ -149,7 +147,10 @@
                 tmp.width = 480; tmp.height = 480;
                 const tCtx = tmp.getContext('2d');
                 tCtx.translate(480, 0); tCtx.scale(-1, 1);
+                
+                // นำฟิลเตอร์ที่เลือกมาใส่ในรูปถ่าย
                 tCtx.filter = currentFilterStyle;
+                
                 const min = Math.min(v.videoWidth, v.videoHeight);
                 tCtx.drawImage(v, (v.videoWidth-min)/2, (v.videoHeight-min)/2, min, min, 0, 0, 480, 480);
                 photos.push(tmp);
@@ -161,15 +162,14 @@
 
         function drawReceipt(photos) {
             ctx.fillStyle = "#fdfdfd"; ctx.fillRect(0, 0, canvas.width, canvas.height);
-            // ลายกระดาษ
             for (let i = 0; i < 5000; i++) {
                 ctx.fillStyle = `rgba(0,0,0,0.05)`;
                 ctx.fillRect(Math.random() * 600, Math.random() * 1580, 1, 1);
             }
 
             ctx.fillStyle = "black"; ctx.textAlign = "center";
-            ctx.font = "38px 'Press Start 2P'"; ctx.fillText("CONGRATULATIONS", 300, 110);
-            ctx.font = "22px 'Press Start 2P'"; ctx.fillText("to jarawee <3", 300, 165);
+            ctx.font = "36px 'Press Start 2P'"; ctx.fillText("CONGRATULATIONS", 300, 110);
+            ctx.font = "20px 'Press Start 2P'"; ctx.fillText("to jarawee <3", 300, 165);
             ctx.font = "20px monospace"; ctx.fillText("----------------------------", 300, 210);
 
             photos.forEach((img, i) => {
@@ -178,7 +178,7 @@
                 ctx.strokeStyle = "rgba(0,0,0,0.1)"; ctx.strokeRect(60, y, 480, 480);
             });
 
-            ctx.textAlign = "left"; ctx.font = "700 30px 'Sarabun'";
+            ctx.textAlign = "left"; ctx.font = "700 30px Sarabun";
             ctx.fillText("รายการ: ค่ารักเอ็ง 3000 บาท", 65, 1285);
             
             ctx.fillStyle = "black";
@@ -190,14 +190,14 @@
             
             ctx.textAlign = "center"; ctx.font = "14px monospace";
             ctx.fillText(new Date().toLocaleString('th-TH'), 300, 1465);
-            ctx.fillText("ขอบคุณที่รักกันนะจ๊ะ", 300, 1500);
+            ctx.fillText("THANK YOU FOR YOUR LOVE", 300, 1495);
 
             canvas.toBlob((b) => {
                 currentBlob = b;
                 document.getElementById('result-img').src = URL.createObjectURL(b);
                 document.getElementById('result-area').style.display = 'block';
                 document.getElementById('btn-snap').style.display = 'inline-block';
-                document.getElementById('btn-snap').innerText = "✨ ถ่ายใหม่อีกรอบ ✨";
+                document.getElementById('btn-snap').innerText = "[ ถ่ายใหม่อีกรอบ ]";
             }, 'image/jpeg', 0.95);
         }
 
