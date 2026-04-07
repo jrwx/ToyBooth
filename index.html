@@ -1,162 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Global Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Press+Start+2P&family=Roboto:wght@300;400;700&family=VT323&display=swap" rel="stylesheet">
+    <title>Jarawee Pro Booth</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg-color: #0f0f0f;
-            --card-bg: #1a1a1a;
-            --accent: #d32f2f;
-            --text-main: #f0f0f0;
-            --text-dim: #999999;
-        }
+        :root { --bg: #121212; --accent: #ff3e3e; }
+        body { background: var(--bg); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; color: #fff; }
+        
+        #camera-ui { padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .header-title { font-family: 'VT323'; font-size: 24px; margin-bottom: 15px; color: #aaa; }
 
-        body { background-color: var(--bg-color); font-family: 'Roboto', sans-serif; text-align: center; margin: 0; padding: 0; color: var(--text-main); overflow-x: hidden; }
+        .mode-selector { display: flex; gap: 10px; margin-bottom: 20px; }
+        .m-btn { background: #333; color: #fff; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 8px; }
+        .m-btn.active { background: var(--accent); }
 
-        #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header-title { font-family: 'Playfair Display', serif; font-size: 32px; font-weight: 700; margin-bottom: 25px; color: #fff; letter-spacing: -1px; }
-
-        /* ส่วนเลือกโหมดหลัก */
-        .mode-selector { display: flex; gap: 12px; margin-bottom: 25px; }
-        .m-btn { background: #2a2a2a; color: #fff; border: none; padding: 14px 24px; font-family: 'Roboto', sans-serif; font-size: 11px; font-weight: 700; cursor: pointer; border-radius: 8px; transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .m-btn.active { background: var(--accent); box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); }
-
-        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 10px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.6); border: 1px solid #333; }
-        #display-box { position: relative; width: 100%; aspect-ratio: 16/9; background: #000; overflow: hidden; border-radius: 12px; }
+        #display-box { width: 100%; max-width: 340px; aspect-ratio: 1/1; background: #000; position: relative; border-radius: 15px; overflow: hidden; border: 3px solid #333; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
-
-        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; transition: opacity 0.1s; }
-        .timer { font-family: 'Playfair Display', serif; font-weight: 700; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 80px; display: none; text-shadow: 0 4px 20px rgba(0,0,0,0.7); }
-
-        .controls { margin-top: 35px; width: 100%; max-width: 360px; }
         
-        /* ตัวเลือกย่อยสำหรับหนังสือพิมพ์ */
-        #news-themes { display: none; gap: 10px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap; }
-        .sub-btn { background: #222; color: #bbb; border: 1px solid #444; padding: 10px 16px; font-size: 10px; border-radius: 6px; font-weight: 700; cursor: pointer; transition: 0.2s; text-transform: uppercase; }
-        .sub-btn.active { border-color: #fff; color: #fff; background: #333; }
+        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
+        .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: bold; z-index: 11; }
 
-        .filter-group { display: flex; justify-content: center; gap: 18px; margin-bottom: 35px; }
-        .f-btn { background: transparent; color: var(--text-dim); border: 2px solid #333; width: 64px; height: 64px; border-radius: 50%; font-size: 9px; font-weight: 700; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
-        .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); box-shadow: 0 0 20px rgba(255,255,255,0.2); }
-        
-        .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: 700; border: none; width: 100%; border-radius: 50px; cursor: pointer; box-shadow: 0 8px 25px rgba(211, 47, 47, 0.4); transition: 0.3s; text-transform: uppercase; letter-spacing: 1px; }
-        .btn-snap:active { transform: scale(0.96); box-shadow: 0 4px 15px rgba(211, 47, 47, 0.4); }
+        .controls { margin-top: 20px; width: 100%; max-width: 340px; }
+        #news-themes { display: none; gap: 5px; justify-content: center; margin-bottom: 15px; }
+        .sub-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
+        .sub-btn.active { color: #fff; border-color: #fff; }
 
-        /* Print Page Animation */
-        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
-        .print-container { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); width: 90%; max-width: 800px; }
-        .print-paper { width: 100%; box-shadow: 0 10px 60px rgba(0,0,0,0.8); position: relative; background: #fdfaf5; border-radius: 4px; overflow: hidden; }
-        .flow-animation { animation: slideInPaper 5s cubic-bezier(0.23, 1, 0.32, 1) forwards; }
-        @keyframes slideInPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, -50%); } }
+        .filter-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
+        .f-btn { background: #222; color: #fff; border: 1px solid #444; width: 60px; height: 60px; border-radius: 50%; font-size: 10px; cursor: pointer; }
+        .f-btn.active { background: #fff; color: #000; }
 
-        #result-img { width: 100%; display: block; height: auto; }
-        #final-actions { position: absolute; bottom: 40px; left: 0; width: 100%; display: none; text-align: center; animation: fadeIn 1s ease forwards; z-index: 110; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .btn-snap { background: var(--accent); color: #fff; padding: 18px; font-size: 20px; font-weight: bold; border: none; width: 100%; border-radius: 50px; cursor: pointer; }
 
-        .btn-save { background: rgba(255, 255, 255, 0.95); color: #000; padding: 18px 36px; font-size: 12px; font-weight: 700; border: none; border-radius: 50px; cursor: pointer; margin: 10px; backdrop-filter: blur(5px); text-transform: uppercase; letter-spacing: 1px; transition: 0.2s; }
-        .btn-retry { background: rgba(30, 30, 30, 0.9); color: #fff; border: 1px solid rgba(255,255,255,0.1); }
-        .btn-save:hover { opacity: 0.9; transform: translateY(-2px); }
+        /* Print Overlay */
+        #print-page { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
+        #result-img { max-width: 90%; max-height: 80vh; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
+        .actions { margin-top: 20px; }
+        .btn-act { padding: 12px 25px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; margin: 5px; }
     </style>
 </head>
 <body>
 
     <div id="camera-ui">
-        <div class="header-title">Jarawee Pro Booth</div>
-        
+        <div class="header-title">Congrats to JANG'S ROOM</div>
         <div class="mode-selector">
-            <button class="m-btn active" id="mode-receipt" onclick="changeMainMode('receipt')">Receipt Strip</button>
-            <button class="m-btn" id="mode-news" onclick="changeMainMode('news')">Newspaper Page</button>
+            <button class="m-btn active" id="btn-mode-1" onclick="setMode('receipt')">โหมดใบเสร็จ</button>
+            <button class="m-btn" id="btn-mode-2" onclick="setMode('news')">โหมดหนังสือพิมพ์</button>
         </div>
 
-        <div id="booth-machine">
-            <div id="display-box">
-                <video id="video" autoplay playsinline muted></video>
-                <div id="flash"></div>
-                <div id="timer" class="timer">3</div>
-            </div>
+        <div id="display-box">
+            <video id="video" autoplay playsinline></video>
+            <div id="flash"></div>
+            <div id="timer" class="timer"></div>
         </div>
 
         <div class="controls">
             <div id="news-themes">
-                <button class="sub-btn active" onclick="setNewsTheme(1, this)">Modern Society</button>
-                <button class="sub-btn" onclick="setNewsTheme(2, this)">Daily Chronicle</button>
-                <button class="sub-btn" onclick="setNewsTheme(3, this)">The Prophet Style</button>
+                <button class="sub-btn active" onclick="setNewsTheme(1, this)">แบบที่ 1</button>
+                <button class="sub-btn" onclick="setNewsTheme(2, this)">แบบที่ 2</button>
+                <button class="sub-btn" onclick="setNewsTheme(3, this)">แบบที่ 3</button>
             </div>
-
             <div class="filter-group">
-                <button class="f-btn active" id="f-norm" onclick="setF('none', this)">Normal</button>
-                <button class="f-btn" id="f-film" onclick="setF('kodak', this)">Film</button>
-                <button class="f-btn" id="f-bw" onclick="setF('bw', this)">B&W</button>
+                <button class="f-btn active" onclick="setFilter('none', this)">ปกติ</button>
+                <button class="f-btn" onclick="setFilter('kodak', this)">ฟิล์ม</button>
+                <button class="f-btn" onclick="setFilter('bw', this)">ขาวดำ</button>
             </div>
-            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">Take the Shot!</button>
+            <button class="btn-snap" id="snap-btn" onclick="startCapture()">กดถ่ายเลย!</button>
         </div>
     </div>
 
     <div id="print-page">
-        <div class="print-container" id="print-cont">
-            <div class="print-paper">
-                <img id="result-img">
+        <div style="text-align:center;">
+            <img id="result-img">
+            <div class="actions">
+                <button class="btn-act" style="background:#fff; color:#000;" onclick="saveImg()">บันทึกรูปภาพ</button>
+                <button class="btn-act" style="background:#444; color:#fff;" onclick="location.reload()">ถ่ายใหม่</button>
             </div>
-        </div>
-        <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">Save to Gallery</button>
-            <button class="btn-save btn-retry" onclick="location.reload()">Try Again</button>
         </div>
     </div>
 
-    <canvas id="canvas" style="display:none;"></canvas>
+    <canvas id="mainCanvas" style="display:none;"></canvas>
 
     <script>
         const video = document.getElementById('video');
-        const timer = document.getElementById('timer');
-        const flash = document.getElementById('flash');
-        const canvas = document.getElementById('canvas');
+        const canvas = document.getElementById('mainCanvas');
         const ctx = canvas.getContext('2d');
-        const resultImg = document.getElementById('result-img');
-        const printPage = document.getElementById('print-page');
-        const printCont = document.getElementById('print-cont');
-        const finalActions = document.getElementById('final-actions');
-
-        let filterStyle = 'none';
-        let currentMode = 'receipt'; 
+        let currentMode = 'receipt';
         let newsTheme = 1;
-        let stream;
-        let finalBlob = null;
+        let filterType = 'none';
 
-        async function startCam() {
-            try {
-                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: 16/9 } });
-                video.srcObject = stream;
-            } catch(e) { alert("Please grant camera access!"); }
-        }
-        startCam();
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(s => video.srcObject = s);
 
-        function changeMainMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.m-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('mode-' + mode).classList.add('active');
-            
-            const newsSub = document.getElementById('news-themes');
-            const filterGroup = document.querySelector('.filter-group');
-            const displayBox = document.getElementById('display-box');
-
-            if(mode === 'news') {
-                newsSub.style.display = 'flex';
-                displayBox.style.aspectRatio = '16/9';
-                setF('bw', document.getElementById('f-bw'));
-                filterGroup.style.pointerEvents = 'none';
-                filterGroup.style.opacity = '0.5';
-            } else {
-                newsSub.style.display = 'none';
-                displayBox.style.aspectRatio = '1/1';
-                filterGroup.style.pointerEvents = 'auto';
-                filterGroup.style.opacity = '1';
-                setF('none', document.getElementById('f-norm'));
-            }
+        function setMode(m) {
+            currentMode = m;
+            document.getElementById('btn-mode-1').classList.toggle('active', m === 'receipt');
+            document.getElementById('btn-mode-2').classList.toggle('active', m === 'news');
+            document.getElementById('news-themes').style.display = (m === 'news') ? 'flex' : 'none';
         }
 
         function setNewsTheme(t, btn) {
             newsTheme = t;
+            document.querySelectorAll('.sub-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
+        function setFilter(f, btn) {
+            filterType = f;
+            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            video.style.filter = (f === 'kodak') ? 'sepia(0.3) contrast(1.2)' : (f === 'bw' ? 'grayscale(1) contrast(1.2)' : 'none');
+        }
+
+        async function startCapture() {
+            const pics = [];
+            const count = (currentMode === 'receipt') ? 2 : 1;
+            document.getElementById('snap-btn').disabled = true;
+
+            for(let i=0; i<count; i++) {
+                for(let s=3; s>0; s--) {
+                    document.getElementById('timer').innerText = s;
+                    await new Promise(r => setTimeout(r, 1000));
+                }
+                document.getElementById('timer').innerText = '';
+                document.getElementById('flash').style.opacity = 1;
+                setTimeout(() => document.getElementById('flash').style.opacity = 0, 100);
+
+                const tmp = document.createElement('canvas');
+                tmp.width = 600; tmp.height = 600;
+                const tCtx = tmp.getContext('2d');
+                tCtx.filter = video.style.filter;
+                tCtx.translate(600, 0); tCtx.scale(-1, 1);
+                tCtx.drawImage(video, 0, 0, 600, 600);
+                pics.push(tmp);
+            }
+            if(currentMode === 'receipt') drawReceipt(pics); else drawNews(pics[0]);
+        }
+
+        function drawReceipt(pics) {
+            canvas.width = 600; canvas.height = 1500;
+            ctx.fillStyle = "#f5f5f5"; ctx.fillRect(0,0,600,1500);
+            ctx.fillStyle = "#111"; ctx.textAlign = "center";
+            ctx.font = "bold 60px 'VT323'"; ctx.fillText("OFFICIAL RECEIPT", 300, 100);
+            ctx.drawImage(pics[0], 50, 200, 500, 500);
+            ctx.drawImage(pics[1], 50, 750, 500, 500);
+            // รอยหยักปลายกระดาษ (เฉพาะใบเสร็จ)
+            ctx.fillStyle = "#121212"; ctx.beginPath();
+            for(let i=0; i<=600; i+=20) { ctx.lineTo(i, 1500); ctx.lineTo(i+10, 1480); }
+            ctx.lineTo(600, 1500); ctx.fill();
+            showResult();
+        }
+
+        function drawNews(pic) {
+            // ขนาดหนังสือพิมพ์ แนวนอน ไม่ยาว
+            canvas.width = 1000; canvas.height = 750;
+            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,1000,750);
+            
+            // Texture Noise
+            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,0.05)`; ctx.fillRect(Math.random()*1000, Math.random()*750, 1, 1); }
+
+            ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
+            
+            if(newsTheme === 1) {
+                ctx.font = "90px 'Playfair Display'"; ctx.fillText("THE DAILY TIMES", 500, 100);
+                ctx.fillRect(50, 120, 900, 3);
+                ctx.font = "bold 40px serif"; ctx.textAlign="left";
+                ctx.fillText("AMAZING MOMENT CAPTURED TODAY", 50, 180);
+                ctx.drawImage(pic, 50, 210, 450, 450);
+                ctx.font = "14px serif";
+                let dummy = "Breaking News: This extraordinary event has shocked the local community. Witnesses say the atmosphere was filled with joy and excitement. Scientists are currently analyzing the data but early reports suggest a 100% increase in happiness levels. The person in the photo has become an overnight sensation across the digital landscape. Our reporters are on the ground gathering more details about this historic occurrence. Stay tuned for further updates on this developing story which continues to dominate global headlines today.";
+                wrapText(dummy, 520, 230, 430, 22);
+            } else if(newsTheme === 2) {
+                ctx.font = "bold 120px serif"; ctx.fillText("WANTED", 500, 150);
+                ctx.drawImage(pic, 275, 180, 450, 450);
+                ctx.font = "bold 40px serif"; ctx.fillText("REWARD: $1,000,000", 500, 680);
+                ctx.font = "18px serif"; ctx.fillText("For any information leading to this person's happiness", 500, 710);
+            } else {
+                ctx.fillRect(50, 40, 900, 15);
+                ctx.font = "bold 80px serif"; ctx.fillText("THE GAZETTE", 500, 120);
+                ctx.drawImage(pic, 50, 160, 900, 500);
+                ctx.textAlign = "left"; ctx.font = "bold 20px serif";
+                ctx.fillText("LATEST UPDATE: THE WORLD WATCHES IN AWE AS THE NEW STAR EMERGES", 50, 700);
+            }
+            showResult();
+        }
+
+        function wrapText(t, x, y, w, l) {
+            let words = t.split(' '); let line = '';
+            for(let n=0; n<words.length; n++) {
+                let test = line + words[n] + ' ';
+                if(ctx.measureText(test).width > w) { ctx.fillText(line, x, y); line = words[n] + ' '; y += l; }
+                else line = test;
+            }
+            ctx.fillText(line, x, y);
+        }
+
+        function showResult() {
+            document.getElementById('result-img').src = canvas.toDataURL('image/jpeg');
+            document.getElementById('print-page').style.display = 'flex';
+        }
+
+        function saveImg() {
+            const link = document.createElement('a');
+            link.download = 'jarawee-pro-booth.jpg';
+            link.href = document.getElementById('result-img').src;
+            link.click();
+        }
+    </script>
+</body>
+</html>
