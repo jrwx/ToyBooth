@@ -3,52 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Multi Frame</title>
-    <link href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=UnifrakturMaguntia&family=Sarabun:wght@300;400;700&family=VT323&display=swap" rel="stylesheet">
+    <title>Jarawee Pro Booth - Vintage Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Courier+Prime:wght@400;700&family=Sarabun:wght@300;400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-main: #ffffff; }
         body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: var(--text-main); overflow-x: hidden; }
 
         #camera-ui { padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header-title { font-family: 'VT323'; font-size: 24px; letter-spacing: 1px; margin-bottom: 20px; color: #a0a0a0; text-transform: uppercase; }
+        .header-title { font-family: 'VT323'; font-size: 24px; margin-bottom: 20px; color: #a0a0a0; text-transform: uppercase; }
 
         .mode-container { display: flex; gap: 10px; margin-bottom: 20px; }
         .mode-btn { background: #333; color: #fff; border: none; padding: 10px 15px; border-radius: 8px; font-family: 'VT323'; cursor: pointer; font-size: 16px; }
         .mode-btn.active { background: var(--accent); box-shadow: 0 0 15px rgba(255, 62, 62, 0.4); }
 
         #booth-machine { position: relative; width: 100%; max-width: 340px; background: var(--card-bg); padding: 8px; border-radius: 24px; }
-        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 18px; transition: aspect-ratio 0.3s; }
-        #display-box.news-preview { aspect-ratio: 3/4; }
+        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 18px; transition: 0.3s; }
+        #display-box.news-preview { aspect-ratio: 3/4; } /* พรีวิวแนวตั้ง */
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
-        .timer { font-family: 'Playfair Display', cursive; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 60px; display: none; text-shadow: 0 4px 15px rgba(0,0,0,0.5); }
+        .timer { font-family: 'Courier Prime'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 30; font-size: 60px; display: none; font-weight: bold; }
 
         .controls { margin-top: 25px; width: 100%; max-width: 340px; }
         #news-themes { display: none; gap: 8px; justify-content: center; margin-bottom: 20px; }
-        .theme-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 10px; border-radius: 4px; cursor: pointer; font-family: 'VT323'; }
+        .theme-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 10px; border-radius: 4px; cursor: pointer; }
         .theme-btn.active { border-color: #fff; color: #fff; }
 
-        .filter-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; opacity: 1; transition: 0.2s; pointer-events: auto; }
+        .filter-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
         .f-btn { background: transparent; color: #666; border: 1px solid #333; width: 55px; height: 55px; border-radius: 50%; font-size: 8px; cursor: pointer; font-family: 'VT323'; }
         .f-btn.active { background: #fff; color: #000; border-color: #fff; }
 
-        .btn-snap { background: var(--accent); color: #fff; padding: 18px; font-size: 16px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; text-transform: uppercase; }
+        .btn-snap { background: var(--accent); color: #fff; padding: 18px; font-size: 16px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; }
 
         #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
         .receipt-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 320px; }
-        .receipt-paper { width: 100%; box-shadow: 0 0 60px rgba(0,0,0,0.8); }
         .flow-animation { animation: slideDownFull 6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideDownFull { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } }
 
         #final-actions { position: absolute; bottom: 40px; left: 0; width: 100%; display: none; text-align: center; }
-        .btn-save { background: #fff; color: #000; padding: 14px 28px; font-size: 12px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 5px; text-transform: uppercase; }
+        .btn-save { background: #fff; color: #000; padding: 14px 28px; font-size: 12px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 5px; }
     </style>
 </head>
 <body>
 
     <div id="camera-ui">
-        <div class="header-title">Congratulations to Jang!</div>
+        <div class="header-title">Congrats to Jang's Room</div>
         
         <div class="mode-container">
             <button class="mode-btn active" id="m-receipt" onclick="changeMode('receipt')">สติกเกอร์ใบเสร็จ</button>
@@ -65,28 +64,26 @@
 
         <div class="controls">
             <div id="news-themes">
-                <button class="theme-btn active" onclick="setNewsT(1, this)">แบบที่ 1</button>
-                <button class="theme-btn" onclick="setNewsT(2, this)">แบบที่ 2</button>
-                <button class="theme-btn" onclick="setNewsT(3, this)">แบบที่ 3</button>
+                <button class="theme-btn active" onclick="setNewsT(1, this)">THE DAILY TIMES</button>
+                <button class="theme-btn" onclick="setNewsT(2, this)">VINTAGE GAZETTE</button>
+                <button class="theme-btn" onclick="setNewsT(3, this)">THE CHRONICLE</button>
             </div>
             <div class="filter-group" id="f-group">
                 <button class="f-btn active" onclick="setF('none', this)">NORM</button>
                 <button class="f-btn" onclick="setF('kodak', this)">FILM</button>
                 <button class="f-btn" id="btn-bw" onclick="setF('bw', this)">B&W</button>
             </div>
-            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">กดถ่ายเลย!</button>
+            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">ถ่ายรูปกันเลย!</button>
         </div>
     </div>
 
     <div id="print-page">
         <div class="receipt-container" id="receipt-cont">
-            <div class="receipt-paper">
-                <img id="result-img" style="width:100%;">
-            </div>
+            <img id="result-img" style="width:100%; box-shadow: 0 0 50px rgba(0,0,0,0.5);">
         </div>
         <div id="final-actions">
             <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
-            <button class="btn-save" style="background:#444; color:#fff" onclick="location.reload()">ถ่ายใหม่เถอะ</button>
+            <button class="btn-save" style="background:#444; color:#fff" onclick="location.reload()">ถ่ายใหม่</button>
         </div>
     </div>
 
@@ -108,7 +105,7 @@
         let newsTheme = 1;
 
         async function startCam() {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: 4/3 } });
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
             video.srcObject = stream;
         }
         startCam();
@@ -122,12 +119,12 @@
             
             if(m === 'news') {
                 setF('bw', document.getElementById('btn-bw'));
-                document.getElementById('f-group').style.opacity = '0.5';
                 document.getElementById('f-group').style.pointerEvents = 'none';
+                document.getElementById('f-group').style.opacity = '0.5';
             } else {
                 setF('none', document.querySelectorAll('.f-btn')[0]);
-                document.getElementById('f-group').style.opacity = '1';
                 document.getElementById('f-group').style.pointerEvents = 'auto';
+                document.getElementById('f-group').style.opacity = '1';
             }
         }
 
@@ -136,7 +133,7 @@
             btn.classList.add('active');
             if(mode === 'none') filterStyle = 'none';
             else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.1) sepia(0.2)';
-            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4) brightness(1.1)'; // ขาวดำที่คมชัดขึ้นสำหรับหนังสือพิมพ์
+            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4) brightness(1.1)';
             video.style.filter = filterStyle;
         }
 
@@ -158,7 +155,7 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                // โหมดหนังสือพิมพ์ต้องการรูปแนวตั้ง (4:5), ใบเสร็จต้องการรูปจัตุรัส (1:1)
+                // โหมดหนังสือพิมพ์ต้องการรูปแนวตั้งPortrait (4:5)
                 pCanvas.width = 600; 
                 pCanvas.height = (currentMode === 'receipt') ? 600 : 750;
                 const pCtx = pCanvas.getContext('2d');
@@ -178,7 +175,6 @@
             if(currentMode === 'receipt') buildReceipt(pics); else buildNews(pics[0]);
         }
 
-        // --- โหมดใบเสร็จ (ตามแบบเดิมของคุณ) ---
         function buildReceipt(pics) {
             canvas.width = 600; canvas.height = 1520;
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0,0,600,1520);
@@ -186,91 +182,67 @@
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
             ctx.font = "48px 'VT323'"; ctx.fillText("To Jang <3", 300, 175);
-            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
-            ctx.textAlign = "left"; ctx.font = "32px 'VT323'"; ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
             ctx.drawImage(pics[0], 90, 300, 420, 420);
             ctx.drawImage(pics[1], 90, 740, 420, 420);
             ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
             showResult();
         }
 
-        // --- โหมดหนังสือพิมพ์ (แบบแนวตั้งเป๊ะๆ) ---
+        // --- โหมดหนังสือพิมพ์ (แนวตั้ง Portrait 800x1200) ---
         function buildNews(pic) {
-            // ขนาดหนังสือพิมพ์แนวนอน ( Landscape ) เหมือนในตัวอย่างที่คุณส่งมา
-            canvas.width = 1200; canvas.height = 900; 
-            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,1200,900);
-            for(let i=0; i<12000; i++) { ctx.fillStyle=`rgba(0,0,0,0.08)`; ctx.fillRect(Math.random()*1200, Math.random()*900, 1, 1); }
+            canvas.width = 800; canvas.height = 1200; 
+            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,800,1200); // กระดาษเก่า
+            for(let i=0; i<15000; i++) { ctx.fillStyle=`rgba(0,0,0,0.08)`; ctx.fillRect(Math.random()*800, Math.random()*1200, 1, 1); }
             
             ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
             
-            if(newsTheme === 1) {
-                // STYLE 1: DAILY PROPHET (เป๊ะๆ แนวตั้ง No Distortion)
-                ctx.lineWidth = 1; ctx.strokeRect(15, 15, 1170, 870); // กรอบเล็ก
-                
-                // หัวหนังสือพิมพ์
-                ctx.font = "bold 120px 'UnifrakturMaguntia', serif"; // หัวข่าว Gothic
-                ctx.fillText("DAILY PROPHET", 600, 110);
-                
-                ctx.fillRect(40, 135, 1120, 3); // เส้นหนา
-                ctx.font = "italic 22px 'IM Fell English SC', serif";
-                ctx.fillText("THE WIZARD WORLD'S FAVORITE BROADSHEET", 600, 160);
-                ctx.fillRect(40, 172, 1120, 1);
+            // หัวหนังสือพิมพ์ฟอนต์ใหม่ (Pirata One)
+            let headerText = (newsTheme === 1) ? "The Daily Times" : (newsTheme === 2) ? "Vintage Gazette" : "The Chronicle";
+            ctx.font = "110px 'Pirata One'"; 
+            ctx.fillText(headerText, 400, 140);
+            
+            // เส้นคั่นหัวกระดาษ
+            ctx.fillRect(40, 160, 720, 4);
+            ctx.font = "bold 18px 'Courier Prime'";
+            ctx.fillText("LONDON, " + new Date().toDateString().toUpperCase() + " • PRICE ONE SHILLING", 400, 195);
+            ctx.fillRect(40, 210, 720, 1);
 
-                // พาดหัวข่าว
-                ctx.textAlign = "left";
-                ctx.font = "bold 65px 'Sarabun'"; // Sarabun แต่ใช้ภาษาอังกฤษเพื่อให้ดูทันสมัย
-                ctx.fillText("EXCLUSIVE", 60, 240);
-                ctx.font = "95px 'IM Fell English SC', serif"; // Serif ยุคเก่า
-                ctx.fillText("A HISTORIC MOMENT CAPTURED!", 60, 310);
-                
-                // วาดรูปถ่าย (แนวตั้ง 4:5 No Distortion)
-                ctx.drawImage(pic, 60, 340, 432, 540); // 432x540 = 4:5
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 10;
-                ctx.strokeRect(60, 340, 432, 540); // กรอบรูปถ่าย
+            // พาดหัวข่าวใหญ่
+            ctx.font = "bold 55px 'Courier Prime'";
+            ctx.fillText("MOMENT OF THE YEAR!", 400, 290);
 
-                // เนื้อหาคอลัมน์ขวา (ตัวหนังสือเยอะ)
-                ctx.font = "bold 28px 'IM Fell English SC', serif"; wrapText("Exclusive Report: The Event That Baffled Everyone!", 520, 370, 620, 34);
-                ctx.font = "18px 'IM Fell English SC', serif";
-                let prophetDummy = "LONDON - Reports have surfaced detailing a truly remarkable occurrence, captured here in this exclusive photograph. Witnesses describe the atmosphere as filled with unprecedented joy and magical energy. Sources close to the Jang Family have confirmed that the emotion displayed in this very image has not been seen in decades. Experts at the Ministry of Magic are currently analyzing the magical resonance from the moment this photograph was taken. Preliminary findings suggest a 100% increase in happiness levels in the immediate area. The individual pictured has become an overnight sensation across the Floo Network, and owls are already arriving from around the globe to offer their congratulations. This is a moment that will be remembered for years to come. Authorities have issued a caution to all who view this image, as it is highly contagious and may cause sudden, uncontrollable smile outbursts.";
-                wrapText(prophetDummy, 520, 430, 620, 24);
+            // วาดรูปถ่าย (แนวตั้ง 4:5 กึ่งกลาง)
+            ctx.drawImage(pic, 150, 330, 500, 625);
+            ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 10;
+            ctx.strokeRect(150, 330, 500, 625);
 
-            } else if(newsTheme === 2) {
-                // STYLE 2: GAZETTE STYLE
-                // (จัดวางองค์ประกอบแนวตั้งเหมือนกัน)
-                ctx.font = "bold 80px serif"; ctx.fillText("DAILY GAZETTE", 600, 100);
-                ctx.fillRect(50, 120, 1100, 2);
-                ctx.font = "20px 'VT323'"; ctx.fillText("VOL. XCIII ... NO. 402 | " + new Date().toDateString().toUpperCase() + " | PRICE: $1.25", 600, 150);
-                ctx.fillRect(50, 160, 1100, 2);
-                
-                ctx.textAlign = "left";
-                ctx.font = "bold 65px serif"; ctx.fillText("URGENT: MOMENT OF THE YEAR", 60, 240);
-                
-                // รูปแนวตั้งนิดนึง
-                ctx.drawImage(pic, 60, 270, 500, 625); // 4:5
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 10;
-                ctx.strokeRect(60, 270, 500, 625);
-                
-                ctx.font = "bold 30px serif"; wrapText("An Extraordinary Event", 590, 300, 550, 34);
-                ctx.font = "16px serif";
-                let gazetteText = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. นี่คือบันทึกเหตุการณ์ที่สำคัญที่สุดของวันนี้ ความงามและรอยยิ้มถูกบันทึกไว้ภายใต้เลนส์กล้องที่คมชัดที่สุด การถ่ายภาพครั้งนี้ถือเป็นความสำเร็จครั้งใหญ่ของวงการสติกเกอร์โบต... Our correspondent filed this report immediately. It is believed this moment will reshape the cultural landscape. The world watches in awe. Authority figures praised the visionary artistry. Jang's contribution is truly pioneering.";
-                wrapText(gazetteText, 590, 340, 550, 24);
-                
-            } else {
-                // STYLE 3: RETRO TIMES ( Wanted Poster Style)
-                ctx.font = "bold 40px serif"; ctx.fillText("MINISTRY OF MAGIC", 600, 80);
-                
-                ctx.font = "bold 110px serif"; 
-                ctx.fillText("HAVE YOU SEEN", 600, 190);
-                ctx.fillText("THIS PERSON?", 600, 290);
+            // เนื้อหาข่าวภาษาอังกฤษ (จัดเป็น 2 คอลัมน์ด้านล่างรูป ไม่ให้ทับกัน)
+            ctx.textAlign = "left";
+            ctx.font = "bold 22px 'Courier Prime'";
+            ctx.fillText("EXCLUSIVE REPORT:", 45, 1000);
+            
+            ctx.font = "15px 'Courier Prime'";
+            let col1 = "Sources confirm that this historic moment was captured today at the famous Jang's Room. Witnesses describe the scene as absolutely electric, filled with unprecedented joy and grace. This image is expected to circulate globally by morning.";
+            let col2 = "Experts say this marks a new era in photography. The subject's expression captures a timeless essence that baffle even the most seasoned journalists. Stay tuned for our evening edition for more details on this breaking story.";
+            
+            wrapText(col1, 45, 1030, 340, 22);
+            wrapText(col2, 415, 1030, 340, 22);
 
-                // รูปถ่ายแนวตั้งนิดนึง
-                ctx.drawImage(pic, 60, 200, 500, 625); // 4:5
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 15;
-                ctx.strokeRect(60, 200, 500, 625);
+            // ข้อความเล็กๆ ด้านข้างรูป (เพื่อความแน่น)
+            ctx.save();
+            ctx.translate(110, 600);
+            ctx.rotate(-Math.PI/2);
+            ctx.font = "italic 14px 'Courier Prime'";
+            ctx.fillText("LATEST NEWS FROM THE FRONT PAGE", 0, 0);
+            ctx.restore();
 
-                ctx.font = "bold 45px serif"; ctx.fillText("REWARD: 10,000 GALLEONS", 600, 750);
-                ctx.font = "20px serif"; ctx.fillText("Owls immediately if sighted. Ward is unclaimed.", 600, 780);
-            }
+            ctx.save();
+            ctx.translate(700, 600);
+            ctx.rotate(Math.PI/2);
+            ctx.font = "italic 14px 'Courier Prime'";
+            ctx.fillText("A NEW CHAPTER BEGINS TODAY", 0, 0);
+            ctx.restore();
+
             showResult();
         }
 
@@ -300,7 +272,7 @@
         }
 
         function saveImage() {
-            const a = document.createElement('a'); a.download = 'jarawee_booth.png'; a.href = resultImg.src; a.click();
+            const a = document.createElement('a'); a.download = 'jarawee_booth_vintage.png'; a.href = resultImg.src; a.click();
         }
     </script>
 </body>
