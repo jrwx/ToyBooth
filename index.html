@@ -3,41 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
+    <title>Jarawee Pro Booth - Daily Prophet Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=Sarabun:wght@400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
-        :root { --bg: #121212; --accent: #ff3e3e; }
+        :root { --bg: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --paper-bw: grayscale(1) contrast(1.4) brightness(1.1); }
         body { background: var(--bg); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; color: #fff; }
         
-        #camera-ui { padding: 20px; display: flex; flex-direction: column; align-items: center; }
-        .header-title { font-family: 'VT323'; font-size: 24px; margin-bottom: 15px; color: #aaa; }
+        #camera-ui { padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header-title { font-family: 'VT323'; font-size: 24px; margin-bottom: 15px; color: #aaa; text-transform: uppercase; }
 
         .mode-selector { display: flex; gap: 10px; margin-bottom: 20px; }
-        .m-btn { background: #333; color: #fff; border: none; padding: 10px 20px; font-weight: bold; cursor: pointer; border-radius: 8px; }
+        .m-btn { background: #333; color: #fff; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 10px; transition: 0.2s; font-size: 14px; }
         .m-btn.active { background: var(--accent); }
 
-        #display-box { width: 100%; max-width: 340px; aspect-ratio: 1/1; background: #000; position: relative; border-radius: 15px; overflow: hidden; border: 3px solid #333; }
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #display-box { width: 100%; max-width: 360px; aspect-ratio: 1/1; background: #000; position: relative; border-radius: 20px; overflow: hidden; border: 4px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        #display-box.news-mode { aspect-ratio: 4/3; } /* ปรับสัดส่วนจอพรีวิวเมื่อเลือกโหมดข่าว */
+        
+        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); transition: aspect-ratio 0.3s; }
         
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
-        .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 70px; font-weight: bold; z-index: 11; }
+        .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 80px; font-weight: 900; z-index: 11; text-shadow: 0 4px 15px rgba(0,0,0,0.5); font-family: 'Playfair Display'; }
 
-        .controls { margin-top: 20px; width: 100%; max-width: 340px; }
-        #news-themes { display: none; gap: 5px; justify-content: center; margin-bottom: 15px; }
-        .sub-btn { background: #222; color: #888; border: 1px solid #444; padding: 5px 10px; font-size: 12px; border-radius: 4px; cursor: pointer; }
-        .sub-btn.active { color: #fff; border-color: #fff; }
+        .controls { margin-top: 25px; width: 100%; max-width: 360px; }
+        #news-themes { display: none; gap: 8px; justify-content: center; margin-bottom: 20px; flex-wrap: wrap; }
+        .sub-btn { background: #222; color: #aaa; border: 1px solid #444; padding: 8px 16px; font-size: 12px; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; }
+        .sub-btn.active { color: #fff; border-color: #fff; background: #444; }
 
-        .filter-group { display: flex; justify-content: center; gap: 10px; margin-bottom: 20px; }
-        .f-btn { background: #222; color: #fff; border: 1px solid #444; width: 60px; height: 60px; border-radius: 50%; font-size: 10px; cursor: pointer; }
-        .f-btn.active { background: #fff; color: #000; }
+        .filter-group { display: flex; justify-content: center; gap: 12px; margin-bottom: 30px; }
+        .f-btn { background: transparent; color: #fff; border: 2px solid #444; width: 65px; height: 65px; border-radius: 50%; font-size: 11px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; }
+        .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
 
-        .btn-snap { background: var(--accent); color: #fff; padding: 18px; font-size: 20px; font-weight: bold; border: none; width: 100%; border-radius: 50px; cursor: pointer; }
+        .btn-snap { background: var(--accent); color: #fff; padding: 20px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 8px 20px rgba(255, 62, 62, 0.3); text-transform: uppercase; }
 
-        /* Print Overlay */
-        #print-page { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 100; justify-content: center; align-items: center; }
-        #result-img { max-width: 90%; max-height: 80vh; box-shadow: 0 0 30px rgba(0,0,0,0.5); }
-        .actions { margin-top: 20px; }
-        .btn-act { padding: 12px 25px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; margin: 5px; }
+        /* Print Overlay (ขอบตัดเรียบ) */
+        #print-page { display: none; position: fixed; top:0; left:0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 100; justify-content: center; align-items: center; flex-direction: column; overflow: hidden; }
+        #result-img { max-width: 90%; max-height: 80vh; border-radius: 4px; box-shadow: 0 10px 50px rgba(0,0,0,0.8); }
+        .actions { margin-top: 25px; }
+        .btn-act { padding: 15px 30px; border-radius: 100px; border: none; font-weight: bold; cursor: pointer; margin: 8px; font-size: 14px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -45,8 +47,8 @@
     <div id="camera-ui">
         <div class="header-title">Congrats to JANG'S ROOM</div>
         <div class="mode-selector">
-            <button class="m-btn active" id="btn-mode-1" onclick="setMode('receipt')">โหมดใบเสร็จ</button>
-            <button class="m-btn" id="btn-mode-2" onclick="setMode('news')">โหมดหนังสือพิมพ์</button>
+            <button class="m-btn active" id="btn-mode-1" onclick="setMode('receipt')">สติกเกอร์ใบเสร็จ</button>
+            <button class="m-btn" id="btn-mode-2" onclick="setMode('news')">หน้าหนังสือพิมพ์</button>
         </div>
 
         <div id="display-box">
@@ -57,26 +59,24 @@
 
         <div class="controls">
             <div id="news-themes">
-                <button class="sub-btn active" onclick="setNewsTheme(1, this)">แบบที่ 1</button>
-                <button class="sub-btn" onclick="setNewsTheme(2, this)">แบบที่ 2</button>
-                <button class="sub-btn" onclick="setNewsTheme(3, this)">แบบที่ 3</button>
+                <button class="sub-btn active" onclick="setNewsTheme(1, this)">DAILY PROPHET</button>
+                <button class="sub-btn" onclick="setNewsTheme(2, this)">WANTED POSTER</button>
+                <button class="sub-btn" onclick="setNewsTheme(3, this)">DAILY Chronicle</button>
             </div>
             <div class="filter-group">
                 <button class="f-btn active" onclick="setFilter('none', this)">ปกติ</button>
                 <button class="f-btn" onclick="setFilter('kodak', this)">ฟิล์ม</button>
-                <button class="f-btn" onclick="setFilter('bw', this)">ขาวดำ</button>
+                <button class="f-btn" id="f-bw" onclick="setFilter('bw', this)">ขาวดำ</button>
             </div>
             <button class="btn-snap" id="snap-btn" onclick="startCapture()">กดถ่ายเลย!</button>
         </div>
     </div>
 
     <div id="print-page">
-        <div style="text-align:center;">
-            <img id="result-img">
-            <div class="actions">
-                <button class="btn-act" style="background:#fff; color:#000;" onclick="saveImg()">บันทึกรูปภาพ</button>
-                <button class="btn-act" style="background:#444; color:#fff;" onclick="location.reload()">ถ่ายใหม่</button>
-            </div>
+        <img id="result-img">
+        <div class="actions">
+            <button class="btn-act" style="background:#fff; color:#000;" onclick="saveImg()">บันทึกรูปภาพ</button>
+            <button class="btn-act" style="background:#444; color:#fff;" onclick="location.reload()">ถ่ายใหม่เถอะ</button>
         </div>
     </div>
 
@@ -90,13 +90,27 @@
         let newsTheme = 1;
         let filterType = 'none';
 
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } }).then(s => video.srcObject = s);
+        // เริ่มกล้อง (ใช้สัดส่วน 4:3 เพื่อให้เหมาะกับทั้งสองโหมด)
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', aspectRatio: 4/3 } })
+            .then(s => video.srcObject = s);
 
         function setMode(m) {
             currentMode = m;
             document.getElementById('btn-mode-1').classList.toggle('active', m === 'receipt');
             document.getElementById('btn-mode-2').classList.toggle('active', m === 'news');
             document.getElementById('news-themes').style.display = (m === 'news') ? 'flex' : 'none';
+            document.getElementById('display-box').classList.toggle('news-mode', m === 'news');
+
+            // บังคับฟิลเตอร์ขาวดำในโหมดหนังสือพิมพ์
+            if(m === 'news') {
+                setFilter('bw', document.getElementById('f-bw'));
+                document.querySelector('.filter-group').style.pointerEvents = 'none';
+                document.querySelector('.filter-group').style.opacity = '0.5';
+            } else {
+                setFilter('none', document.querySelectorAll('.f-btn')[0]);
+                document.querySelector('.filter-group').style.pointerEvents = 'auto';
+                document.querySelector('.filter-group').style.opacity = '1';
+            }
         }
 
         function setNewsTheme(t, btn) {
@@ -109,7 +123,54 @@
             filterType = f;
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            video.style.filter = (f === 'kodak') ? 'sepia(0.3) contrast(1.2)' : (f === 'bw' ? 'grayscale(1) contrast(1.2)' : 'none');
+            
+            let filterString = 'none';
+            if(f === 'kodak') filterString = 'sepia(0.3) contrast(1.2)';
+            else if(f === 'bw') filterString = 'grayscale(1) contrast(1.4) brightness(1.1)'; // ขาวดำที่คมชัดขึ้นสำหรับหนังสือพิมพ์
+            
+            video.style.filter = filterString;
+        }
+
+        // --- ฟังก์ชันหลักสำหรับการ Crop ภาพจากตรงกลาง เพื่อแก้ปัญหาภาพบีบ ---
+        function getCroppedCanvas(targetWidth, targetHeight) {
+            const tmpCanvas = document.createElement('canvas');
+            tmpCanvas.width = targetWidth;
+            tmpCanvas.height = targetHeight;
+            const tmpCtx = tmpCanvas.getContext('2d');
+            
+            // ใช้ฟิลเตอร์ปัจจุบัน
+            tmpCtx.filter = video.style.filter;
+
+            // กลับด้านภาพ (Mirror)
+            tmpCtx.translate(targetWidth, 0);
+            tmpCtx.scale(-1, 1);
+
+            const vW = video.videoWidth;
+            const vH = video.videoHeight;
+            const vAspect = vW / vH;
+            const targetAspect = targetWidth / targetHeight;
+
+            let sourceX, sourceY, sourceWidth, sourceHeight;
+
+            // Logic: ถ้าวิดีโอกว้างกว่าเฟรม -> ตัดซ้ายขวา
+            if (vAspect > targetAspect) {
+                sourceHeight = vH;
+                sourceWidth = vH * targetAspect;
+                sourceX = (vW - sourceWidth) / 2;
+                sourceY = 0;
+            } 
+            // Logic: ถ้าวิดีโอสูงกว่าเฟรม (หรือพอดี) -> ตัดบนล่าง
+            else {
+                sourceWidth = vW;
+                sourceHeight = vW / targetAspect;
+                sourceX = 0;
+                sourceY = (vH - sourceHeight) / 2;
+            }
+
+            // วาดภาพที่ Crop แล้วลงบน Canvas ชั่วคราว
+            tmpCtx.drawImage(video, sourceX, sourceY, sourceWidth, sourceHeight, 0, 0, targetWidth, targetHeight);
+            
+            return tmpCanvas;
         }
 
         async function startCapture() {
@@ -118,91 +179,177 @@
             document.getElementById('snap-btn').disabled = true;
 
             for(let i=0; i<count; i++) {
+                // Countdown
                 for(let s=3; s>0; s--) {
                     document.getElementById('timer').innerText = s;
                     await new Promise(r => setTimeout(r, 1000));
                 }
                 document.getElementById('timer').innerText = '';
+                
+                // Flash
                 document.getElementById('flash').style.opacity = 1;
                 setTimeout(() => document.getElementById('flash').style.opacity = 0, 100);
 
-                const tmp = document.createElement('canvas');
-                tmp.width = 600; tmp.height = 600;
-                const tCtx = tmp.getContext('2d');
-                tCtx.filter = video.style.filter;
-                tCtx.translate(600, 0); tCtx.scale(-1, 1);
-                tCtx.drawImage(video, 0, 0, 600, 600);
-                pics.push(tmp);
+                // ถ่ายรูปด้วยสัดส่วนที่ถูกต้อง ( Crop Center )
+                // โหมดใบเสร็จต้องการรูปจัตุรัส (1:1), โหมดหนังสือพิมพ์ต้องการรูป แนวนอน (16:10)
+                const imgWidth = (currentMode === 'news') ? 640 : 500;
+                const imgHeight = (currentMode === 'news') ? 400 : 500;
+                
+                const cropped = getCroppedCanvas(imgWidth, imgHeight);
+                pics.push(cropped);
+                
+                if(i < count - 1) await new Promise(r => setTimeout(r, 1000)); // พักระหว่างรูป
             }
+            
             if(currentMode === 'receipt') drawReceipt(pics); else drawNews(pics[0]);
         }
 
+        // --- โหมดใบเสร็จ (Strip - ตามเดิม) ---
         function drawReceipt(pics) {
             canvas.width = 600; canvas.height = 1500;
-            ctx.fillStyle = "#f5f5f5"; ctx.fillRect(0,0,600,1500);
+            ctx.clearRect(0,0,600,1500);
+            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0,0,600,1500);
+            
+            // Noise
+            for(let i=0; i<6000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.06})`; ctx.fillRect(Math.random()*600, Math.random()*1500, 1, 1); }
+
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            ctx.font = "bold 60px 'VT323'"; ctx.fillText("OFFICIAL RECEIPT", 300, 100);
-            ctx.drawImage(pics[0], 50, 200, 500, 500);
-            ctx.drawImage(pics[1], 50, 750, 500, 500);
-            // รอยหยักปลายกระดาษ (เฉพาะใบเสร็จ)
+            ctx.font = "bold 60px 'VT323'"; ctx.fillText(" Congrats! JANG'S ROOM ", 300, 100);
+            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 140);
+
+            // วาดรูปสี่เหลี่ยมจัตุรัสที่ Crop มาแล้ว ( No Distortion )
+            ctx.drawImage(pics[0], 50, 180, 500, 500);
+            ctx.strokeRect(50, 180, 500, 500);
+            ctx.drawImage(pics[1], 50, 710, 500, 500);
+            ctx.strokeRect(50, 710, 500, 500);
+
+            ctx.textAlign = "center"; ctx.font = "bold 25px Sarabun"; ctx.fillText("ITEMS: ค่ารักเอ็ง (1)", 300, 1260);
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1320);
+            
+            ctx.globalAlpha = 0.5; ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR TODAY <3", 300, 1380);
+            ctx.globalAlpha = 1.0;
+
+            // ปลายกระดาษรอยหยัก
             ctx.fillStyle = "#121212"; ctx.beginPath();
-            for(let i=0; i<=600; i+=20) { ctx.lineTo(i, 1500); ctx.lineTo(i+10, 1480); }
+            for(let i=0; i<=600; i+=20) { ctx.lineTo(i, 1500); ctx.lineTo(i+10, 1475); }
             ctx.lineTo(600, 1500); ctx.fill();
+            
             showResult();
         }
 
-        function drawNews(pic) {
-            // ขนาดหนังสือพิมพ์ แนวนอน ไม่ยาว
+        // --- โหมดหนังสือพิมพ์ (Landscape Page - เป๊ะตามสไตล์ Daily Prophet) ---
+        function drawNews(picCanvas) {
+            // ขนาดหนังสือพิมพ์แนวนอน ( landscape )
             canvas.width = 1000; canvas.height = 750;
-            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,1000,750);
+            ctx.clearRect(0,0,1000,750);
             
-            // Texture Noise
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,0.05)`; ctx.fillRect(Math.random()*1000, Math.random()*750, 1, 1); }
+            // Texture กระดาษเก่า
+            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,1000,750);
+            for(let i=0; i<8000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.08})`; ctx.fillRect(Math.random()*1000, Math.random()*750, 1, 1); }
 
             ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
             
             if(newsTheme === 1) {
-                ctx.font = "90px 'Playfair Display'"; ctx.fillText("THE DAILY TIMES", 500, 100);
-                ctx.fillRect(50, 120, 900, 3);
-                ctx.font = "bold 40px serif"; ctx.textAlign="left";
-                ctx.fillText("AMAZING MOMENT CAPTURED TODAY", 50, 180);
-                ctx.drawImage(pic, 50, 210, 450, 450);
-                ctx.font = "14px serif";
-                let dummy = "Breaking News: This extraordinary event has shocked the local community. Witnesses say the atmosphere was filled with joy and excitement. Scientists are currently analyzing the data but early reports suggest a 100% increase in happiness levels. The person in the photo has become an overnight sensation across the digital landscape. Our reporters are on the ground gathering more details about this historic occurrence. Stay tuned for further updates on this developing story which continues to dominate global headlines today.";
-                wrapText(dummy, 520, 230, 430, 22);
+                // --- STYLE 1: DAILY PROPHET (เป๊ะๆ) ---
+                ctx.lineWidth = 1; ctx.strokeRect(15, 15, 970, 720); // กรอบเล็ก
+                
+                // หัวหนังสือพิมพ์
+                ctx.font = "bold 90px serif"; 
+                ctx.fillText("THE DAILY PROPHET", 500, 100);
+                
+                ctx.fillRect(40, 120, 920, 3); // เส้นหนา
+                ctx.font = "italic 22px serif";
+                ctx.fillText("THE WIZARDING WORLD'S LEADING BROADSHEET OF CHOICE", 500, 150);
+                ctx.fillRect(40, 162, 920, 1);
+
+                // พาดหัวข่าว
+                ctx.textAlign = "left";
+                ctx.font = "bold 55px 'Sarabun'";
+                ctx.fillText("MOMENT OF THE YEAR", 50, 230);
+                
+                // วาดรูปถ่าย (แนวนอน No Distortion)
+                ctx.drawImage(picCanvas, 50, 260, 640, 400); // 16:10
+                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 10;
+                ctx.strokeRect(50, 260, 640, 400); // กรอบรูปถ่าย
+
+                // เนื้อหาคอลัมน์ขวา
+                ctx.font = "bold 30px serif";
+                wrapText("EXCLUSIVE REPORT:", 710, 290, 240, 34);
+                
+                ctx.font = "16px 'Sarabun'";
+                let prophetDummy = "Sources close to Jang's Room can confirm an event that has baffled wizarding experts. The captured expression on the subject's face suggests a high-level charm was used, or perhaps it is just raw, uncontrolled joy. The Ministry of Magic has issued a statement of caution to all who view this image: It is highly contagious. Stay alert.";
+                wrapText(prophetDummy, 710, 330, 240, 22);
+
+                // ข่าวสั้นด้านล่าง
+                ctx.fillRect(40, 680, 920, 2);
+                ctx.font = "italic 16px serif";
+                ctx.fillText("INSIDE TODAY: Goblins Protest at Gringotts (Page 4) | The Latest on Quidditch (Page 8) | New Cauldron Shop Review (Page 12)", 50, 710);
+                
+                // ปรับ filter ของรูปภาพให้เป๊ะขึ้น
+                ctx.globalCompositeOperation = 'source-over';
+
             } else if(newsTheme === 2) {
-                ctx.font = "bold 120px serif"; ctx.fillText("WANTED", 500, 150);
-                ctx.drawImage(pic, 275, 180, 450, 450);
-                ctx.font = "bold 40px serif"; ctx.fillText("REWARD: $1,000,000", 500, 680);
-                ctx.font = "18px serif"; ctx.fillText("For any information leading to this person's happiness", 500, 710);
+                // STYLE 2: WANTED POSTER
+                ctx.font = "bold 40px serif"; ctx.fillText("MINISTRY OF MAGIC", 500, 80);
+                
+                ctx.font = "bold 100px serif"; 
+                ctx.fillText("HAVE YOU SEEN", 500, 190);
+                ctx.fillText("THIS PERSON?", 500, 290);
+
+                // รูปถ่ายแนวตั้งนิดนึง (ต้อง Crop ใหม่ให้เหมาะ)
+                const wantedPic = getCroppedCanvas(480, 520); 
+                ctx.drawImage(wantedPic, 260, 140, 480, 520);
+                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 15;
+                ctx.strokeRect(260, 140, 480, 520);
+
+                ctx.font = "bold 45px serif"; ctx.fillText("REWARD: 10,000 GALLEONS", 500, 700);
+                ctx.font = "20px serif"; ctx.fillText(" Owls immediately if sighted. Reward is unclaimed.", 500, 730);
+
             } else {
-                ctx.fillRect(50, 40, 900, 15);
-                ctx.font = "bold 80px serif"; ctx.fillText("THE GAZETTE", 500, 120);
-                ctx.drawImage(pic, 50, 160, 900, 500);
-                ctx.textAlign = "left"; ctx.font = "bold 20px serif";
-                ctx.fillText("LATEST UPDATE: THE WORLD WATCHES IN AWE AS THE NEW STAR EMERGES", 50, 700);
+                // STYLE 3: DAILY CHRONICLE
+                ctx.fillRect(30, 30, 940, 8);
+                ctx.font = "bold 95px 'Playfair Display'"; ctx.fillText("DAILY CHRONICLE", 500, 130);
+                ctx.fillRect(30, 150, 940, 3);
+                ctx.font = "bold 22px 'Playfair Display'"; ctx.fillText("VOL. 290 * " + new Date().toDateString().toUpperCase() + " * PRICE: $1.25", 500, 180);
+                ctx.fillRect(30, 195, 940, 3);
+
+                ctx.font = "bold 65px 'Playfair Display'"; ctx.fillText("BREAKING NEWS", 500, 280);
+                
+                ctx.drawImage(picCanvas, 60, 310, 880, 360);
+                
+                ctx.font = "bold 18px 'Playfair Display'"; ctx.textAlign="left";
+                ctx.fillText("HISTORICAL CAPTURE IN THE ROOM", 60, 700);
+                ctx.font = "14px Sarabun";
+                wrapText("This historic photograph captures an event of global significance. Witnesses confirm the subject demonstrated remarkable poise and happiness, a true moment of legend.", 60, 720, 880, 20);
             }
             showResult();
         }
 
-        function wrapText(t, x, y, w, l) {
-            let words = t.split(' '); let line = '';
-            for(let n=0; n<words.length; n++) {
-                let test = line + words[n] + ' ';
-                if(ctx.measureText(test).width > w) { ctx.fillText(line, x, y); line = words[n] + ' '; y += l; }
-                else line = test;
+        // ฟังก์ชันวาดข้อความขึ้นบรรทัดใหม่อัตโนมัติ (ภาษาอังกฤษล้วน)
+        function wrapText(text, x, y, maxWidth, lineHeight) {
+            let words = text.split(' ');
+            let line = '';
+            for(let n = 0; n < words.length; n++) {
+                let testLine = line + words[n] + ' ';
+                let metrics = ctx.measureText(testLine);
+                if (metrics.width > maxWidth && n > 0) {
+                    ctx.fillText(line, x, y);
+                    line = words[n] + ' ';
+                    y += lineHeight;
+                } else { line = testLine; }
             }
             ctx.fillText(line, x, y);
         }
 
         function showResult() {
-            document.getElementById('result-img').src = canvas.toDataURL('image/jpeg');
+            document.getElementById('result-img').src = canvas.toDataURL('image/jpeg', 0.9);
             document.getElementById('print-page').style.display = 'flex';
+            document.getElementById('snap-btn').disabled = false;
         }
 
         function saveImg() {
             const link = document.createElement('a');
-            link.download = 'jarawee-pro-booth.jpg';
+            link.download = `jarawee-booth-${currentMode}.jpg`;
             link.href = document.getElementById('result-img').src;
             link.click();
         }
