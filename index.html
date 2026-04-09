@@ -165,7 +165,9 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = 600; pCanvas.height = (currentMode === 'news') ? 750 : 600;
+                // ปรับ Canvas Size ให้ตรงกับสัดส่วน Mirror ตอนวาด
+                pCanvas.width = video.videoWidth; 
+                pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 
@@ -173,25 +175,8 @@
                 pCtx.translate(pCanvas.width, 0); 
                 pCtx.scale(-1, 1);
                 
-                const vW = video.videoWidth;
-                const vH = video.videoHeight;
-                const targetAspect = pCanvas.width / pCanvas.height;
-                let sW, sH, sX, sY;
-
-                // Center Crop Logic เพื่อแก้ปัญหาภาพบีบ
-                if (vW/vH > targetAspect) {
-                    sH = vH;
-                    sW = vH * targetAspect;
-                    sX = (vW - sW) / 2;
-                    sY = 0;
-                } else {
-                    sW = vW;
-                    sH = vW / targetAspect;
-                    sX = 0;
-                    sY = (vH - sH) / 2;
-                }
-
-                pCtx.drawImage(video, sX, sY, sW, sH, 0, 0, pCanvas.width, pCanvas.height);
+                // วาดภาพเต็มใบ No Distortion
+                pCtx.drawImage(video, 0, 0, pCanvas.width, pCanvas.height);
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
             }
@@ -216,11 +201,24 @@
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
             ctx.textAlign = "left"; ctx.font = "32px 'VT323'";
             ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            
+            // วาดรูปถ่ายใบเสร็จ (No Distortion Logic)
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
-                ctx.drawImage(p, 90, y, 420, 420);
-                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
+                const targetW = 420; const targetH = 420;
+                
+                // คำนวณ Center Crop เพื่อรักษาสัดส่วนภาพ (No Stretch)
+                const vW = p.width; const vH = p.height;
+                const targetAspect = targetW / targetH;
+                let sW, sH, sX, sY;
+
+                if (vW/vH > targetAspect) { sH = vH; sW = vH * targetAspect; sX = (vW - sW) / 2; sY = 0; } 
+                else { sW = vW; sH = vW / targetAspect; sX = 0; sY = (vH - sH) / 2; }
+
+                ctx.drawImage(p, sX, sY, sW, sH, 90, y, targetW, targetH);
+                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, targetW, targetH);
             });
+
             ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
             for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
             ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
@@ -229,7 +227,7 @@
             renderFinal();
         }
 
-        // --- โหมดหนังสือพิมพ์ (จุดที่แก้ตามคำสั่ง: ถอดแบบตามรูปต้นฉบับเป๊ะๆ + รูปแนวนอนชิดขวา) ---
+        // --- โหมดหนังสือพิมพ์ (จุดที่แก้ตามคำสั่ง: ฟอนต์เวทมนตร์ + ลบกรอบ + สัดส่วนเป๊ะ) ---
         function buildNewspaper(pic) {
             // ขนาดหนังสือพิมพ์แนวตั้งยาว (portrait) แต่ไม่ยาวเฟื้อยแบบใบเสร็จ
             canvas.width = 1000;
@@ -261,9 +259,10 @@
             ctx.fillText("LONDON, TUESDAY, 25 DECEMBER 2025 | GALLEON 3", 500, 110);
             ctx.fillRect(40, 130, 920, 2); // เส้นคั่นล่างแบนเนอร์
 
-            // หัวหนังสือพิมพ์ (The Daily Prophet - ตามรูปต้นฉบับเป๊ะๆ)
+            // หัวหนังสือพิมพ์ (The Daily Prophet - จุดที่แก้: ฟอนต์เวทมนตร์ขลังๆ)
             ctx.fillStyle = "#1a1a1a";
-            ctx.font = "bold 120px 'Pirata One'"; // หัวข่าว Gothic ขนาดใหญ่
+            // ใช้ฟอนต์ Serif โบราณแทนฟอนต์ Gothic แข็งๆ
+            ctx.font = "bold 120px Garamond, 'Times New Roman', serif"; 
             ctx.fillText("THE DAILY PROPHET", 500, 220);
             
             ctx.font = "italic 24px 'IM Fell English SC', serif"; // d p เล็กๆ ด้านล่าง
@@ -275,13 +274,22 @@
             ctx.fillText("TWO AZKABAN PRISONERS ESCAPED ON CHRISTMAS EVE!", 500, 345); // ขยับข้อความชิดแบนเนอร์ขึ้น
             ctx.fillRect(40, 380, 920, 2); // เส้นคั่นใต้หัวข้อข่าวหลัก
 
-            // วาดรูปถ่าย (จุดสำคัญ: เปลี่ยนเป็นแนวนอน ชิดมุมขวา เป๊ะๆ No Distortion)
-            const imgW = 600; // ขนาดรูปถ่ายแนวนอน
-            const imgH = 420; // ขนาดรูปถ่ายจัตุรัสสูงเท่าเดิม
+            // วาดรูปถ่าย (จุดสำคัญ: เปลี่ยนเป็นแนวนอน ชิดมุมขวา + ลบกรอบ + สัดส่วนเป๊ะ No Distortion)
+            const imgW = 600; // ขนาดพื้นที่วาดรูปแนวนอน
+            const imgH = 420; // ขนาดพื้นที่วาดรูปสูงเท่าเดิม
             const imgX = 1000 - imgW - 50; // ชิดมุมขวา (เว้นขอบกระดาษ 50px)
-            ctx.drawImage(pic, imgX, 410, imgW, imgH); // วาดรูปถ่ายแนวนอนชิดขวา
-            ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 15;
-            ctx.strokeRect(imgX, 410, imgW, imgH); // กรอบรูปถ่าย (หนาแบบในรูปต้นฉบับ)
+            const imgY = 410;
+
+            // คำนวณ Center Crop เพื่อรักษาสัดส่วนภาพแนวนอน No Distortion
+            const vW = pic.width; const vH = pic.height;
+            const targetAspect = imgW / imgH;
+            let sW, sH, sX, sY;
+
+            if (vW/vH > targetAspect) { sH = vH; sW = vH * targetAspect; sX = (vW - sW) / 2; sY = 0; } 
+            else { sW = vW; sH = vW / targetAspect; sX = 0; sY = (vH - sH) / 2; }
+
+            // วาดรูปถ่ายแนวนอน No Distortion (ลบ ctx.strokeRect ออกแล้ว)
+            ctx.drawImage(pic, sX, sY, sW, sH, imgX, imgY, imgW, imgH); 
 
             // เนื้อหาข่าว (เยอะเต็มหน้าล้อมรูป - ตาม Prompt และ Layout รูปต้นฉบับ)
             ctx.textAlign = "left"; ctx.font = "italic 16px Sarabun"; // ภาษาอังกฤษผสม
@@ -291,7 +299,7 @@
             wrapText(leftTxt, 50, 440, imgX - 100, 24); // ชิดซ้าย (เว้นขอบกระดาษ 50px) + เพิ่มขนาดบรรทัดนิดหน่อย
 
             // เนื้อหาคอลัมน์ด้านล่างทั้ง 3 คอลัมน์ (เยอะเต็มหน้า อวยคนในรูปยาวๆๆๆๆ)
-            const colTopY = 410 + imgH + 60; // ใต้กรอบรูป
+            const colTopY = imgY + imgH + 60; // ใต้กรอบรูป
             ctx.font = "bold 24px 'IM Fell English SC', serif"; ctx.fillText("FEATURE REPORT:", 50, colTopY - 15);
             
             ctx.font = "italic 14px Sarabun"; // ภาษาอังกฤษล้วนแต่ใช้ Sarabun เพื่อให้อ่านออก
@@ -342,6 +350,7 @@
 
         function renderFinal() {
             canvas.toBlob(blob => {
+                finalBlob = blob;
                 resultImg.src = URL.createObjectURL(blob);
                 document.getElementById('snap-btn').style.opacity = '1';
                 document.getElementById('snap-btn').style.pointerEvents = 'auto';
