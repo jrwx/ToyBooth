@@ -48,8 +48,8 @@
     <div id="camera-ui">
         <div class="header-title">Congratulations to Jarawee!</div>
         <div class="mode-selector">
-            <button class="m-btn active" id="btn-m-receipt" onclick="setMode('receipt')">บส (Receipt)</button>
-            <button class="m-btn" id="btn-m-news" onclick="setMode('news')">บกน (News)</button>
+            <button class="m-btn active" id="btn-m-receipt" onclick="setMode('receipt')">Receipt</button>
+            <button class="m-btn" id="btn-m-news" onclick="setMode('news')">Newspaper</button>
         </div>
         <div id="booth-machine">
             <div id="display-box">
@@ -150,13 +150,11 @@
             
             if(currentMode === 'receipt') {
                 ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, baseW, baseH);
-                ctx.fillStyle = "#111"; ctx.textAlign = "center"; // ทุกอย่างกึ่งกลาง
+                ctx.fillStyle = "#111"; ctx.textAlign = "center";
                 ctx.font = `bold ${baseW*0.15}px 'VT323'`; ctx.fillText("Congrats!!", baseW/2, baseH*0.075);
                 ctx.font = `${baseW*0.08}px 'VT323'`; ctx.fillText("To Jarawee <3", baseW/2, baseH*0.115);
-                
-                ctx.font = `${baseW*0.05}px 'VT323'`;
-                ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), baseW/2, baseH*0.17);
-                
+                ctx.textAlign = "left"; ctx.font = `${baseW*0.05}px 'VT323'`;
+                ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), baseW*0.15, baseH*0.17);
                 capturedPics.forEach((p, idx) => {
                     const imgW = baseW * 0.7; const y = baseH * 0.2 + (idx * (imgW + 20));
                     ctx.drawImage(p, (baseW-imgW)/2, y, imgW, imgW);
@@ -164,30 +162,28 @@
                 });
                 const barX = (baseW - 420)/2;
                 for(let k=0; k<60; k++) { ctx.fillRect(barX+(k*7), baseH*0.83, [2,4,5][Math.floor(Math.random()*3)], 80); }
-                
-                // วันที่และเวลาใหญ่ขึ้นและกึ่งกลาง
-                ctx.textAlign = "center";
-                ctx.font = "bold 32px 'VT323'"; 
-                ctx.fillText(new Date().toLocaleString(), baseW/2, baseH*0.93);
+                ctx.textAlign = "center"; ctx.fillText(new Date().toLocaleString(), baseW/2, baseH*0.91);
             } else {
                 ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,baseW,baseH);
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 1.0; ctx.strokeRect(20, 20, baseW-40, baseH-40);
+                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 1.0; ctx.strokeRect(20, 20, baseW-40, baseH-40); // กรอบบาง
                 
-                // บกน ใหญ่ขึ้นเยอะๆ เด่นๆ
+                // บกน ใหญ่เด่น (BREAKING NEWS)
                 ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
-                ctx.font = "bold 85px 'Courier Prime'"; ctx.fillText("BREAKING NEWS", baseW/2, 110);
-                ctx.fillRect(40, 135, baseW-80, 5);
+                ctx.font = "bold 52px 'Courier Prime'"; ctx.fillText("BREAKING NEWS", baseW/2, 100);
+                ctx.fillRect(40, 120, baseW-80, 4);
                 
                 ctx.font = "bold 34px 'Courier Prime'"; ctx.fillText("HISTORIC RADIANCE!", baseW/2, 210);
                 const imgS = baseW * 0.6; ctx.drawImage(capturedPics[0], (baseW-imgS)/2, 250, imgS, imgS);
                 ctx.strokeRect((baseW-imgS)/2, 250, imgS, imgS);
                 
+                // เนื้อหาข่าว (คุมให้อยู่ในกรอบ 3 คอลัมน์)
                 ctx.textAlign = "left"; ctx.font = "14px 'Courier Prime'";
-                let fullText = "Sources from around the globe confirm that this historic photograph captures the absolute essence of poise, charm, and natural beauty. The subject's radiance is simply beyond description, a true testament to modern elegance. Early reports suggest a global increase in happiness. Experts are currently analyzing the unique resonance. This moment marks a major shift in public sentiment, with happiness rising in all demographics. Detailed analysis inside. The individual pictured has become an overnight sensation across all networks. Stay alert for more updates tonight. The world needs more moments like this, and this capture is a beacon of hope and celebration. The elegance displayed is truly unprecedented in this era.";
+                let fullText = "Sources from around the globe confirm that this historic photograph captures the absolute essence of poise, charm, and natural beauty. The subject's radiance is simply beyond description, a true testament to modern elegance. Early reports suggest a global increase in happiness. Experts are currently analyzing the unique resonance. This moment marks a major shift in public sentiment, with happiness rising in all demographics. Detailed analysis inside. The individual pictured has become an overnight sensation across all networks. Stay alert for more updates tonight. The world needs more moments like this, and this capture is a beacon of hope and celebration. The elegance displayed is truly unprecedented in this era. Leaders have declared this a day of national joy.";
                 const colW = (baseW - 140) / 3; 
                 const words = fullText.split(' ');
                 const third = Math.ceil(words.length / 3);
                 
+                // วาดเนื้อหาพร้อมคุมระยะขอบ (Padding ภายในกรอบ)
                 wrapText(words.slice(0, third).join(' '), 50, 650, colW, 16);
                 wrapText(words.slice(third, third*2).join(' '), 70+colW, 650, colW, 16);
                 wrapText(words.slice(third*2).join(' '), 90+colW*2, 650, colW, 16);
@@ -198,6 +194,7 @@
             let words = text.split(' '); let line = '';
             for(let n = 0; n < words.length; n++) {
                 let testLine = line + words[n] + ' ';
+                // ถ้าคำต่อไปจะเกินขอบคอลัมน์ ให้ขึ้นบรรทัดใหม่
                 if (ctx.measureText(testLine).width > maxWidth && n > 0) {
                     ctx.fillText(line, x, y); line = words[n] + ' '; y += lineHeight;
                 } else line = testLine;
@@ -216,7 +213,7 @@
         }
 
         function saveImage() {
-            const link = document.createElement('a'); link.download = 'jarawee_booth.png';
+            const link = document.createElement('a'); link.download = 'booth_capture.png';
             link.href = resultImg.src; link.click();
         }
 
@@ -229,12 +226,13 @@
                 const url = canvas.toDataURL();
                 printWin.document.write(`<html><body style="margin:0;"><img src="${url}" style="width:80mm;">`);
             } else {
-                w = 945; h = 590; 
+                w = 945; h = 590; // แนวนอน 80x50mm
                 canvas.width = w; canvas.height = h;
                 ctx.clearRect(0,0,w,h);
                 ctx.save();
                 ctx.translate(0, h);
                 ctx.rotate(-Math.PI / 2); // หมุน บกน ไปทางซ้าย
+                // วาดเนื้อหาขนาด 590x945 ลงในพื้นที่หมุน
                 drawCanvas(h, w); 
                 ctx.restore();
                 const url = canvas.toDataURL();
