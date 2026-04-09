@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Wizarding News - 1:1 Edition</title>
+    <title>Jarawee Wizarding Photo Booth</title>
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=IM+Fell+English+SC&family=Fondamento:ital@0;1&family=Sarabun:wght@300;400;700&family=VT323&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; }
@@ -16,17 +16,14 @@
         .m-btn { background: #333; color: #fff; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 10px; font-size: 14px; text-transform: uppercase; }
         .m-btn.active { background: var(--accent); }
 
-        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
+        #booth-machine { position: relative; width: 100%; max-width: 340px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
         #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; }
-        
-        /* กล้องโหมดหนังสือพิมพ์ 1:1 ตามคำสั่ง */
-        #display-box.news-mode { aspect-ratio: 1/1; border-color: #ffd700; }
         
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
         .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-weight: bold; }
 
-        .controls { margin-top: 25px; width: 100%; max-width: 360px; }
+        .controls { margin-top: 25px; width: 100%; max-width: 340px; }
         .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
         .f-btn { background: transparent; color: #a0a0a0; border: 2px solid #333; width: 60px; height: 60px; border-radius: 50%; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
         .f-btn.active { background: #fff; color: #000; border-color: #fff; }
@@ -46,10 +43,10 @@
 <body>
 
     <div id="camera-ui">
-        <div class="header-title">Wizarding World Photo Booth</div>
+        <div class="header-title">ยินดีด้วยนะ!</div>
         <div class="mode-selector">
-            <button class="m-btn active" id="btn-m-receipt" onclick="changeMode('receipt')">Receipt</button>
-            <button class="m-btn" id="btn-m-news" onclick="changeMode('news')">The Prophet</button>
+            <button class="m-btn active" id="btn-m-receipt" onclick="changeMode('receipt')">โหมดใบเสร็จ</button>
+            <button class="m-btn" id="btn-m-news" onclick="changeMode('news')">โหมดหนังสือพิมพ์</button>
         </div>
         <div id="booth-machine">
             <div id="display-box">
@@ -60,18 +57,18 @@
         </div>
         <div class="controls">
             <div class="filter-group">
-                <button class="f-btn active" id="f-norm" onclick="setF('none', this)">Normal</button>
-                <button class="f-btn" id="f-bw" onclick="setF('bw', this)">Magic B&W</button>
+                <button class="f-btn active" id="f-norm" onclick="setF('none', this)">สีปกติ</button>
+                <button class="f-btn" id="f-bw" onclick="setF('bw', this)">โทนเวทมนตร์</button>
             </div>
-            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">Take Magic Photo!</button>
+            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">กดเพื่อถ่ายรูป!</button>
         </div>
     </div>
 
     <div id="print-page">
         <div class="print-container" id="print-cont"><img id="result-img"></div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">Download</button>
-            <button class="btn-save" style="background:#333;color:#fff" onclick="location.reload()">Retry</button>
+            <button class="btn-save" onclick="saveImage()">ดาวน์โหลดรูปภาพ</button>
+            <button class="btn-save" style="background:#333;color:#fff" onclick="location.reload()">ถ่ายใหม่อีกครั้ง</button>
         </div>
     </div>
 
@@ -101,14 +98,20 @@
             currentMode = mode;
             document.getElementById('btn-m-receipt').classList.toggle('active', mode === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', mode === 'news');
-            document.getElementById('display-box').classList.toggle('news-mode', mode === 'news');
-            if(mode === 'news') setF('bw', document.getElementById('f-bw'));
+            if(mode === 'news') setF('bw', document.getElementById('f-bw')); 
+            else setF('none', document.getElementById('f-norm'));
         }
 
         function setF(mode, btn) {
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
-            filterStyle = (mode === 'bw') ? 'grayscale(1) contrast(1.3) brightness(1.1) sepia(0.2)' : 'none';
+            if (mode === 'bw') {
+                filterStyle = (currentMode === 'news') 
+                    ? 'grayscale(1) contrast(1.5) brightness(0.9) sepia(0.5) hue-rotate(-10deg)' 
+                    : 'grayscale(1) contrast(1.3) brightness(1.1)';
+            } else {
+                filterStyle = 'none';
+            }
             video.style.filter = filterStyle;
         }
 
@@ -122,7 +125,7 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = 800; pCanvas.height = 800; // บังคับ 1:1 เสมอ
+                pCanvas.width = 800; pCanvas.height = 800; 
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 pCtx.translate(800, 0); pCtx.scale(-1, 1);
@@ -136,6 +139,7 @@
             if(currentMode === 'news') buildNewspaper(pics[0]); else buildReceipt(pics);
         }
 
+        // --- ใบเสร็จ: Logic เดิมที่ล็อคไว้ ---
         function buildReceipt(pics) {
             canvas.width = 600; canvas.height = 1500;
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1500);
@@ -145,52 +149,41 @@
             renderFinal();
         }
 
+        // --- หนังสือพิมพ์: รูปชิดขวา ตัวหนังสือล้อมซ้าย ดาร์กเปรอะ ---
         function buildNewspaper(pic) {
             canvas.width = 1000; canvas.height = 1400;
-            // พื้นหลังกระดาษเก่า
-            ctx.fillStyle = "#d9cfb9"; ctx.fillRect(0, 0, 1000, 1400);
-            // Noise เพิ่มความเก่า
-            for(let i=0; i<8000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.07})`; ctx.fillRect(Math.random()*1000, Math.random()*1400, 1, 1); }
-
-            ctx.fillStyle = "#1a1a1a";
-            ctx.textAlign = "center";
+            ctx.fillStyle = "#c2b294"; ctx.fillRect(0, 0, 1000, 1400);
             
-            // 1. หัวหนังสือพิมพ์ ขลังกว่าเดิม
-            ctx.font = "bold 130px 'Pirata One'";
-            ctx.shadowBlur = 2; ctx.shadowColor = "rgba(0,0,0,0.3)";
-            ctx.fillText("THE DAILY PROPHET", 500, 200);
-            ctx.shadowBlur = 0;
+            // รอยเปรอะ
+            for(let i=0; i<10000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.08})`; ctx.fillRect(Math.random()*1000, Math.random()*1400, 1, 1); }
+            for(let i=0; i<15; i++) {
+                ctx.fillStyle = `rgba(30, 20, 10, ${Math.random()*0.3 + 0.1})`;
+                ctx.beginPath(); ctx.arc(Math.random()*1000, Math.random()*1400, Math.random()*50 + 10, 0, Math.PI*2); ctx.fill();
+            }
+            
+            ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
+            ctx.font = "bold 120px 'Pirata One'"; ctx.fillText("THE DAILY PROPHET", 500, 180);
+            ctx.fillRect(50, 210, 900, 5); 
+            ctx.font = "italic 22px 'IM Fell English SC'"; ctx.fillText("WIZARDING WORLD'S NO.1 NEWS SOURCE | 3 กัลเลียน", 500, 245);
+            ctx.fillRect(50, 260, 900, 2);
 
-            ctx.fillRect(50, 230, 900, 5); // เส้นคั่นหนา
-            ctx.font = "italic 22px 'IM Fell English SC'";
-            ctx.fillText("WIZARDING WORLD'S NO.1 NEWS SOURCE | GALLEON 3", 500, 265);
-            ctx.fillRect(50, 280, 900, 2);
-
-            // 2. หัวข่าวหลัก
-            ctx.font = "bold 60px 'IM Fell English SC'";
-            ctx.fillText("AZKABAN ESCAPEE SPOTTED!", 500, 360);
-
-            // 3. รูปถ่าย 1:1 (ลบกรอบสีดำออก)
-            const imgSize = 650;
-            const imgX = (1000 - imgSize) / 2;
-            const imgY = 410;
+            // รูปชิดขวา
+            const imgSize = 520; const imgX = 410; const imgY = 350;
             ctx.drawImage(pic, imgX, imgY, imgSize, imgSize);
-            
-            // 4. เนื้อหาข่าว (ป้องกันหลุดขอบกระดาษ)
-            ctx.textAlign = "left";
+            ctx.fillStyle = "rgba(194, 178, 148, 0.15)"; ctx.fillRect(imgX, imgY, imgSize, imgSize);
+
+            // ข้อความซ้าย
+            ctx.textAlign = "left"; ctx.font = "bold 50px 'IM Fell English SC'"; ctx.fillText("ข่าวด่วน!", 70, 330);
+            ctx.font = "bold 28px 'Fondamento'"; ctx.fillText("ต้องการตัวผู้มีเวทมนตร์", 70, 400);
             ctx.font = "italic 22px 'Fondamento'";
-            const content = "LATEST REPORT: The Ministry of Magic has confirmed a massive surge in magical energy following this capture. Witnesses describe the radiance as 'unprecedented' and 'spellbinding'. Citizens are advised to keep this image as a protection charm. This marks a new era in wizarding photography. BEWARE: The happiness contained in this photo is highly contagious!";
-            
-            // ปรับ maxWidth ให้ปลอดภัย (เว้นขอบข้างละ 80px)
-            wrapText(content, 80, 1120, 840, 32);
+            const contentSide = "กระทรวงเวทมนตร์ประกาศเฝ้าระวังขั้นสูงสุดหลังจากตรวจพบพลังงานที่น่าเหลือเชื่อในภาพถ่ายใบนี้ ผู้เชี่ยวชาญกล่าวว่านี่คือมนตราที่หาได้ยากยิ่ง ขอให้พ่อมดแม่มดทุกคนเก็บภาพนี้ไว้เพื่อเป็นเครื่องรางคุ้มครองภัยจากศาสตร์มืด";
+            wrapText(contentSide, 70, 440, 320, 30);
 
-            // ท้ายกระดาษ
-            ctx.font = "bold 40px 'Pirata One'";
-            ctx.fillText("THE DARK LORD RETURNS?", 80, 1330);
-            ctx.textAlign = "right";
-            ctx.font = "italic 20px serif";
-            ctx.fillText("Page 3-4 >>", 920, 1330);
+            const contentBottom = "อัปเดตล่าสุด: นี่คือจุดเริ่มต้นยุคใหม่ของการถ่ายภาพเวทมนตร์ ไม่ต้องตกใจหากคุณรู้สึกอยากยิ้มอย่างกะทันหัน เพราะนั่นคือปฏิกิริยาตอบสนองตามธรรมชาติต่อพลังงานด้านบวกระดับสูงในภาพนี้! โปรดติดตามข่าวสารเพิ่มเติมได้ในฉบับหน้า";
+            wrapText(contentBottom, 70, 920, 860, 32);
 
+            ctx.font = "bold 40px 'Pirata One'"; ctx.fillText("จอมมารกำลังกลับมา?", 70, 1330);
+            ctx.textAlign = "right"; ctx.font = "italic 20px serif"; ctx.fillText("หน้า 3-4 >>", 930, 1330);
             renderFinal();
         }
 
@@ -217,7 +210,7 @@
 
         function saveImage() {
             const link = document.createElement('a');
-            link.download = 'wizard_news_1x1.png'; link.href = resultImg.src; link.click();
+            link.download = 'jarawee_booth.png'; link.href = resultImg.src; link.click();
         }
     </script>
 </body>
