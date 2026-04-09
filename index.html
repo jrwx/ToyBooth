@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Ultimate Prophet Edition</title>
+    <title>Jarawee Pro Booth - Ultimate Prophet Edition (Landscape Pic)</title>
     <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Courier+Prime:wght@400;700&family=Sarabun:wght@300;400;700&family=VT323&family=IM+Fell+English+SC&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-dim: #a0a0a0; }
@@ -70,7 +70,7 @@
 
         <div class="controls">
             <div id="news-themes">
-                <button class="sub-btn active" onclick="setNewsTheme(1, this)">THE DAILY PROPHET (Ultimate Edition)</button>
+                <button class="sub-btn active" onclick="setNewsTheme(1, this)">THE DAILY PROPHET (Landscape Edition)</button>
             </div>
 
             <div class="filter-group">
@@ -229,7 +229,7 @@
             renderFinal();
         }
 
-        // --- โหมดหนังสือพิมพ์ (จุดที่แก้ตามคำสั่ง: ถอดแบบตามรูปต้นฉบับเป๊ะๆ) ---
+        // --- โหมดหนังสือพิมพ์ (จุดที่แก้ตามคำสั่ง: ถอดแบบตามรูปต้นฉบับเป๊ะๆ + รูปแนวนอนชิดขวา) ---
         function buildNewspaper(pic) {
             // ขนาดหนังสือพิมพ์แนวตั้งยาว (portrait) แต่ไม่ยาวเฟื้อยแบบใบเสร็จ
             canvas.width = 1000;
@@ -270,27 +270,28 @@
             ctx.fillText("d p", 500, 255);
             ctx.fillRect(40, 275, 920, 5); // เส้นคั่นใต้หัวหนังสือพิมพ์
 
-            // หัวข้อข่าวหลัก (ตามรูปต้นฉบับ)
+            // หัวข้อข่าวหลัก (ตามรูปต้นฉบับ + ปรับตำแหน่งให้ชิดแบนเนอร์ขึ้น)
             ctx.font = "bold 55px 'IM Fell English SC', serif"; // ฟอนต์ดูโบราณ
-            ctx.fillText("TWO AZKABAN PRISONERS ESCAPED ON CHRISTMAS EVE!", 500, 360);
-            ctx.fillRect(40, 395, 920, 2); // เส้นคั่นใต้หัวข้อข่าวหลัก
+            ctx.fillText("TWO AZKABAN PRISONERS ESCAPED ON CHRISTMAS EVE!", 500, 345); // ขยับข้อความชิดแบนเนอร์ขึ้น
+            ctx.fillRect(40, 380, 920, 2); // เส้นคั่นใต้หัวข้อข่าวหลัก
 
-            // วาดรูปถ่าย (จุดสำคัญ: วางตรงกลางเป๊ะๆ No Distortion)
-            const imgS = 420; // ขนาดรูปถ่ายจัตุรัส
-            const imgX = (1000 - imgS) / 2; // จัดกึ่งกลางเป๊ะๆ
-            ctx.drawImage(pic, imgX, 430, imgS, imgS);
+            // วาดรูปถ่าย (จุดสำคัญ: เปลี่ยนเป็นแนวนอน ชิดมุมขวา เป๊ะๆ No Distortion)
+            const imgW = 600; // ขนาดรูปถ่ายแนวนอน
+            const imgH = 420; // ขนาดรูปถ่ายจัตุรัสสูงเท่าเดิม
+            const imgX = 1000 - imgW - 50; // ชิดมุมขวา (เว้นขอบกระดาษ 50px)
+            ctx.drawImage(pic, imgX, 410, imgW, imgH); // วาดรูปถ่ายแนวนอนชิดขวา
             ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 15;
-            ctx.strokeRect(imgX, 430, imgS, imgS); // กรอบรูปถ่าย (หนาแบบในรูปต้นฉบับ)
+            ctx.strokeRect(imgX, 410, imgW, imgH); // กรอบรูปถ่าย (หนาแบบในรูปต้นฉบับ)
 
             // เนื้อหาข่าว (เยอะเต็มหน้าล้อมรูป - ตาม Prompt และ Layout รูปต้นฉบับ)
             ctx.textAlign = "left"; ctx.font = "italic 16px Sarabun"; // ภาษาอังกฤษผสม
             
-            // คอลัมน์ซ้ายเนื้อหาล้อมรูป
-            let leftTxt = "Create Harry Potter inspired photobooth newspaper with me! Exclusive report: joy captured in London. Witnesses are in awe of the resonance. The smile represents a pivotal moment in history.";
-            wrapText(leftTxt, 50, 460, imgX - 70, 22);
+            // คอลัมน์ซ้ายเนื้อหาล้อมรูป (ชิดมุมซ้ายเป๊ะๆ + เพิ่มข้อความอวยเต็มพื้นที่)
+            let leftTxt = "Sources from around the globe confirm that this historic photograph captures the absolute essence of poise, charm, and natural beauty. The captured smile represents a pivotal moment in history, a true testament to natural elegance. Experts confirm staggeringly high happiness resonance. ministry warns citizens to brace for extreme joy. create harry potter inspired photobooth newspaper with me! and create harry potter inspired photobooth newspaper with me!";
+            wrapText(leftTxt, 50, 440, imgX - 100, 24); // ชิดซ้าย (เว้นขอบกระดาษ 50px) + เพิ่มขนาดบรรทัดนิดหน่อย
 
             // เนื้อหาคอลัมน์ด้านล่างทั้ง 3 คอลัมน์ (เยอะเต็มหน้า อวยคนในรูปยาวๆๆๆๆ)
-            const colTopY = 430 + imgS + 60; // ใต้กรอบรูป
+            const colTopY = 410 + imgH + 60; // ใต้กรอบรูป
             ctx.font = "bold 24px 'IM Fell English SC', serif"; ctx.fillText("FEATURE REPORT:", 50, colTopY - 15);
             
             ctx.font = "italic 14px Sarabun"; // ภาษาอังกฤษล้วนแต่ใช้ Sarabun เพื่อให้อ่านออก
