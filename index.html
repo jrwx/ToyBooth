@@ -26,6 +26,19 @@
             transform: scaleX(-1);
         }
 
+        /* --- [ CSS สำหรับ Preview Overlay ] --- */
+        #preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none; /* เริ่มต้นปิดไว้ */
+            z-index: 5;
+            object-fit: fill;
+        }
+
         #booth-machine.news-mode { max-width: 480px; }
         #display-box.news-mode { aspect-ratio: 16/9 !important; }
 
@@ -61,6 +74,7 @@
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
+                <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
                 <div id="flash"></div>
                 <div id="timer" class="timer">3</div>
             </div>
@@ -98,6 +112,7 @@
         const printPage = document.getElementById('print-page');
         const printCont = document.getElementById('print-cont');
         const finalActions = document.getElementById('final-actions');
+        const previewOverlay = document.getElementById('preview-overlay');
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
@@ -125,9 +140,11 @@
             if (mode === 'news') {
                 booth.classList.add('news-mode');
                 display.classList.add('news-mode');
+                previewOverlay.style.display = 'block'; // แสดงเฟรมตอนถ่าย
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
+                previewOverlay.style.display = 'none'; // ซ่อนเฟรม
             }
         }
 
@@ -188,7 +205,6 @@
             
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
-                // Center Crop for Receipt
                 const s = Math.min(p.width, p.height);
                 const sx = (p.width - s) / 2;
                 const sy = (p.height - s) / 2;
@@ -215,56 +231,45 @@
 
             renderFinal();
         }        
-                        function buildNewspaper(pic) {
-            // 1. ล็อกขนาด Canvas ให้แม่นยำ
+
+        function buildNewspaper(pic) {
             canvas.width = 1000; 
             canvas.height = 1400;
 
-            // 2. วาดพื้นสีกระดาษ
             ctx.fillStyle = "#e3dccb"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // --- [ ตั้งค่าขนาด 800 และจัดวางกึ่งกลาง ] ---
             const photoW = 800;  
-            const photoH = 450;  // สัดส่วน 16:9 สำหรับ 800px
-            const photoX = (canvas.width - photoW) / 2; // คำนวณกึ่งกลาง Canvas เสมอ
-            const photoY = 310;  // ตำแหน่งความสูง (ขยับขึ้น-ลง ปรับเลขนี้ได้ครับ)
+            const photoH = 450;  
+            const photoX = (canvas.width - photoW) / 2; 
+            const photoY = 310;  
 
-            // 3. เตรียมภาพและใส่ฟิลเตอร์ "น้ำตาลไหม้เข้ม" (Deep Burnt Brown)
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = photoW;
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // สูตรน้ำตาลดำไหม้: เข้มขลัง ไม่เหลืองจ้า
             tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
 
-            // --- [ ระบบแก้ภาพเอียง: บังคับตัดกึ่งกลางจากกล้องเป๊ะๆ ] ---
             const targetRatio = photoW / photoH;
             const picRatio = pic.width / pic.height;
             let sw, sh, sx, sy;
             
             if (picRatio > targetRatio) {
-                // ถ้ากล้องกว้างไป ตัดด้านข้างออกเท่าๆ กันเพื่อให้เหลือแค่กึ่งกลาง
                 sh = pic.height;
                 sw = pic.height * targetRatio;
                 sx = (pic.width - sw) / 2;
                 sy = 0;
             } else {
-                // ถ้ากล้องสูงไป ตัดบนล่างออกเท่าๆ กันเพื่อให้เหลือแค่กึ่งกลาง
                 sw = pic.width;
                 sh = pic.width / targetRatio;
                 sx = 0;
                 sy = (pic.height - sh) / 2;
             }
 
-            // วาดรูปจากจุดกึ่งกลาง (sx, sy) ลงใน tempCanvas
             tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
-            
-            // 4. วาดรูปลงบน Canvas หลักตามพิกัดที่คำนวณไว้
             ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
 
-            // 5. วาดเฟรมหนังสือพิมพ์ทับ (ยืดเฟรมให้เต็ม Canvas)
             if (newsFrame.complete) {
                 ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
             }
