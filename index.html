@@ -215,8 +215,8 @@
 
             renderFinal();
         }        
-        function buildNewspaper(pic) {
-            // 1. บังคับขนาด Canvas ให้คงที่เพื่อให้คำนวณพิกเซลแม่นยำ
+                function buildNewspaper(pic) {
+            // 1. บังคับขนาด Canvas ให้คงที่ (ถ้าอยากให้ภาพชัดขึ้น เพิ่มเป็น 2000x2800 ได้ครับ)
             canvas.width = 1000; 
             canvas.height = 1400;
 
@@ -224,11 +224,11 @@
             ctx.fillStyle = "#e3dccb"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // --- [ ปรับซูมแบบเน้นๆ - ขยายตัวเลขให้ใหญ่ขึ้น ] ---
-            const photoW = 750;  // ขยายความกว้างรูปให้ใหญ่ขึ้นมาก
-            const photoH = 422;  // สัดส่วน 16:9
-            const photoX = 125;  // กึ่งกลาง ( (1000-750)/2 )
-            const photoY = 320;  // ตำแหน่งความสูง (ปรับขึ้นลงตรงนี้)
+            // --- [ ปรับซูมแบบ "เน้นๆ" รอบสุดท้าย ] ---
+            const photoW = 880;  // ขยายใหญ่ขึ้นอีก (จากเดิม 750)
+            const photoH = 495;  // สัดส่วน 16:9 ( photoW * 9 / 16 )
+            const photoX = 60;   // ขยับเข้ามาชิดขอบซ้ายมากขึ้นเพื่อให้ภาพดูใหญ่เต็มตา
+            const photoY = 290;  // ขยับพิกัด Y ขึ้นเล็กน้อยเพื่อให้ฟิตกรอบบน
 
             // 3. เตรียมภาพและใส่ฟิลเตอร์ "น้ำตาลไหม้เข้ม" (Deep Burnt Brown)
             const tempCanvas = document.createElement('canvas');
@@ -236,10 +236,10 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // สูตร: ดึงสีเหลืองออกด้วย hue-rotate และอัดความมืดด้วย brightness ต่ำๆ
-            tempCtx.filter = 'sepia(1) saturate(2) hue-rotate(-20deg) contrast(1.6) brightness(0.5)';
+            // สูตรน้ำตาลดำไหม้: เร่ง Contrast และลด Brightness ให้มืดขรึม
+            tempCtx.filter = 'sepia(1) saturate(2.2) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
 
-            // Center Crop เพื่อความฟิต
+            // Center Crop (Object-fit: cover) บังคับให้ภาพล้นช่องเพื่อความฟิต
             const targetRatio = photoW / photoH;
             const picRatio = pic.width / pic.height;
             let sw, sh, sx, sy;
@@ -253,7 +253,7 @@
 
             tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
             
-            // 4. วาดรูปลงบน Canvas
+            // 4. วาดรูปลงบน Canvas หลัก
             ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
 
             // 5. วาดเฟรมหนังสือพิมพ์ทับ (ยืดเฟรมให้เต็ม Canvas 1000x1400)
@@ -263,6 +263,7 @@
             
             renderFinal();
         }
+
 
         function renderFinal() {
             canvas.toBlob(blob => {
