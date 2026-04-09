@@ -26,20 +26,8 @@
             transform: scaleX(-1);
         }
 
-        /* --- [ CSS สำหรับ Preview Overlay ] --- */
-        #preview-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: none; /* เริ่มต้นปิดไว้ */
-            z-index: 5;
-            object-fit: fill;
-        }
-
-        #booth-machine.news-mode { max-width: 480px; }
+        /* ปรับให้โหมด News ไม่ต้องมี Overlay และขยายขนาดตามวิดีโอ */
+        #booth-machine.news-mode { max-width: 500px; }
         #display-box.news-mode { aspect-ratio: 16/9 !important; }
 
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
@@ -74,7 +62,6 @@
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
-                <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
                 <div id="flash"></div>
                 <div id="timer" class="timer">3</div>
             </div>
@@ -112,7 +99,6 @@
         const printPage = document.getElementById('print-page');
         const printCont = document.getElementById('print-cont');
         const finalActions = document.getElementById('final-actions');
-        const previewOverlay = document.getElementById('preview-overlay');
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
@@ -140,11 +126,9 @@
             if (mode === 'news') {
                 booth.classList.add('news-mode');
                 display.classList.add('news-mode');
-                previewOverlay.style.display = 'block'; // แสดงเฟรมตอนถ่าย
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
-                previewOverlay.style.display = 'none'; // ซ่อนเฟรม
             }
         }
 
@@ -188,20 +172,11 @@
             canvas.width = 600;
             canvas.height = 1520;
             ctx.clearRect(0,0,600,1520);
-            
-            ctx.fillStyle = "#fdfaf5"; 
-            ctx.fillRect(0, 0, 600, 1520);
-            
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
-            
+            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
             ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
-            
-            ctx.textAlign = "left"; 
-            ctx.font = "32px 'VT323'";
-            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
             
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
@@ -211,69 +186,36 @@
                 ctx.drawImage(p, sx, sy, s, s, 90, y, 420, 420);
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
-
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
-            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
-            
-            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
+            ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
             ctx.globalAlpha = 0.5;
             ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
             ctx.globalAlpha = 1.0;
-
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.moveTo(0, 1520);
-            let step = 60;
-            for(let x=0; x<=600; x+=step) {
-                ctx.lineTo(x + step/2, 1490 + (Math.random()*20));
-                ctx.lineTo(x + step, 1520);
-            }
-            ctx.fill(); ctx.globalCompositeOperation = 'source-over';
-
             renderFinal();
         }        
 
         function buildNewspaper(pic) {
+            // ปรับขนาดภาพตามที่ถ่ายมาเลย (16:9)
             canvas.width = 1000; 
-            canvas.height = 1400;
+            canvas.height = 562; 
 
-            ctx.fillStyle = "#e3dccb"; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ใส่ฟิลเตอร์น้ำตาลไหม้เข้มขลัง
+            ctx.filter = 'sepia(1) saturate(2.3) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
 
-            const photoW = 800;  
-            const photoH = 450;  
-            const photoX = (canvas.width - photoW) / 2; 
-            const photoY = 310;  
-
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = photoW;
-            tempCanvas.height = photoH;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
-
-            const targetRatio = photoW / photoH;
+            // วาดรูปถ่ายให้เต็ม Canvas โดยไม่มีการบีบหรือใส่กรอบ
+            const targetRatio = canvas.width / canvas.height;
             const picRatio = pic.width / pic.height;
             let sw, sh, sx, sy;
             
             if (picRatio > targetRatio) {
-                sh = pic.height;
-                sw = pic.height * targetRatio;
-                sx = (pic.width - sw) / 2;
-                sy = 0;
+                sh = pic.height; sw = pic.height * targetRatio;
+                sx = (pic.width - sw) / 2; sy = 0;
             } else {
-                sw = pic.width;
-                sh = pic.width / targetRatio;
-                sx = 0;
-                sy = (pic.height - sh) / 2;
+                sw = pic.width; sh = pic.width / targetRatio;
+                sx = 0; sy = (pic.height - sh) / 2;
             }
 
-            tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
-            ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
-
-            if (newsFrame.complete) {
-                ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
-            }
-            
+            ctx.drawImage(pic, sx, sy, sw, sh, 0, 0, canvas.width, canvas.height);
+            ctx.filter = 'none'; // reset filter
             renderFinal();
         }
 
