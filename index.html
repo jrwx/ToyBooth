@@ -169,36 +169,76 @@
         }
 
         function buildReceipt(pics) {
-    canvas.width = 600; canvas.height = 1520;
-    ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
-    ctx.fillStyle = "#111"; ctx.textAlign = "center";
-    
-    ctx.font = "bold 90px 'VT323'"; ctx.fillText("Jarawee Booth", 300, 115);
-    ctx.font = "24px 'Sarabun'"; ctx.fillText("Thank you for being together", 300, 165);
-    ctx.font = "30px 'VT323'"; ctx.fillText("---------------------------", 300, 210);
+    // ตั้งค่าขนาดใบเสร็จ
+    canvas.width = 600;
+    canvas.height = 1520;
 
+    // 1. วาดพื้นหลังกระดาษใบเสร็จ (ขาวนวล)
+    ctx.fillStyle = "#fdfaf5";
+    ctx.fillRect(0, 0, 600, 1520);
+
+    // 2. ตั้งค่า Font และวาด Header
+    ctx.fillStyle = "#111";
+    ctx.textAlign = "center";
+    ctx.font = "bold 90px 'VT323'";
+    ctx.fillText("Jarawee Booth", 300, 115);
+    ctx.font = "24px 'Sarabun'";
+    ctx.fillText("Thank you for being together", 300, 165);
+    ctx.font = "30px 'VT323'";
+    ctx.fillText("---------------------------", 300, 210);
+
+    // 3. วาดรูปถ่าย (ส่วนที่แก้ไขให้ภาพฟิตพอดีขอบ)
     pics.forEach((p, idx) => {
-        const y = 280 + (idx * 480);
-        const targetSize = 440; // ขนาดช่องสี่เหลี่ยมในใบเสร็จ
-        
+        const y = 280 + (idx * 480); 
+        const targetSize = 440; // ขนาดช่องสี่เหลี่ยม
+
         const tempCanvas = document.createElement('canvas');
         tempCanvas.width = targetSize;
         tempCanvas.height = targetSize;
         const tempCtx = tempCanvas.getContext('2d');
-        
-        // โทนน้ำตาลไหม้ (เข้มขลัง)
-        tempCtx.filter = 'grayscale(0.2) sepia(1) contrast(1.2) brightness(0.8) saturate(1.4)';
-        
-        // --- อัลกอริทึม Center Crop (ทำให้ภาพเต็มสี่เหลี่ยม ไม่เหลือขอบขาว) ---
-        const s = Math.min(p.width, p.height);
-        const sx = (p.width - s) / 2;
-        const sy = (p.height - s) / 2;
-        
-        tempCtx.drawImage(p, sx, sy, s, s, 0, 0, targetSize, targetSize);
-        
+
+        // โทนขาวดำอมน้ำตาล
+        tempCtx.filter = 'grayscale(1) sepia(0.2) contrast(1.2) brightness(0.9)';
+
+        // --- สูตรคำนวณให้ภาพฟิตพอดีขอบ (Center Crop) ---
+        const targetRatio = 1; 
+        const picRatio = p.width / p.height;
+        let sw, sh, sx, sy;
+
+        if (picRatio > targetRatio) {
+            sh = p.height;
+            sw = p.height * targetRatio;
+            sx = (p.width - sw) / 2;
+            sy = 0;
+        } else {
+            sw = p.width;
+            sh = p.width / targetRatio;
+            sx = 0;
+            sy = (p.height - sh) / 2;
+        }
+
+        // วาดภาพที่คำนวณแล้วลง tempCanvas
+        tempCtx.drawImage(p, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
+
+        // วาดลงใบเสร็จจริง
         ctx.drawImage(tempCanvas, 80, y, targetSize, targetSize);
-        ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(80, y, targetSize, targetSize);
+
+        // วาดเส้นขอบรูป
+        ctx.strokeStyle = "#222";
+        ctx.lineWidth = 2;
+        ctx.strokeRect(80, y, targetSize, targetSize);
     });
+
+    // 4. วาด Footer ท้ายใบเสร็จ
+    const footerY = 1320;
+    ctx.font = "30px 'VT323'";
+    ctx.fillText("---------------------------", 300, footerY);
+    ctx.font = "22px 'Sarabun'";
+    ctx.fillText("MEMORIES WITH YOU", 300, footerY + 50);
+    const now = new Date();
+    ctx.font = "18px 'VT323'";
+    ctx.fillText(now.toLocaleString(), 300, footerY + 90);
+
     renderFinal();
 }
 
@@ -208,12 +248,15 @@
         canvas.height = newsFrame.naturalHeight;
     }
 
-    // ปรับพิกัดให้ภาพอยู่กึ่งกลางช่องว่างในเฟรม harry.PNG
-    const photoW = canvas.width * 0.45; 
-    const photoH = photoW * (9/16); // บังคับสัดส่วน 16:9 ตามจอถ่าย
+    // --- [ ส่วนที่ปรับให้ "ซูมเข้า" และ "ฟิตเฟรม" ] ---
+    // ขยายขนาดภาพให้ใหญ่ขึ้น (จาก 0.45 เป็น 0.55) เพื่อให้ดูซูมเข้าและเต็มช่อง
+    const photoW = canvas.width * 0.55; 
+    const photoH = photoW * (9/16); 
     const photoX = (canvas.width - photoW) / 2; 
-    const photoY = canvas.height * 0.31; // ขยับลงมา 31% ของความสูงเฟรม
+    // ปรับพิกัด Y ให้ภาพขึ้นไปอยู่ในกรอบ (ลองปรับเลข 0.28 ถ้ายังไม่กลาง)
+    const photoY = canvas.height * 0.28; 
 
+    // 1. วาดพื้นหลังกระดาษ
     ctx.fillStyle = "#e3dccb"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -222,27 +265,37 @@
     tempCanvas.height = photoH;
     const tempCtx = tempCanvas.getContext('2d');
     
-    // โทนน้ำตาลไหม้ (Vintage Burned Brown) - เข้มกว่าเดิม
-    tempCtx.filter = 'grayscale(0.1) sepia(1) contrast(1.3) brightness(0.75) saturate(1.5)';
+    // --- [ สูตรสีน้ำตาลไหม้: Burnt Brown Filter ] ---
+    // ลดความสว่าง (brightness) เหลือ 0.65 เพื่อให้ดูไหม้เข้มๆ
+    // เร่งความอิ่มตัวสี (saturate) เป็น 1.8 ให้สีน้ำตาลชัดเจน
+    tempCtx.filter = 'sepia(1) saturate(1.8) contrast(1.3) brightness(0.65) grayscale(0.1)';
 
-    // Center Crop จากกล้องมือถือให้ฟิตช่อง 16:9
+    // Center Crop: ตัดส่วนกลางภาพมาขยายให้เต็ม (ทำให้ภาพดูซูมและไม่เหลือขอบดำ)
     const targetRatio = photoW / photoH;
     const picRatio = pic.width / pic.height;
     let sw, sh, sx, sy;
+    
     if (picRatio > targetRatio) {
-        sh = pic.height; sw = pic.height * targetRatio;
-        sx = (pic.width - sw) / 2; sy = 0;
+        sh = pic.height;
+        sw = pic.height * targetRatio;
+        sx = (pic.width - sw) / 2;
+        sy = 0;
     } else {
-        sw = pic.width; sh = pic.width / targetRatio;
-        sx = 0; sy = (pic.height - sh) / 2;
+        sw = pic.width;
+        sh = pic.width / targetRatio;
+        sx = 0;
+        sy = (pic.height - sh) / 2;
     }
 
+    // วาดรูปที่ตัดแล้วลงในพื้นที่ที่เตรียมไว้
     tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
     ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
 
+    // 2. วาดเฟรมหนังสือพิมพ์ทับ (Layer บนสุด)
     if (newsFrame.complete) {
         ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
     }
+    
     renderFinal();
 }
         function renderFinal() {
