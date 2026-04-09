@@ -30,10 +30,6 @@
         .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
         .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
 
-        /* ส่วนที่เพิ่ม: ปุ่มแนบไฟล์ */
-        #news-upload-container { display: none; margin-bottom: 15px; width: 100%; }
-        .btn-upload { background: #4a90e2; color: #fff; padding: 12px; border: none; border-radius: 10px; cursor: pointer; width: 100%; font-weight: bold; font-size: 13px; }
-
         #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
         .print-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 90%; max-width: 300px; }
         .flow-animation { animation: slideDownPaper 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -61,11 +57,6 @@
             </div>
         </div>
         <div class="controls">
-            <div id="news-upload-container">
-                <input type="file" id="frame-input" accept="image/*" style="display:none" onchange="loadFrame(event)">
-                <button class="btn-upload" onclick="document.getElementById('frame-input').click()">🖼️ แนบภาพเฟรม (80x50mm)</button>
-            </div>
-
             <div class="filter-group">
                 <button class="f-btn active" onclick="setF('none', this)">Normal</button>
                 <button class="f-btn" onclick="setF('kodak', this)">Film</button>
@@ -101,7 +92,6 @@
         let filterStyle = 'none';
         let currentMode = 'receipt';
         let finalBlob = null;
-        let attachedFrame = null; // เก็บรูปเฟรมที่ผู้ใช้แนบ
 
         async function startCam() {
             try {
@@ -111,27 +101,11 @@
         }
         startCam();
 
-        // สอนวิธีแนบภาพ: ฟังก์ชันนี้จะอ่านไฟล์ที่เลือกแล้วเก็บไว้ในตัวแปร
-        function loadFrame(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const img = new Image();
-                    img.onload = () => { attachedFrame = img; alert("แนบเฟรมสำเร็จ!"); };
-                    img.src = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
         function changeMode(mode) {
             currentMode = mode;
             document.getElementById('btn-m-receipt').classList.toggle('active', mode === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', mode === 'news');
             document.getElementById('display-box').classList.toggle('news-mode', mode === 'news');
-            // แสดง/ซ่อน ปุ่มแนบเฟรมตามโหมด
-            document.getElementById('news-upload-container').style.display = (mode === 'news') ? 'block' : 'none';
         }
 
         function setF(mode, btn) {
@@ -187,6 +161,7 @@
             renderFinal();
         }
 
+        // แก้ไขส่วนนี้เพื่อให้ดึงรูปจาก GitHub อัตโนมัติ
         function buildNewspaper(pic) {
             canvas.width = 1000; canvas.height = 1350;
             ctx.fillStyle = "#e3dccb"; ctx.fillRect(0, 0, 1000, 1350);
@@ -202,28 +177,35 @@
             ctx.font = "bold 50px 'IM Fell English SC', serif"; ctx.fillText("AZKABAN PRISONER ESCAPED ON CHRISTMAS EVE!", 500, 345);
             ctx.fillRect(40, 380, 920, 2);
 
-            // ตำแหน่งรูปถ่าย (ช่องเขียวเดิม)
             const imgW = 600, imgH = 420, imgX = 350, imgY = 410;
             ctx.drawImage(pic, 0, 0, pic.width, pic.height, imgX, imgY, imgW, imgH);
 
-            // ส่วนที่เพิ่ม: ถ้ามีการแนบเฟรม ให้วาดทับลงไปที่ตำแหน่งรูปถ่าย
-            if (attachedFrame) {
-                ctx.drawImage(attachedFrame, imgX, imgY, imgW, imgH);
-            }
+            // ดึงเฟรมจาก GitHub
+            const frameImg = new Image();
+            frameImg.crossOrigin = "anonymous"; 
+            // *** วางลิงก์ Raw จาก GitHub ของคุณตรงนี้ ***
+            frameImg.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
+            
+            frameImg.onload = function() {
+                ctx.drawImage(frameImg, imgX, imgY, imgW, imgH);
+                drawNewsText();
+            };
+            frameImg.onerror = function() { drawNewsText(); };
 
-            ctx.textAlign = "left"; ctx.font = "italic 16px Sarabun";
-            wrapText("Sources confirm this photograph captures the essence of charm. The radiance is beyond description, a true testament to natural elegance. Experts confirm staggeringly high happiness resonance. Ministry warns citizens to brace for extreme joy!", 50, 420, 250, 24);
-            
-            const colW = 280, colTop = 880;
-            ctx.font = "bold 22px 'IM Fell English SC', serif"; ctx.fillText("FEATURE REPORT:", 50, colTop - 20);
-            ctx.font = "14px Sarabun";
-            wrapText("Witnesses described the atmosphere as electric. The captured expression is linked to a monumental achievement. Experts at the Ministry are analyzing the resonance. This image will become iconic for generations.", 50, colTop, colW, 20);
-            wrapText("Public sentiment is overflowing with praise. Citizens are celebrating this extraordinary occurrence. Critics cannot stop talking about the natural ability to command a frame. Happiness levels are rising worldwide.", 350, colTop, colW, 20);
-            wrapText("Authorities urge caution: this level of delight is contagious. While not dangerous, it may cause uncontrollable smiles. A task force is monitoring the situation. Stay alert for more updates on this story.", 650, colTop, colW, 20);
-            
-            ctx.font = "bold 45px 'Pirata One'"; ctx.fillText("THE DARK LORD...", 50, 1310);
-            ctx.fillRect(40, 1315, 920, 1);
-            renderFinal();
+            function drawNewsText() {
+                ctx.fillStyle = "#1a1a1a";
+                ctx.textAlign = "left"; ctx.font = "italic 16px Sarabun";
+                wrapText("Sources confirm this photograph captures the essence of charm. The radiance is beyond description, a true testament to natural elegance. Experts confirm staggeringly high happiness resonance. Ministry warns citizens to brace for extreme joy!", 50, 420, 250, 24);
+                const colW = 280, colTop = 880;
+                ctx.font = "bold 22px 'IM Fell English SC', serif"; ctx.fillText("FEATURE REPORT:", 50, colTop - 20);
+                ctx.font = "14px Sarabun";
+                wrapText("Witnesses described the atmosphere as electric. The captured expression is linked to a monumental achievement. Experts at the Ministry are analyzing the resonance. This image will become iconic for generations.", 50, colTop, colW, 20);
+                wrapText("Public sentiment is overflowing with praise. Citizens are celebrating this extraordinary occurrence. Critics cannot stop talking about the natural ability to command a frame. Happiness levels are rising worldwide.", 350, colTop, colW, 20);
+                wrapText("Authorities urge caution: this level of delight is contagious. While not dangerous, it may cause uncontrollable smiles. A task force is monitoring the situation. Stay alert for more updates on this story.", 650, colTop, colW, 20);
+                ctx.font = "bold 45px 'Pirata One'"; ctx.fillText("THE DARK LORD...", 50, 1310);
+                ctx.fillRect(40, 1315, 920, 1);
+                renderFinal();
+            }
         }
 
         function wrapText(text, x, y, maxWidth, lineHeight) {
