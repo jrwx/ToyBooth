@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jarawee Pro Booth</title>
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Pirata+One&family=Courier+Prime:wght@400;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Courier+Prime:wght@400;700&family=Sarabun:wght@300;400;700&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-main: #ffffff; --text-dim: #a0a0a0; }
         body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: var(--text-main); overflow-x: hidden; }
@@ -17,7 +17,7 @@
         .m-btn.active { background: var(--accent); }
 
         #booth-machine { position: relative; width: 100%; max-width: 340px; background: var(--card-bg); padding: 8px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
-        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 18px; transition: aspect-ratio 0.3s; }
+        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 18px; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
@@ -38,9 +38,9 @@
         #result-img { width: 100%; display: block; box-shadow: 0 0 60px rgba(0,0,0,1); }
         #final-actions { position: absolute; bottom: 30px; left: 0; width: 100%; display: none; text-align: center; z-index: 200; }
         
-        .btn-action { background: #ffffff; color: #000; padding: 14px 24px; font-family: 'Press Start 2P'; font-size: 9px; border: none; border-radius: 50px; cursor: pointer; margin: 5px; display: inline-flex; align-items: center; justify-content: center; min-width: 140px; }
+        .btn-action { background: #ffffff; color: #000; padding: 14px 20px; font-family: 'Press Start 2P'; font-size: 8px; border: none; border-radius: 50px; cursor: pointer; margin: 5px; display: inline-flex; align-items: center; justify-content: center; min-width: 140px; }
         .btn-print { background: var(--accent); color: #fff; }
-        .btn-retry { background: #444; color: #fff; display: block; margin: 15px auto; width: 120px; font-size: 8px; padding: 10px; }
+        .btn-retry { background: #444; color: #fff; display: block; margin: 15px auto; width: 120px; font-size: 8px; padding: 8px; }
     </style>
 </head>
 <body>
@@ -59,7 +59,7 @@
             </div>
         </div>
         <div class="controls">
-            <div class="filter-group" id="filter-group">
+            <div class="filter-group">
                 <button class="f-btn active" onclick="setF('none', this)">NORM</button>
                 <button class="f-btn" onclick="setF('kodak', this)">FILM</button>
                 <button class="f-btn" id="f-bw" onclick="setF('bw', this)">B&W</button>
@@ -106,15 +106,8 @@
             currentMode = m;
             document.getElementById('btn-m-receipt').classList.toggle('active', m === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', m === 'news');
-            if(m === 'news') {
-                setF('bw', document.getElementById('f-bw'));
-                document.getElementById('filter-group').style.opacity = '0.5';
-                document.getElementById('filter-group').style.pointerEvents = 'none';
-            } else {
-                setF('none', document.querySelectorAll('.f-btn')[0]);
-                document.getElementById('filter-group').style.opacity = '1';
-                document.getElementById('filter-group').style.pointerEvents = 'auto';
-            }
+            if(m === 'news') { setF('bw', document.getElementById('f-bw')); } 
+            else { setF('none', document.querySelectorAll('.f-btn')[0]); }
         }
 
         function setF(mode, btn) {
@@ -138,87 +131,54 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = 800; pCanvas.height = 800; // จัตุรัสทั้งสองโหมดตอนเก็บภาพ
+                pCanvas.width = 800; pCanvas.height = 800;
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                
-                const vW = video.videoWidth; const vH = video.videoHeight;
-                const side = Math.min(vW, vH);
-                pCtx.drawImage(video, (vW-side)/2, (vH-side)/2, side, side, 0, 0, 800, 800);
+                const side = Math.min(video.videoWidth, video.videoHeight);
+                pCtx.drawImage(video, (video.videoWidth-side)/2, (video.videoHeight-side)/2, side, side, 0, 0, 800, 800);
                 capturedPics.push(pCanvas);
                 if(i < count-1) await new Promise(r => setTimeout(r, 1000));
             }
-            if(currentMode === 'receipt') drawCanvas('std', 600, 1520);
-            else drawCanvas('std', 800, 1250);
+            drawCanvas(600, (currentMode === 'receipt') ? 1520 : 1000);
             showResult();
         }
 
-        function drawCanvas(sizeLabel, baseW, baseH) {
+        function drawCanvas(baseW, baseH) {
             canvas.width = baseW; canvas.height = baseH;
             ctx.clearRect(0,0,baseW,baseH);
             
             if(currentMode === 'receipt') {
                 ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, baseW, baseH);
-                for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,0.05)`; ctx.fillRect(Math.random()*baseW, Math.random()*baseH, 1, 1); }
                 ctx.fillStyle = "#111"; ctx.textAlign = "center";
                 ctx.font = `bold ${baseW*0.15}px 'VT323'`; ctx.fillText("Congrats!!", baseW/2, baseH*0.075);
                 ctx.font = `${baseW*0.08}px 'VT323'`; ctx.fillText("To Jarawee <3", baseW/2, baseH*0.115);
-                ctx.font = "20px monospace"; ctx.fillText("------------------------------", baseW/2, baseH*0.14);
                 ctx.textAlign = "left"; ctx.font = `${baseW*0.05}px 'VT323'`;
                 ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), baseW*0.15, baseH*0.17);
                 capturedPics.forEach((p, idx) => {
-                    const imgW = baseW * 0.7; const imgH = imgW;
-                    const x = (baseW - imgW) / 2;
-                    const y = baseH * 0.2 + (idx * (imgH + 20));
-                    ctx.drawImage(p, x, y, imgW, imgH);
-                    ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(x, y, imgW, imgH);
+                    const imgW = baseW * 0.7; const y = baseH * 0.2 + (idx * (imgW + 20));
+                    ctx.drawImage(p, (baseW-imgW)/2, y, imgW, imgW);
+                    ctx.strokeRect((baseW-imgW)/2, y, imgW, imgW);
                 });
-                ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", baseW*0.15, baseH*0.8);
-                const barcodeStartX = (baseW - (60 * 7)) / 2;
-                for(let k=0; k<60; k++) { ctx.fillRect(barcodeStartX+(k*7), baseH*0.83, [2,4,5][Math.floor(Math.random()*3)], 80); }
-                ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), baseW/2, baseH*0.91);
-                ctx.fillStyle = "#111"; ctx.font = `${baseW*0.05}px 'VT323'`;
-                ctx.fillText("THANK YOU FOR BEING TOGETHER <3", baseW/2, baseH*0.95);
-                ctx.globalCompositeOperation = 'destination-out';
-                ctx.beginPath(); ctx.moveTo(0, baseH);
-                for(let x=0; x<=baseW; x+=60) { ctx.lineTo(x + 30, baseH-30 + (Math.random()*20)); ctx.lineTo(x + 60, baseH); }
-                ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+                const barX = (baseW - 420)/2;
+                for(let k=0; k<60; k++) { ctx.fillRect(barX+(k*7), baseH*0.83, [2,4,5][Math.floor(Math.random()*3)], 80); }
+                ctx.textAlign = "center"; ctx.fillText(new Date().toLocaleString(), baseW/2, baseH*0.91);
             } else {
                 ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,baseW,baseH);
                 ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 1.5; ctx.strokeRect(20, 20, baseW-40, baseH-40);
-                
-                // หัวข้อ BREAKING NEWS ฟอนต์ทันสมัย
                 ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
-                ctx.font = "bold 45px 'Courier Prime'"; ctx.fillText("B R E A K I N G   N E W S", baseW/2, 100);
-                ctx.fillRect(40, 125, baseW-80, 3);
-                ctx.font = "bold 16px 'Courier Prime'";
-                ctx.fillText("GLOBAL EDITION | " + new Date().toDateString().toUpperCase(), baseW/2, 155);
-                ctx.fillRect(40, 175, baseW-80, 1);
-
-                // พาดหัวรอง
-                ctx.font = "bold 38px 'Courier Prime'"; ctx.fillText("UNPARALLELED RADIANCE!", baseW/2, 235);
-
-                // รูปภาพจัตุรัสตามสั่ง
-                const imgSide = baseW * 0.65;
-                const imgX = (baseW - imgSide) / 2;
-                ctx.drawImage(capturedPics[0], imgX, 270, imgSide, imgSide);
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 5; ctx.strokeRect(imgX, 270, imgSide, imgSide);
-                
-                // เนื้อหาข่าวอัดแน่นไม่มีที่ว่าง
-                ctx.textAlign = "left"; ctx.font = "bold 20px 'Courier Prime'"; ctx.fillText("THE LEAD STORY:", 50, 270 + imgSide + 45);
-                ctx.font = "14px 'Courier Prime'";
-                
-                let fullText = "Sources from around the globe confirm that this historic photograph captures the absolute essence of poise, charm, and natural beauty. The subject's radiance is simply beyond description, a true testament to modern elegance. Early reports suggest a global increase in happiness. Witnesses described the atmosphere as absolutely electric. The captured expression is rumored to be linked to a monumental achievement, a celebratory moment that redefines digital artistry. Experts at the Ministry are currently analyzing the unique resonance from the instant this photograph was taken. It is believed that this image will become an iconic representation of grace and success in the 21st century. Public sentiment is overflowing with praise, with citizens celebrating this extraordinary occurrence globally. Critics cannot stop talking about the natural ability to command a frame. This moment marks a major shift in public sentiment, with happiness rising in all demographics. Detailed analysis inside on how this single capture represents a major historic shift. The individual pictured has become an overnight sensation across all networks. Authorities urge caution: This level of pure delight is highly contagious. A special task force is monitoring the situation, ensuring public safety is maintained amidst this wave of happiness. Stay alert for more updates tonight. The world needs more moments like this, and this capture is a beacon of hope and celebration.";
-                
-                const colW = (baseW - 140) / 3;
-                const textY = 270 + imgSide + 75;
-                const words = fullText.split(' ');
+                ctx.font = "bold 40px 'Courier Prime'"; ctx.fillText("B R E A K I N G   N E W S", baseW/2, 100);
+                ctx.fillRect(40, 120, baseW-80, 3);
+                ctx.font = "bold 32px 'Courier Prime'"; ctx.fillText("HISTORIC RADIANCE!", baseW/2, 210);
+                const imgS = baseW * 0.6; ctx.drawImage(capturedPics[0], (baseW-imgS)/2, 250, imgS, imgS);
+                ctx.strokeRect((baseW-imgS)/2, 250, imgS, imgS);
+                ctx.textAlign = "left"; ctx.font = "13px 'Courier Prime'";
+                let fullText = "Sources from around the globe confirm that this historic photograph captures the absolute essence of poise, charm, and natural beauty. The subject's radiance is simply beyond description, a true testament to modern elegance. Early reports suggest a global increase in happiness. Experts are currently analyzing the unique resonance. This moment marks a major shift in public sentiment, with happiness rising in all demographics. Detailed analysis inside. The individual pictured has become an overnight sensation across all networks. Stay alert for more updates tonight. The world needs more moments like this, and this capture is a beacon of hope and celebration.";
+                const colW = (baseW - 120) / 3; const words = fullText.split(' ');
                 const third = Math.ceil(words.length / 3);
-                
-                wrapText(words.slice(0, third).join(' '), 50, textY, colW, 17);
-                wrapText(words.slice(third, third*2).join(' '), 70 + colW, textY, colW, 17);
-                wrapText(words.slice(third*2).join(' '), 90 + colW*2, textY, colW, 17);
+                wrapText(words.slice(0, third).join(' '), 50, 650, colW, 16);
+                wrapText(words.slice(third, third*2).join(' '), 70+colW, 650, colW, 16);
+                wrapText(words.slice(third*2).join(' '), 90+colW*2, 650, colW, 16);
             }
         }
 
@@ -244,37 +204,49 @@
         }
 
         function saveImage() {
-            const link = document.createElement('a');
-            link.download = 'booth_capture.png'; link.href = resultImg.src; link.click();
+            const link = document.createElement('a'); link.download = 'jarawee_capture.png';
+            link.href = resultImg.src; link.click();
         }
 
         function print80mm() {
-            let w, h, isLandscape = false;
+            let w, h;
+            const printWin = window.open('', '_blank');
+            
             if(currentMode === 'receipt') {
                 w = 945; h = 2400;
+                drawCanvas(w, h);
+                const url = canvas.toDataURL();
+                printWin.document.write(`<html><body style="margin:0;"><img src="${url}" style="width:80mm;">`);
             } else {
-                w = 945; h = 590; // แนวนอน 80x50mm
-                isLandscape = true;
+                // โหมดหนังสือพิมพ์: หมุนภาพไปทางซ้ายเพื่อให้เป็นแนวนอนในกระดาษ 80x50mm
+                w = 945; h = 590; // สัดส่วนแนวนอนสำหรับกระดาษ 80mm
+                canvas.width = w; canvas.height = h;
+                ctx.clearRect(0,0,w,h);
+                
+                // คำนวณการหมุน
+                ctx.save();
+                ctx.translate(0, h); // ย้ายไปมุมซ้ายล่าง
+                ctx.rotate(-Math.PI / 2); // หมุนทวนเข็ม 90 องศา (ไปทางซ้าย)
+                
+                // วาดเนื้อหาหนังสือพิมพ์ (ซึ่งเป็นแนวตั้ง) ลงบน Canvas ที่หมุนแล้ว
+                const tempCanvas = document.createElement('canvas');
+                tempCanvas.width = 1000; tempCanvas.height = 1600; // ขนาดต้นฉบับแนวตั้ง
+                const tempCtx = tempCanvas.getContext('2d');
+                // เรียกใช้ drawCanvas เดิมแต่เขียนลง temp
+                const oldCtx = ctx; 
+                // บังคับเปลี่ยน Mode ชั่วคราวเพื่อให้วาดแบบ News แนวตั้ง
+                currentMode = 'news'; 
+                // การหมุนต้องวาดให้พอดี: 
+                // ความกว้างของกระดาษ (h=590) จะกลายเป็นความสูงของภาพแนวตั้ง
+                // ความสูงของกระดาษ (w=945) จะกลายเป็นความกว้างของภาพแนวตั้ง
+                drawCanvas(h, w); 
+                
+                ctx.restore();
+                const url = canvas.toDataURL();
+                printWin.document.write(`<html><body style="margin:0;"><img src="${url}" style="width:80mm; height:50mm;">`);
             }
-            drawCanvas('80mm', w, h);
-            canvas.toBlob(blob => {
-                const url = URL.createObjectURL(blob);
-                const printWin = window.open('', '_blank');
-                printWin.document.write(`
-                    <html>
-                        <head><title>Barigan PR-01W Print</title></head>
-                        <body style="margin:0; text-align:center;">
-                            <img src="${url}" style="width: 80mm; ${isLandscape ? 'height: 50mm;' : ''}">
-                            <script>
-                                window.onload = function() { 
-                                    window.print(); 
-                                    setTimeout(() => { window.close(); }, 500);
-                                };
-                            <\/script>
-                        </body>
-                    </html>
-                `);
-            });
+
+            printWin.document.write(`<script>window.onload=function(){window.print();setTimeout(window.close,500);};<\/script></body></html>`);
         }
     </script>
 </body>
