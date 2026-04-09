@@ -215,8 +215,8 @@
 
             renderFinal();
         }        
-                function buildNewspaper(pic) {
-            // 1. บังคับขนาด Canvas ให้คงที่ (ถ้าอยากให้ภาพชัดขึ้น เพิ่มเป็น 2000x2800 ได้ครับ)
+                        function buildNewspaper(pic) {
+            // 1. ล็อกขนาด Canvas ให้แม่นยำ
             canvas.width = 1000; 
             canvas.height = 1400;
 
@@ -224,11 +224,11 @@
             ctx.fillStyle = "#e3dccb"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            // --- [ ปรับซูมแบบ "เน้นๆ" รอบสุดท้าย ] ---
-            const photoW = 880;  // ขยายใหญ่ขึ้นอีก (จากเดิม 750)
-            const photoH = 495;  // สัดส่วน 16:9 ( photoW * 9 / 16 )
-            const photoX = 60;   // ขยับเข้ามาชิดขอบซ้ายมากขึ้นเพื่อให้ภาพดูใหญ่เต็มตา
-            const photoY = 290;  // ขยับพิกัด Y ขึ้นเล็กน้อยเพื่อให้ฟิตกรอบบน
+            // --- [ ตั้งค่าขนาด 800 และจัดวางกึ่งกลาง ] ---
+            const photoW = 800;  
+            const photoH = 450;  // สัดส่วน 16:9 สำหรับ 800px
+            const photoX = (canvas.width - photoW) / 2; // คำนวณกึ่งกลาง Canvas เสมอ
+            const photoY = 310;  // ตำแหน่งความสูง (ขยับขึ้น-ลง ปรับเลขนี้ได้ครับ)
 
             // 3. เตรียมภาพและใส่ฟิลเตอร์ "น้ำตาลไหม้เข้ม" (Deep Burnt Brown)
             const tempCanvas = document.createElement('canvas');
@@ -236,34 +236,41 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // สูตรน้ำตาลดำไหม้: เร่ง Contrast และลด Brightness ให้มืดขรึม
-            tempCtx.filter = 'sepia(1) saturate(2.2) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
+            // สูตรน้ำตาลดำไหม้: เข้มขลัง ไม่เหลืองจ้า
+            tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
 
-            // Center Crop (Object-fit: cover) บังคับให้ภาพล้นช่องเพื่อความฟิต
+            // --- [ ระบบแก้ภาพเอียง: บังคับตัดกึ่งกลางจากกล้องเป๊ะๆ ] ---
             const targetRatio = photoW / photoH;
             const picRatio = pic.width / pic.height;
             let sw, sh, sx, sy;
+            
             if (picRatio > targetRatio) {
-                sh = pic.height; sw = pic.height * targetRatio;
-                sx = (pic.width - sw) / 2; sy = 0;
+                // ถ้ากล้องกว้างไป ตัดด้านข้างออกเท่าๆ กันเพื่อให้เหลือแค่กึ่งกลาง
+                sh = pic.height;
+                sw = pic.height * targetRatio;
+                sx = (pic.width - sw) / 2;
+                sy = 0;
             } else {
-                sw = pic.width; sh = pic.width / targetRatio;
-                sx = 0; sy = (pic.height - sh) / 2;
+                // ถ้ากล้องสูงไป ตัดบนล่างออกเท่าๆ กันเพื่อให้เหลือแค่กึ่งกลาง
+                sw = pic.width;
+                sh = pic.width / targetRatio;
+                sx = 0;
+                sy = (pic.height - sh) / 2;
             }
 
+            // วาดรูปจากจุดกึ่งกลาง (sx, sy) ลงใน tempCanvas
             tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
             
-            // 4. วาดรูปลงบน Canvas หลัก
+            // 4. วาดรูปลงบน Canvas หลักตามพิกัดที่คำนวณไว้
             ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
 
-            // 5. วาดเฟรมหนังสือพิมพ์ทับ (ยืดเฟรมให้เต็ม Canvas 1000x1400)
+            // 5. วาดเฟรมหนังสือพิมพ์ทับ (ยืดเฟรมให้เต็ม Canvas)
             if (newsFrame.complete) {
                 ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
             }
             
             renderFinal();
         }
-
 
         function renderFinal() {
             canvas.toBlob(blob => {
