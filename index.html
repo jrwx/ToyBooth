@@ -12,7 +12,6 @@
         #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 30px; color: var(--text-dim); text-transform: uppercase; }
 
-        /* ส่วนเลือกโหมด */
         .mode-selector { display: flex; gap: 10px; margin-bottom: 25px; }
         .m-btn { background: #333; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-family: 'VT323'; cursor: pointer; font-size: 18px; }
         .m-btn.active { background: var(--accent); }
@@ -32,6 +31,11 @@
         
         .btn-snap { background: var(--accent); color: #fff; padding: 20px 40px; font-family: 'Press Start 2P'; font-size: 14px; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 20px rgba(255, 62, 62, 0.3); }
 
+        /* การเลือกขนาด */
+        #size-overlay { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.9); z-index: 150; flex-direction: column; align-items: center; justify-content: center; }
+        .size-box { background: #222; padding: 30px; border-radius: 20px; width: 80%; max-width: 300px; }
+        .size-btn { background: #fff; color: #00; border: none; padding: 15px; width: 100%; margin: 10px 0; border-radius: 10px; font-family: 'VT323'; font-size: 20px; cursor: pointer; }
+
         #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
         .receipt-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 300px; }
         .flow-animation { animation: slideDownFull 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
@@ -46,12 +50,10 @@
 
     <div id="camera-ui">
         <div class="header-title">Congratulations to Jarawee!</div>
-        
         <div class="mode-selector">
             <button class="m-btn active" id="btn-m-receipt" onclick="setMode('receipt')">Receipt</button>
             <button class="m-btn" id="btn-m-news" onclick="setMode('news')">Newspaper</button>
         </div>
-
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
@@ -59,7 +61,6 @@
                 <div id="timer" class="timer">3</div>
             </div>
         </div>
-
         <div class="controls">
             <div class="filter-group" id="filter-group">
                 <button class="f-btn active" onclick="setF('none', this)">NORM</button>
@@ -67,6 +68,14 @@
                 <button class="f-btn" id="f-bw" onclick="setF('bw', this)">B&W</button>
             </div>
             <button class="btn-snap" id="snap-btn" onclick="takePhotos()">มาถ่ายด่วนน</button>
+        </div>
+    </div>
+
+    <div id="size-overlay">
+        <div class="size-box">
+            <h2 style="font-family:'VT323'">CHOOSE SIZE</h2>
+            <button class="size-btn" onclick="processFinalRender('std')">ขนาดปัจจุบัน (Standard)</button>
+            <button class="size-btn" onclick="processFinalRender('80mm')">ความกว้าง 80mm</button>
         </div>
     </div>
 
@@ -92,9 +101,11 @@
         const printPage = document.getElementById('print-page');
         const receiptCont = document.getElementById('receipt-cont');
         const finalActions = document.getElementById('final-actions');
+        const sizeOverlay = document.getElementById('size-overlay');
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
+        let capturedPics = [];
 
         async function startCam() {
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -107,7 +118,6 @@
             document.getElementById('btn-m-receipt').classList.toggle('active', m === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', m === 'news');
             document.getElementById('display-box').classList.toggle('news-mode', m === 'news');
-            
             if(m === 'news') {
                 setF('bw', document.getElementById('f-bw'));
                 document.getElementById('filter-group').style.opacity = '0.5';
@@ -129,7 +139,7 @@
         }
 
         async function takePhotos() {
-            const pics = [];
+            capturedPics = [];
             const count = (currentMode === 'receipt') ? 2 : 1;
             document.getElementById('snap-btn').style.opacity = '0';
 
@@ -140,8 +150,7 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = 600; 
-                pCanvas.height = (currentMode === 'receipt') ? 600 : 750;
+                pCanvas.width = 800; pCanvas.height = (currentMode === 'receipt') ? 800 : 1000;
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
@@ -153,87 +162,96 @@
                 else { sW = vW; sH = vW / targetAspect; sX = 0; sY = (vH - sH)/2; }
                 
                 pCtx.drawImage(video, sX, sY, sW, sH, 0, 0, pCanvas.width, pCanvas.height);
-                pics.push(pCanvas);
+                capturedPics.push(pCanvas);
                 if(i < count-1) await new Promise(r => setTimeout(r, 1000));
             }
-            if(currentMode === 'receipt') buildReceipt(pics); else buildNews(pics[0]);
+            sizeOverlay.style.display = 'flex';
         }
 
-        // --- ล็อคส่วนใบเสร็จตามโค้ดต้นฉบับ ---
-        function buildReceipt(pics) {
-            canvas.width = 600; canvas.height = 1520;
-            ctx.clearRect(0,0,600,1520);
-            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
+        function processFinalRender(sizeType) {
+            sizeOverlay.style.display = 'none';
+            if(currentMode === 'receipt') buildReceipt(capturedPics, sizeType);
+            else buildNews(capturedPics[0], sizeType);
+        }
+
+        function buildReceipt(pics, sizeType) {
+            const baseW = (sizeType === '80mm') ? 800 : 600;
+            const baseH = (sizeType === '80mm') ? 2000 : 1520;
+            canvas.width = baseW; canvas.height = baseH;
+            ctx.clearRect(0,0,baseW,baseH);
+            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, baseW, baseH);
+            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*baseW, Math.random()*baseH, 1, 1); }
             
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
-            ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
-            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
+            ctx.font = `bold ${baseW*0.15}px 'VT323'`; ctx.fillText("Congrats!!", baseW/2, baseH*0.075);
+            ctx.font = `${baseW*0.08}px 'VT323'`; ctx.fillText("To Jarawee <3", baseW/2, baseH*0.115);
+            ctx.font = "20px monospace"; ctx.fillText("------------------------------", baseW/2, baseH*0.14);
             
-            ctx.textAlign = "left"; 
-            ctx.font = "32px 'VT323'"; // กลับมาเป็นแบบไม่ Bold ตามโค้ดต้นฉบับ
-            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            ctx.textAlign = "left"; ctx.font = `${baseW*0.05}px 'VT323'`;
+            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), baseW*0.15, baseH*0.17);
             
             pics.forEach((p, idx) => {
-                const y = 300 + (idx * 440);
-                ctx.drawImage(p, 90, y, 420, 420);
-                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
+                const imgW = baseW * 0.7; const imgH = imgW;
+                const x = (baseW - imgW) / 2;
+                const y = baseH * 0.2 + (idx * (imgH + 20));
+                ctx.drawImage(p, x, y, imgW, imgH);
+                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(x, y, imgW, imgH);
             });
 
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
-            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
-            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", baseW*0.15, baseH*0.8);
+            for(let k=0; k<60; k++) { ctx.fillRect(baseW*0.15+(k*7), baseH*0.83, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), baseW/2, baseH*0.91);
             
-            ctx.globalAlpha = 0.5; ctx.fillStyle = "#111";
-            ctx.font = "32px 'VT323'"; // ไม่ Bold ตามโค้ดต้นฉบับ
-            ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
-            ctx.globalAlpha = 1.0;
+            // ปรับสีให้เข้มเท่ากัน (ลบ alpha 0.5 ออก)
+            ctx.fillStyle = "#111"; ctx.font = `${baseW*0.05}px 'VT323'`;
+            ctx.fillText("THANK YOU FOR BEING TOGETHER <3", baseW/2, baseH*0.95);
 
-            // รอยฉีก
             ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.moveTo(0, 1520);
-            for(let x=0; x<=600; x+=60) { ctx.lineTo(x + 30, 1490 + (Math.random()*20)); ctx.lineTo(x + 60, 1520); }
+            ctx.beginPath(); ctx.moveTo(0, baseH);
+            for(let x=0; x<=baseW; x+=60) { ctx.lineTo(x + 30, baseH-30 + (Math.random()*20)); ctx.lineTo(x + 60, baseH); }
             ctx.fill(); ctx.globalCompositeOperation = 'source-over';
-
             renderResult();
         }
 
-        // --- โหมดหนังสือพิมพ์แบบแน่นๆ แนวตั้ง ---
-        function buildNews(pic) {
-            canvas.width = 800; canvas.height = 1250;
-            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,800,1250);
-            for(let i=0; i<15000; i++) { ctx.fillStyle=`rgba(0,0,0,0.08)`; ctx.fillRect(Math.random()*800, Math.random()*1250, 1, 1); }
+        function buildNews(pic, sizeType) {
+            const baseW = (sizeType === '80mm') ? 1000 : 800;
+            const baseH = (sizeType === '80mm') ? 1600 : 1250;
+            canvas.width = baseW; canvas.height = baseH;
+            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,baseW,baseH);
             
-            ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
-            ctx.font = "105px 'Pirata One'"; ctx.fillText("THE DAILY WORLD", 400, 120);
-            
-            ctx.fillRect(40, 145, 720, 4);
+            // ขอบกระดาษ Breaking News
+            ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 10; ctx.strokeRect(20, 20, baseW-40, baseH-40);
+            ctx.fillStyle = "#1a1a1a"; ctx.fillRect(20, 20, 250, 40);
+            ctx.fillStyle = "#fff"; ctx.font = "bold 20px 'Courier Prime'"; ctx.textAlign = "center";
+            ctx.fillText("BREAKING NEWS", 145, 48);
+
+            ctx.fillStyle = "#1a1a1a";
+            ctx.font = `${baseW*0.13}px 'Pirata One'`; ctx.fillText("THE DAILY WORLD", baseW/2, 140);
+            ctx.fillRect(40, 165, baseW-80, 4);
             ctx.font = "bold 16px 'Courier Prime'";
-            ctx.fillText("ESTABLISHED 1894 | " + new Date().toDateString().toUpperCase() + " | NO. 4,821", 400, 175);
-            ctx.fillRect(40, 190, 720, 1);
+            ctx.fillText("ESTABLISHED 1894 | " + new Date().toDateString().toUpperCase() + " | NO. 4,821", baseW/2, 195);
+            ctx.fillRect(40, 210, baseW-80, 1);
 
-            ctx.font = "bold 45px 'Courier Prime'"; ctx.fillText("STUNNING RADIANCE CAPTURED!", 400, 275);
+            ctx.font = "bold 40px 'Courier Prime'"; ctx.fillText("STUNNING RADIANCE CAPTURED!", baseW/2, 280);
 
-            // รูปถ่าย
-            ctx.drawImage(pic, 150, 310, 500, 625);
-            ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 12; ctx.strokeRect(150, 310, 500, 625);
+            // รูปถ่าย (ล็อคสัดส่วน)
+            const imgW = baseW * 0.65; const imgH = imgW * 1.25;
+            const imgX = (baseW - imgW) / 2;
+            ctx.drawImage(pic, imgX, 320, imgW, imgH);
+            ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 12; ctx.strokeRect(imgX, 320, imgW, imgH);
             
-            // ข่าวรอบรูป (แน่นๆ)
-            ctx.textAlign = "left"; ctx.font = "bold 20px 'Courier Prime'"; ctx.fillText("LATEST NEWS:", 45, 1000);
-            ctx.font = "14px 'Courier Prime'";
-            let news1 = "LONDON - Reports have surfaced detailing a truly remarkable occurrence, captured here in this exclusive photograph. Witnesses describe the atmosphere as filled with unprecedented joy and magical energy. Sources confirm that the individual pictured has become an overnight sensation across the Floo Network, and owls are already arriving from around the globe to offer their congratulations.";
-            let news2 = "The world watches in awe as this image represents a pivotal moment in contemporary history. Experts at the Ministry are currently analyzing the magical resonance from the moment this photograph was taken. Preliminary findings suggest a 100% increase in happiness levels. This is a moment that will be remembered for years to come.";
-            wrapText(news1, 45, 1030, 340, 18);
-            wrapText(news2, 415, 1030, 340, 18);
-
-            // ข่าวข้างรูป
-            ctx.save(); ctx.translate(100, 620); ctx.rotate(-Math.PI/2);
-            ctx.font = "bold 16px 'Courier Prime'"; ctx.fillText("BREAKING: A NEW LEGEND IS BORN TODAY", 0, 0);
-            ctx.restore();
-            ctx.save(); ctx.translate(700, 620); ctx.rotate(Math.PI/2);
-            ctx.font = "bold 16px 'Courier Prime'"; ctx.fillText("EXCLUSIVE: THE SECRET BEHIND THE SMILE", 0, 0);
-            ctx.restore();
+            // ข้อความข่าวเยอะๆ
+            ctx.textAlign = "left"; ctx.font = "bold 18px 'Courier Prime'";
+            ctx.fillText("LATEST NEWS FROM LONDON:", 50, baseH - 260);
+            ctx.font = "13px 'Courier Prime'";
+            let news1 = "Reports have surfaced detailing a truly remarkable occurrence, captured here in this exclusive photograph. Witnesses describe the atmosphere as filled with unprecedented joy and magical energy. Sources confirm that the individual pictured has become an overnight sensation across the world, and letters are already arriving from around the globe to offer their congratulations. Experts say this level of charm hasn't been seen in centuries.";
+            let news2 = "The world watches in awe as this image represents a pivotal moment in contemporary history. Experts are currently analyzing the resonance from the moment this photograph was taken. Preliminary findings suggest a 100% increase in happiness levels in nearby areas. This is a moment that will be remembered for years to come. Local authorities have declared this a day of celebration, inviting everyone to witness this radiance.";
+            let news3 = "ADDITIONAL REPORT: In a related story, photographers are queuing up for miles just to catch a glimpse of the technique used here. The lighting, the composition, and the subject all blend into a masterpiece of modern journalism. Stay tuned for our evening edition where we will feature a 10-page special on this historic breakthrough. The world has never seen anything quite like this smile.";
+            
+            const colW = (baseW - 140) / 3;
+            wrapText(news1, 50, baseH - 230, colW, 16);
+            wrapText(news2, 70 + colW, baseH - 230, colW, 16);
+            wrapText(news3, 90 + colW*2, baseH - 230, colW, 16);
 
             renderResult();
         }
