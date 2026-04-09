@@ -155,7 +155,6 @@
                 capturedPics.push(pCanvas);
                 if(i < count-1) await new Promise(r => setTimeout(r, 1000));
             }
-            // แสดงผลขนาดมาตรฐานทันที
             if(currentMode === 'receipt') drawCanvas('std', 600, 1520);
             else drawCanvas('std', 800, 1250);
             showResult();
@@ -193,26 +192,38 @@
             } else {
                 ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,baseW,baseH);
                 ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 10; ctx.strokeRect(20, 20, baseW-40, baseH-40);
-                ctx.fillStyle = "#1a1a1a"; ctx.fillRect(20, 20, 250, 40);
-                ctx.fillStyle = "#fff"; ctx.font = "bold 20px 'Courier Prime'"; ctx.textAlign = "center"; ctx.fillText("BREAKING NEWS", 145, 48);
-                ctx.fillStyle = "#1a1a1a"; ctx.font = `${baseW*0.13}px 'Pirata One'`; ctx.fillText("THE DAILY WORLD", baseW/2, 140);
-                ctx.fillRect(40, 165, baseW-80, 4);
-                ctx.font = "bold 16px 'Courier Prime'"; ctx.fillText("ESTABLISHED 1894 | " + new Date().toDateString().toUpperCase(), baseW/2, 195);
-                ctx.fillRect(40, 210, baseW-80, 1);
-                ctx.font = "bold 40px 'Courier Prime'"; ctx.fillText("STUNNING RADIANCE!", baseW/2, 280);
-                const imgW = baseW * 0.65; const imgH = imgW * 1.25;
+                
+                // หัวข้อ BREAKING NEWS แทนที่เดิม
+                ctx.fillStyle = "#1a1a1a"; ctx.fillRect(20, 20, baseW-40, 60);
+                ctx.fillStyle = "#fff"; ctx.font = "bold 35px 'Courier Prime'"; ctx.textAlign = "center";
+                ctx.fillText("BREAKING NEWS", baseW/2, 62);
+
+                ctx.fillStyle = "#1a1a1a";
+                ctx.font = `${baseW*0.12}px 'Pirata One'`; ctx.fillText("THE DAILY WORLD", baseW/2, 145);
+                ctx.fillRect(40, 165, baseW-80, 2);
+                ctx.font = "bold 14px 'Courier Prime'";
+                ctx.fillText("ESTABLISHED 1894 | " + new Date().toDateString().toUpperCase(), baseW/2, 185);
+                ctx.fillRect(40, 195, baseW-80, 1);
+
+                // รูปเล็กลง และขยับเนื้อหาขึ้นมา
+                const imgW = baseW * 0.55; const imgH = imgW * 1.25;
                 const imgX = (baseW - imgW) / 2;
-                ctx.drawImage(capturedPics[0], imgX, 320, imgW, imgH);
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 12; ctx.strokeRect(imgX, 320, imgW, imgH);
-                ctx.textAlign = "left"; ctx.font = "bold 16px 'Courier Prime'"; ctx.fillText("LATEST REPORT:", 50, baseH - 240);
-                ctx.font = "12px 'Courier Prime'";
+                ctx.drawImage(capturedPics[0], imgX, 220, imgW, imgH);
+                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 8; ctx.strokeRect(imgX, 220, imgW, imgH);
+                
+                // เนื้อหาข่าวใหญ่ขึ้นและชิดรูปมากขึ้น
+                ctx.textAlign = "left"; ctx.font = "bold 22px 'Courier Prime'"; 
+                ctx.fillText("LATEST REPORT:", 50, 220 + imgH + 40);
+                
+                ctx.font = "16px 'Courier Prime'"; // ขนาดใหญ่ขึ้น
                 let n1 = "Exclusive report: joy captured in London. Witnesses are in awe of the resonance. The smile represents a pivotal moment in history.";
                 let n2 = "Experts confirm 100% happiness increase. The Ministry has declared a celebration. This radiance is seen from miles away.";
                 let n3 = "Photographers are queuing to see the technique. A true masterpiece of modern journalism. Stay tuned for our morning special edition.";
                 const colW = (baseW - 140) / 3;
-                wrapText(n1, 50, baseH - 210, colW, 15);
-                wrapText(n2, 70 + colW, baseH - 210, colW, 15);
-                wrapText(n3, 90 + colW*2, baseH - 210, colW, 15);
+                const textY = 220 + imgH + 70; // ชิดรูปมากขึ้น
+                wrapText(n1, 50, textY, colW, 20);
+                wrapText(n2, 70 + colW, textY, colW, 20);
+                wrapText(n3, 90 + colW*2, textY, colW, 20);
             }
         }
 
@@ -243,9 +254,17 @@
         }
 
         function print80mm() {
-            // สร้างรูปใหม่ขนาด 80mm (ใช้ DPI 300 ประมาณ 945px)
-            if(currentMode === 'receipt') drawCanvas('80mm', 945, 2400);
-            else drawCanvas('80mm', 945, 1500);
+            let w, h, isLandscape = false;
+            
+            if(currentMode === 'receipt') {
+                w = 945; h = 2400; // แนวตั้งปกติ
+            } else {
+                // หนังสือพิมพ์เปลี่ยนเป็นแนวนอน กว้าง 80mm (945px) สูง 50mm (590px)
+                w = 945; h = 590; 
+                isLandscape = true;
+            }
+            
+            drawCanvas('80mm', w, h);
             
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
@@ -255,7 +274,7 @@
                         <head><title>Print to Barigan PR-01W</title></head>
                         <body style="margin:0; text-align:center;">
                             <p style="font-family:sans-serif; font-size:12px;">Connecting to Barigan PR-01W via Wi-Fi...</p>
-                            <img src="${url}" style="width: 80mm;">
+                            <img src="${url}" style="width: 80mm; ${isLandscape ? 'height: 50mm;' : ''}">
                             <script>
                                 window.onload = function() { 
                                     window.print(); 
