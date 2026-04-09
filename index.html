@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Ultimate Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Pirata+One&family=Sarabun:wght@300;400;700&family=VT323&family=IM+Fell+English+SC&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <title>Jarawee Pro Booth - Dual Edition</title>
+    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-dim: #a0a0a0; }
         body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #fff; overflow-x: hidden; }
@@ -12,14 +12,18 @@
         #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 25px; color: #a0a0a0; text-transform: uppercase; }
 
+        /* ส่วนเลือกโหมด */
         .mode-selector { display: flex; gap: 10px; margin-bottom: 25px; }
         .m-btn { background: #333; color: #fff; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 10px; font-size: 14px; text-transform: uppercase; }
         .m-btn.active { background: var(--accent); box-shadow: 0 0 15px rgba(255, 62, 62, 0.4); }
 
-        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); }
-        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; }
-        #display-box.news-mode { aspect-ratio: 3/4; }
+        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; transition: all 0.3s ease; }
         
+        /* ปรับสัดส่วนหน้าจอพรีวิวเมื่อเป็นโหมดหนังสือพิมพ์ (3:4) */
+        #booth-machine.news-mode { max-width: 300px; }
+        #display-box.news-mode { aspect-ratio: 3/4; }
+
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
         .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-family: 'Press Start 2P'; }
@@ -36,8 +40,7 @@
         @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } }
 
         #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
-        #final-actions { position: absolute; bottom: 50px; left: 0; width: 100%; display: none; text-align: center; animation: fadeIn 1s ease forwards; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        #final-actions { position: absolute; bottom: 50px; left: 0; width: 100%; display: none; text-align: center; }
         .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
     </style>
 </head>
@@ -45,10 +48,12 @@
 
     <div id="camera-ui">
         <div class="header-title">Congratulations to Jarawee!</div>
+        
         <div class="mode-selector">
             <button class="m-btn active" id="btn-m-receipt" onclick="changeMode('receipt')">Receipt Strip</button>
-            <button class="m-btn" id="btn-m-news" onclick="changeMode('news')">Newspaper Page</button>
+            <button class="m-btn" id="btn-m-news" onclick="changeMode('news')">Newspaper</button>
         </div>
+
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
@@ -56,6 +61,7 @@
                 <div id="timer" class="timer">3</div>
             </div>
         </div>
+
         <div class="controls">
             <div class="filter-group">
                 <button class="f-btn active" onclick="setF('none', this)">Normal</button>
@@ -90,8 +96,17 @@
         const finalActions = document.getElementById('final-actions');
 
         let filterStyle = 'none';
-        let currentMode = 'receipt';
+        let currentMode = 'receipt'; // โหมดเริ่มต้น
         let finalBlob = null;
+
+        // โหลดเฟรมใบเสร็จ (ขอบดำปกติ) เตรียมไว้
+        const receiptFrame = new Image();
+        // receiptFrame.src = 'path/to/receipt-frame.png'; // ถ้ามีไฟล์เฟรมใบเสร็จแยก
+
+        // โหลดเฟรมหนังสือพิมพ์จาก GitHub เตรียมไว้
+        const newsFrame = new Image();
+        newsFrame.crossOrigin = "anonymous"; // สำคัญมากสำหรับการดึงรูปข้ามเว็บ
+        newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG; // *** วางลิงก์ RAW ของเฟรมหนังสือพิมพ์ตรงนี้ ***
 
         async function startCam() {
             try {
@@ -101,10 +116,14 @@
         }
         startCam();
 
+        // ฟังก์ชันเปลี่ยนโหมด
         function changeMode(mode) {
             currentMode = mode;
             document.getElementById('btn-m-receipt').classList.toggle('active', mode === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', mode === 'news');
+            
+            // ปรับสัดส่วนหน้าจอพรีวิว
+            document.getElementById('booth-machine').classList.toggle('news-mode', mode === 'news');
             document.getElementById('display-box').classList.toggle('news-mode', mode === 'news');
         }
 
@@ -119,6 +138,7 @@
 
         async function takePhotos() {
             const pics = [];
+            // โหมดหนังสือพิมพ์ถ่ายรูปเดียว, ใบเสร็จถ่าย 2 รูป
             const photoCount = (currentMode === 'news') ? 1 : 2;
             document.getElementById('snap-btn').style.opacity = '0';
 
@@ -129,31 +149,57 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = video.videoWidth; pCanvas.height = video.videoHeight;
+                // ปรับขนาด Canvas รูปถ่ายตามโหมด
+                if (currentMode === 'news') {
+                    pCanvas.width = video.videoWidth * (3/4); // ตัดให้ได้สัดส่วน 3:4
+                    pCanvas.height = video.videoHeight;
+                } else {
+                    pCanvas.width = video.videoWidth;
+                    pCanvas.height = video.videoHeight;
+                }
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0);
+                
+                // วาดรูปจาก Video ลง Canvas (แบบตัดขอบถ้าเป็นโหมด News)
+                if (currentMode === 'news') {
+                    const sx = (video.videoWidth - pCanvas.width) / 2;
+                    pCtx.drawImage(video, sx, 0, pCanvas.width, pCanvas.height, 0, 0, pCanvas.width, pCanvas.height);
+                } else {
+                    pCtx.drawImage(video, 0, 0);
+                }
+                
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
             }
-            if(currentMode === 'receipt') buildReceipt(pics); else buildNewspaper(pics[0]);
+            
+            if (currentMode === 'news') {
+                buildNewspaper(pics[0]);
+            } else {
+                buildReceipt(pics);
+            }
         }
 
+        // --- ฟังก์ชันวาดใบเสร็จ (Receipt) ---
         function buildReceipt(pics) {
             canvas.width = 600; canvas.height = 1520;
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
             for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
+            
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
             ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
             ctx.textAlign = "left"; ctx.font = "32px 'VT323'"; ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
+                // 1. วาดรูปถ่ายคน
                 ctx.drawImage(p, (p.width-p.height)/2, 0, p.height, p.height, 90, y, 420, 420);
+                // 2. วาดเส้นขอบดำ (หรือเฟรมถ้ามี)
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
+
             ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
             for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
             ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
@@ -161,62 +207,32 @@
             renderFinal();
         }
 
-        // แก้ไขส่วนนี้เพื่อให้ดึงรูปจาก GitHub อัตโนมัติ
+        // --- ฟังก์ชันวาดหนังสือพิมพ์ (Newspaper) ---
         function buildNewspaper(pic) {
+            // ขนาด Canvas หนังสือพิมพ์ (ปรับตามต้องการ เช่น A4 หรือสัดส่วนที่ชอบ)
             canvas.width = 1000; canvas.height = 1350;
-            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0, 0, 1000, 1350);
-            for(let i=0; i<9000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.08})`; ctx.fillRect(Math.random()*1000, Math.random()*1350, 1, 1); }
-            
-            ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "left";
-            ctx.font = "bold 28px 'Pirata One'"; ctx.fillText("HE WHO IS BARR-", 50, 65);
-            ctx.fillRect(40, 80, 920, 2);
-            ctx.textAlign = "center"; ctx.font = "italic 20px serif"; ctx.fillText("LONDON, TUESDAY, 25 DECEMBER 2025 | GALLEON 3", 500, 110);
-            ctx.fillRect(40, 130, 920, 2);
-            ctx.font = "bold 110px serif"; ctx.fillText("THE DAILY PROPHET", 500, 225);
-            ctx.fillRect(40, 275, 920, 5);
-            ctx.font = "bold 50px 'IM Fell English SC', serif"; ctx.fillText("AZKABAN PRISONER ESCAPED ON CHRISTMAS EVE!", 500, 345);
-            ctx.fillRect(40, 380, 920, 2);
+            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0, 0, 1000, 1350); // สีพื้นหลังกระดาษเก่า
+            for(let i=0; i<9000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.08})`; ctx.fillRect(Math.random()*1000, Math.random()*1350, 1, 1); } // ลายกระดาษ
 
-            const imgW = 600, imgH = 420, imgX = 350, imgY = 410;
-            ctx.drawImage(pic, 0, 0, pic.width, pic.height, imgX, imgY, imgW, imgH);
+            // ตำแหน่งและขนาดช่องว่างในเฟรม PNG (*** ต้องปรับค่าตรงนี้ให้ตรงกับรูปเฟรมของคุณ ***)
+            const photoW = 600; // ความกว้างช่องรูป
+            const photoH = 375; // ความสูงช่องรูป (สัดส่วนประมาณ 1.6:1 แนวตั้ง)
+            const photoX = 350; // ตำแหน่ง X ของช่องรูป
+            const photoY = 410; // ตำแหน่ง Y ของช่องรูป
 
-            // ดึงเฟรมจาก GitHub
-            const frameImg = new Image();
-            frameImg.crossOrigin = "anonymous"; 
-            // *** วางลิงก์ Raw จาก GitHub ของคุณตรงนี้ ***
-            frameImg.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
-            
-            frameImg.onload = function() {
-                ctx.drawImage(frameImg, imgX, imgY, imgW, imgH);
-                drawNewsText();
-            };
-            frameImg.onerror = function() { drawNewsText(); };
+            // 1. วาดรูปถ่ายคน (Layer ล่างสุด) - มันจะเข้าไปซ้อนข้างหลังเฟรม
+            ctx.drawImage(pic, 0, 0, pic.width, pic.height, photoX, photoY, photoW, photoH);
 
-            function drawNewsText() {
-                ctx.fillStyle = "#1a1a1a";
-                ctx.textAlign = "left"; ctx.font = "italic 16px Sarabun";
-                wrapText("Sources confirm this photograph captures the essence of charm. The radiance is beyond description, a true testament to natural elegance. Experts confirm staggeringly high happiness resonance. Ministry warns citizens to brace for extreme joy!", 50, 420, 250, 24);
-                const colW = 280, colTop = 880;
-                ctx.font = "bold 22px 'IM Fell English SC', serif"; ctx.fillText("FEATURE REPORT:", 50, colTop - 20);
-                ctx.font = "14px Sarabun";
-                wrapText("Witnesses described the atmosphere as electric. The captured expression is linked to a monumental achievement. Experts at the Ministry are analyzing the resonance. This image will become iconic for generations.", 50, colTop, colW, 20);
-                wrapText("Public sentiment is overflowing with praise. Citizens are celebrating this extraordinary occurrence. Critics cannot stop talking about the natural ability to command a frame. Happiness levels are rising worldwide.", 350, colTop, colW, 20);
-                wrapText("Authorities urge caution: this level of delight is contagious. While not dangerous, it may cause uncontrollable smiles. A task force is monitoring the situation. Stay alert for more updates on this story.", 650, colTop, colW, 20);
-                ctx.font = "bold 45px 'Pirata One'"; ctx.fillText("THE DARK LORD...", 50, 1310);
-                ctx.fillRect(40, 1315, 920, 1);
-                renderFinal();
+            // 2. วาดเฟรมหนังสือพิมพ์ PNG (Layer บน) - ส่วนที่ไม่ใช่ช่องว่างจะบังรูปคนไว้
+            if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
+                ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height); // วาดเฟรมเต็ม Canvas
+            } else {
+                // ถ้าโหลดเฟรมไม่สำเร็จ ให้วาดกรอบสีดำแทนช่องรูป
+                ctx.strokeStyle = "#000"; ctx.lineWidth = 5; ctx.strokeRect(photoX, photoY, photoW, photoH);
+                ctx.fillStyle = "#000"; ctx.textAlign = "center"; ctx.font = "30px Sarabun"; ctx.fillText("Error: โหลดเฟรมไม่สำเร็จ", 500, 600);
             }
-        }
 
-        function wrapText(text, x, y, maxWidth, lineHeight) {
-            const words = text.split(' '); let line = '';
-            for(let n = 0; n < words.length; n++) {
-                let testLine = line + words[n] + ' ';
-                if (ctx.measureText(testLine).width > maxWidth && n > 0) {
-                    ctx.fillText(line, x, y); line = words[n] + ' '; y += lineHeight;
-                } else { line = testLine; }
-            }
-            ctx.fillText(line, x, y);
+            renderFinal();
         }
 
         function renderFinal() {
@@ -231,9 +247,11 @@
 
         async function saveImage() {
             if (!finalBlob) return;
-            const file = new File([finalBlob], "booth_capture.png", { type: "image/png" });
-            if (navigator.share) await navigator.share({ files: [file], title: 'Jarawee Booth' });
-            else { const link = document.createElement('a'); link.download = 'jarawee_booth.png'; link.href = resultImg.src; link.click(); }
+            const link = document.createElement('a');
+            // ตั้งชื่อไฟล์ตามโหมด
+            link.download = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
+            link.href = resultImg.src;
+            link.click();
         }
     </script>
 </body>
