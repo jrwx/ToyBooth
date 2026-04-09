@@ -18,7 +18,6 @@
 
         #booth-machine { position: relative; width: 100%; max-width: 340px; background: var(--card-bg); padding: 8px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.4); }
         #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 18px; transition: aspect-ratio 0.3s; }
-        #display-box.news-mode { aspect-ratio: 3/4; }
         video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
 
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 20; pointer-events: none; }
@@ -107,7 +106,6 @@
             currentMode = m;
             document.getElementById('btn-m-receipt').classList.toggle('active', m === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', m === 'news');
-            document.getElementById('display-box').classList.toggle('news-mode', m === 'news');
             if(m === 'news') {
                 setF('bw', document.getElementById('f-bw'));
                 document.getElementById('filter-group').style.opacity = '0.5';
@@ -140,18 +138,14 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                pCanvas.width = 800; pCanvas.height = (currentMode === 'receipt') ? 800 : 1000;
+                pCanvas.width = 800; pCanvas.height = 800; // จัตุรัสทั้งสองโหมดตอนเก็บภาพ
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
                 
                 const vW = video.videoWidth; const vH = video.videoHeight;
-                const targetAspect = pCanvas.width / pCanvas.height;
-                let sW, sH, sX, sY;
-                if (vW/vH > targetAspect) { sH = vH; sW = vH * targetAspect; sX = (vW - sW)/2; sY = 0; }
-                else { sW = vW; sH = vW / targetAspect; sX = 0; sY = (vH - sH)/2; }
-                
-                pCtx.drawImage(video, sX, sY, sW, sH, 0, 0, pCanvas.width, pCanvas.height);
+                const side = Math.min(vW, vH);
+                pCtx.drawImage(video, (vW-side)/2, (vH-side)/2, side, side, 0, 0, 800, 800);
                 capturedPics.push(pCanvas);
                 if(i < count-1) await new Promise(r => setTimeout(r, 1000));
             }
@@ -181,13 +175,8 @@
                     ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(x, y, imgW, imgH);
                 });
                 ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", baseW*0.15, baseH*0.8);
-                
-                // แก้ไข Barcode ให้อยู่ตรงกลาง
-                const barcodeStartX = (baseW - (60 * 7)) / 2; // คำนวณให้กึ่งกลาง
-                for(let k=0; k<60; k++) { 
-                    ctx.fillRect(barcodeStartX+(k*7), baseH*0.83, [2,4,5][Math.floor(Math.random()*3)], 80); 
-                }
-                
+                const barcodeStartX = (baseW - (60 * 7)) / 2;
+                for(let k=0; k<60; k++) { ctx.fillRect(barcodeStartX+(k*7), baseH*0.83, [2,4,5][Math.floor(Math.random()*3)], 80); }
                 ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), baseW/2, baseH*0.91);
                 ctx.fillStyle = "#111"; ctx.font = `${baseW*0.05}px 'VT323'`;
                 ctx.fillText("THANK YOU FOR BEING TOGETHER <3", baseW/2, baseH*0.95);
@@ -197,40 +186,39 @@
                 ctx.fill(); ctx.globalCompositeOperation = 'source-over';
             } else {
                 ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,baseW,baseH);
-                // กรอบบางลงตามสั่ง
                 ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 1.5; ctx.strokeRect(20, 20, baseW-40, baseH-40);
                 
+                // หัวข้อ BREAKING NEWS ฟอนต์ทันสมัย
                 ctx.fillStyle = "#1a1a1a"; ctx.textAlign = "center";
-                // เปลี่ยนหัวข้อเป็น BREAKING NEWS แทน Daily World
-                ctx.font = `bold ${baseW*0.12}px 'Pirata One'`; ctx.fillText("BREAKING NEWS", baseW/2, 120);
-                
-                ctx.fillRect(40, 145, baseW-80, 2);
-                ctx.font = "bold 14px 'Courier Prime'";
-                ctx.fillText("ESTABLISHED 1894 | " + new Date().toDateString().toUpperCase(), baseW/2, 170);
-                ctx.fillRect(40, 185, baseW-80, 1);
+                ctx.font = "bold 45px 'Courier Prime'"; ctx.fillText("B R E A K I N G   N E W S", baseW/2, 100);
+                ctx.fillRect(40, 125, baseW-80, 3);
+                ctx.font = "bold 16px 'Courier Prime'";
+                ctx.fillText("GLOBAL EDITION | " + new Date().toDateString().toUpperCase(), baseW/2, 155);
+                ctx.fillRect(40, 175, baseW-80, 1);
 
-                // พาดหัว
-                ctx.font = "bold 35px 'Courier Prime'"; ctx.fillText("A HISTORIC CAPTURE!", baseW/2, 240);
+                // พาดหัวรอง
+                ctx.font = "bold 38px 'Courier Prime'"; ctx.fillText("UNPARALLELED RADIANCE!", baseW/2, 235);
 
-                // รูปภาพ
-                const imgW = baseW * 0.55; const imgH = imgW * 1.25;
-                const imgX = (baseW - imgW) / 2;
-                ctx.drawImage(capturedPics[0], imgX, 270, imgW, imgH);
-                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 5; ctx.strokeRect(imgX, 270, imgW, imgH);
+                // รูปภาพจัตุรัสตามสั่ง
+                const imgSide = baseW * 0.65;
+                const imgX = (baseW - imgSide) / 2;
+                ctx.drawImage(capturedPics[0], imgX, 270, imgSide, imgSide);
+                ctx.strokeStyle = "#1a1a1a"; ctx.lineWidth = 5; ctx.strokeRect(imgX, 270, imgSide, imgSide);
                 
-                // เนื้อหาข่าวอวยยาวๆ เต็มหน้า (3 คอลัมน์)
-                ctx.textAlign = "left"; ctx.font = "bold 18px 'Courier Prime'"; ctx.fillText("LATEST REPORT:", 50, 270 + imgH + 40);
-                ctx.font = "13px 'Courier Prime'";
+                // เนื้อหาข่าวอัดแน่นไม่มีที่ว่าง
+                ctx.textAlign = "left"; ctx.font = "bold 20px 'Courier Prime'"; ctx.fillText("THE LEAD STORY:", 50, 270 + imgSide + 45);
+                ctx.font = "14px 'Courier Prime'";
                 
-                let col1 = "Sources confirm that this historic photograph captures the absolute essence of poise and charm. The subject's radiance is simply beyond description, a true testament to natural elegance. Early reports suggest a 100% increase in happiness levels.";
-                let col2 = "Witnesses described the atmosphere as electric. The captured expression is rumored to be linked to a monumental achievement, a celebratory moment that redefines digital artistry. Experts are currently analyzing the unique resonance.";
-                let col3 = "Authorities urge caution: This level of pure delight is highly contagious. A special task force is monitoring the situation, ensuring public safety is maintained amidst this wave of happiness. Stay alert for more updates tonight.";
+                let fullText = "Sources from around the globe confirm that this historic photograph captures the absolute essence of poise, charm, and natural beauty. The subject's radiance is simply beyond description, a true testament to modern elegance. Early reports suggest a global increase in happiness. Witnesses described the atmosphere as absolutely electric. The captured expression is rumored to be linked to a monumental achievement, a celebratory moment that redefines digital artistry. Experts at the Ministry are currently analyzing the unique resonance from the instant this photograph was taken. It is believed that this image will become an iconic representation of grace and success in the 21st century. Public sentiment is overflowing with praise, with citizens celebrating this extraordinary occurrence globally. Critics cannot stop talking about the natural ability to command a frame. This moment marks a major shift in public sentiment, with happiness rising in all demographics. Detailed analysis inside on how this single capture represents a major historic shift. The individual pictured has become an overnight sensation across all networks. Authorities urge caution: This level of pure delight is highly contagious. A special task force is monitoring the situation, ensuring public safety is maintained amidst this wave of happiness. Stay alert for more updates tonight. The world needs more moments like this, and this capture is a beacon of hope and celebration.";
                 
                 const colW = (baseW - 140) / 3;
-                const textY = 270 + imgH + 70;
-                wrapText(col1, 50, textY, colW, 18);
-                wrapText(col2, 70 + colW, textY, colW, 18);
-                wrapText(col3, 90 + colW*2, textY, colW, 18);
+                const textY = 270 + imgSide + 75;
+                const words = fullText.split(' ');
+                const third = Math.ceil(words.length / 3);
+                
+                wrapText(words.slice(0, third).join(' '), 50, textY, colW, 17);
+                wrapText(words.slice(third, third*2).join(' '), 70 + colW, textY, colW, 17);
+                wrapText(words.slice(third*2).join(' '), 90 + colW*2, textY, colW, 17);
             }
         }
 
@@ -257,27 +245,24 @@
 
         function saveImage() {
             const link = document.createElement('a');
-            link.download = 'jarawee_booth.png'; link.href = resultImg.src; link.click();
+            link.download = 'booth_capture.png'; link.href = resultImg.src; link.click();
         }
 
         function print80mm() {
             let w, h, isLandscape = false;
             if(currentMode === 'receipt') {
-                w = 945; h = 2400; // แนวตั้ง
+                w = 945; h = 2400;
             } else {
-                // หนังสือพิมพ์: แนวนอน 80x50mm (945x590px)
-                w = 945; h = 590; 
+                w = 945; h = 590; // แนวนอน 80x50mm
                 isLandscape = true;
             }
-            
             drawCanvas('80mm', w, h);
-            
             canvas.toBlob(blob => {
                 const url = URL.createObjectURL(blob);
                 const printWin = window.open('', '_blank');
                 printWin.document.write(`
                     <html>
-                        <head><title>Print to Barigan PR-01W</title></head>
+                        <head><title>Barigan PR-01W Print</title></head>
                         <body style="margin:0; text-align:center;">
                             <img src="${url}" style="width: 80mm; ${isLandscape ? 'height: 50mm;' : ''}">
                             <script>
