@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Dual Edition</title>
+    <title>Jarawee Pro Booth - Ultimate Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
         :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-dim: #a0a0a0; }
@@ -19,10 +19,17 @@
         #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
         #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; transition: all 0.3s ease; }
         
-        #booth-machine.news-mode { max-width: 300px; }
-        #display-box.news-mode { aspect-ratio: 3/4; }
+        /* แก้ไขให้กล้องมือถือฟิตเต็มจอ 16:9 */
+        #display-box video {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transform: scaleX(-1);
+        }
 
-        video { width: 100%; height: 100%; object-fit: cover; transform: scaleX(-1); }
+        #booth-machine.news-mode { max-width: 480px; }
+        #display-box.news-mode { aspect-ratio: 16/9 !important; }
+
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
         .timer { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-family: 'Press Start 2P'; }
 
@@ -99,7 +106,6 @@
 
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
-        // แก้ไขจุดนี้: ใส่เครื่องหมาย ' ปิดท้ายให้ถูกต้อง
         newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
 
         async function startCam() {
@@ -112,10 +118,18 @@
 
         function changeMode(mode) {
             currentMode = mode;
+            const booth = document.getElementById('booth-machine');
+            const display = document.getElementById('display-box');
             document.getElementById('btn-m-receipt').classList.toggle('active', mode === 'receipt');
             document.getElementById('btn-m-news').classList.toggle('active', mode === 'news');
-            document.getElementById('booth-machine').classList.toggle('news-mode', mode === 'news');
-            document.getElementById('display-box').classList.toggle('news-mode', mode === 'news');
+            
+            if (mode === 'news') {
+                booth.classList.add('news-mode');
+                display.classList.add('news-mode');
+            } else {
+                booth.classList.remove('news-mode');
+                display.classList.remove('news-mode');
+            }
         }
 
         function setF(mode, btn) {
@@ -139,23 +153,12 @@
                 flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
 
                 const pCanvas = document.createElement('canvas');
-                if (currentMode === 'news') {
-                    pCanvas.width = video.videoWidth * (3/4);
-                    pCanvas.height = video.videoHeight;
-                } else {
-                    pCanvas.width = video.videoWidth;
-                    pCanvas.height = video.videoHeight;
-                }
+                pCanvas.width = video.videoWidth;
+                pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
                 pCtx.filter = filterStyle;
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                
-                if (currentMode === 'news') {
-                    const sx = (video.videoWidth - pCanvas.width) / 2;
-                    pCtx.drawImage(video, sx, 0, pCanvas.width, pCanvas.height, 0, 0, pCanvas.width, pCanvas.height);
-                } else {
-                    pCtx.drawImage(video, 0, 0);
-                }
+                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
@@ -168,93 +171,62 @@
         function buildReceipt(pics) {
             canvas.width = 600; canvas.height = 1520;
             ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
-            
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
-            ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
-            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
-            ctx.textAlign = "left"; ctx.font = "32px 'VT323'"; ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
-            
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
                 ctx.drawImage(p, (p.width-p.height)/2, 0, p.height, p.height, 90, y, 420, 420);
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
-
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
-            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
-            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
-            ctx.globalAlpha = 0.5; ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
             renderFinal();
         }
 
         function buildNewspaper(pic) {
-    // 1. ปรับ Canvas ตามขนาดไฟล์เฟรมจริง
-    if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
-        canvas.width = newsFrame.naturalWidth;
-        canvas.height = newsFrame.naturalHeight;
-    } else {
-        canvas.width = 1000;
-        canvas.height = 1350;
-    }
+            if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
+                canvas.width = newsFrame.naturalWidth;
+                canvas.height = newsFrame.naturalHeight;
+            } else {
+                canvas.width = 1600; canvas.height = 900;
+            }
 
-    // --- [ ตั้งค่าช่องว่างในเฟรม ] ---
-    const photoW = 680;  // ความกว้างช่อง
-    const photoH = 430;  // ความสูงช่อง
-    const photoX = 160;  // พิกัด X
-    const photoY = 405;  // พิกัด Y
+            // *** ปรับพิกเซลช่องว่างตาม harry.PNG ของคุณ ***
+            const photoW = 800;  
+            const photoH = 450; 
+            const photoX = 400;  
+            const photoY = 225; 
 
-    // 2. วาดพื้นหลังกระดาษ
-    ctx.fillStyle = "#e3dccb"; 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // --- [ คำนวณแบบ Fit (ย่อให้เห็นครบ ไม่ซูม) ] ---
-    const targetRatio = photoW / photoH;
-    const picRatio = pic.width / pic.height;
-    let dw, dh, dx, dy;
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = photoW;
+            tempCanvas.height = photoH;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // โทนน้ำตาลวินเทจจัดเต็ม
+            tempCtx.filter = 'sepia(1) saturate(1.3) contrast(1.1) brightness(0.85)';
+            
+            // Center Crop 16:9 จากกล้องมือถือ
+            const targetRatio = photoW / photoH;
+            const picRatio = pic.width / pic.height;
+            let sw, sh, sx, sy;
+            if (picRatio > targetRatio) {
+                sh = pic.height; sw = pic.height * targetRatio;
+                sx = (pic.width - sw) / 2; sy = 0;
+            } else {
+                sw = pic.width; sh = pic.width / targetRatio;
+                sx = 0; sy = (pic.height - sh) / 2;
+            }
 
-    if (picRatio > targetRatio) {
-        // ถ้ารูปกว้างกว่าช่อง (เหมือนภาพแนวนอนส่วนใหญ่)
-        dw = photoW;
-        dh = photoW / picRatio;
-        dx = photoX;
-        dy = photoY + (photoH - dh) / 2; // จัดวางกึ่งกลางแนวตั้ง
-    } else {
-        // ถ้ารูปสูงกว่าช่อง
-        dh = photoH;
-        dw = photoH * picRatio;
-        dx = photoX + (photoW - dw) / 2; // จัดวางกึ่งกลางแนวนอน
-        dy = photoY;
-    }
+            tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
+            ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
 
-    // --- [ ใส่ฟิลเตอร์สีโทนกระดาษ ] ---
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = dw;
-    tempCanvas.height = dh;
-    const tempCtx = tempCanvas.getContext('2d');
-    
-    // ใส่ Sepia 0.8 และลดความสว่างนิดหน่อยเพื่อให้ดูเก่าสมจริง
-    tempCtx.filter = 'sepia(0.8) contrast(1.1) brightness(0.9)';
-    tempCtx.drawImage(pic, 0, 0, pic.width, pic.height, 0, 0, dw, dh);
+            if (newsFrame.complete) {
+                ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
+            }
+            renderFinal();
+        }
 
-    // 3. วาดภาพที่ย่อแล้วลงไป (Layer ล่าง)
-    // ใส่สีดำจางๆ เป็นพื้นหลังในช่องเพื่อไม่ให้เห็นสีพื้นกระดาษถ้าภาพไม่เต็มช่องพอดี
-    ctx.fillStyle = "#222";
-    ctx.fillRect(photoX, photoY, photoW, photoH);
-    
-    ctx.drawImage(tempCanvas, dx, dy, dw, dh);
-
-    // 4. วาดเฟรมหนังสือพิมพ์ทับ (Layer บน)
-    if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
-        ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
-    } else {
-        ctx.strokeStyle = "red";
-        ctx.strokeRect(photoX, photoY, photoW, photoH);
-    }
-
-    renderFinal();
-}
         function renderFinal() {
             canvas.toBlob(blob => {
                 finalBlob = blob; resultImg.src = URL.createObjectURL(blob);
