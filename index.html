@@ -215,20 +215,24 @@
 
             renderFinal();
         }
-                function buildNewspaper(pic) {
+                        function buildNewspaper(pic) {
             if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
                 canvas.width = newsFrame.naturalWidth;
                 canvas.height = newsFrame.naturalHeight;
             }
 
-            // --- [ ปรับค่าซูมเข้า: เพิ่มจาก 0.48 เป็น 0.54 ] ---
-            const photoW = canvas.width * 0.54; 
+            // --- [ ส่วนที่ปรับให้ "ซูมเยอะๆ" และ "ฟิตพอดีช่อง" ] ---
+            // เพิ่ม photoW ขึ้นเล็กน้อย (จาก 0.54 เป็น 0.60) เพื่อให้ภาพดูใหญ่ขึ้น (ซูมเข้า)
+            const photoW = canvas.width * 0.60; 
             const photoH = photoW * (9/16); 
+            
+            // คำนวณให้ภาพอยู่กึ่งกลางแนวนอนเสมอ
             const photoX = (canvas.width - photoW) / 2; 
-            // ปรับตำแหน่ง Y (ความสูง) ให้พอดีกรอบ
-            const photoY = canvas.height * 0.285; 
+            
+            // ปรับพิกัดแนวตั้ง (ถ้าภาพต่ำไปให้ลดเลข 0.27 ลง / ถ้าสูงไปให้เพิ่มเลขขึ้น)
+            const photoY = canvas.height * 0.27; 
 
-            // 1. วาดสีพื้นหลังกระดาษ
+            // 1. วาดพื้นหลังกระดาษ
             ctx.fillStyle = "#e3dccb"; 
             ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -237,37 +241,44 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // --- [ สูตรสีดำน้ำตาลเข้ม (Burnt Brown Black) - แก้ไขด่วน ] ---
-            // ลบ grayscale ออกเพื่อให้สีน้ำตาลแสดงผลชัดเจน 
-            // ใช้ hue-rotate เบี่ยงสีเหลืองไปทางน้ำตาลแดงเข้ม
-            // ลด brightness เพื่อให้ดูมืดและไหม้
-            tempCtx.filter = 'sepia(1) saturate(2) hue-rotate(-20deg) contrast(1.5) brightness(0.65)';
+            // --- [ สูตรสีดำน้ำตาลเข้ม: Burnt Brown Filter (เข้มสุดๆ) ] ---
+            // ปรับสูตรเพื่อดึงสีเหลืองออกและอัดสีน้ำตาลแดงเข้มเข้าไปแทน
+            // - grayscale(0.1): ใส่ขาวดำนิดเดียวเพื่อดึงสีเหลืองออกไม่ให้จัดเกินไป
+            // - sepia(1): ใส่สี Sepia แบบจัดเต็ม 100%
+            // - saturate(1.8): เร่งความชัดของสี Sepia ให้ดูอุ่นและเข้มขลัง
+            // - hue-rotate(-15deg): บิดโทนสีจากเหลืองไปทางน้ำตาลแดง/ไหม้ เพื่อไม่ให้เหลืองจัด
+            // - contrast(1.4): เพิ่มความต่างของแสงให้ภาพดูคมชัดเหมือนหมึกพิมพ์โบราณ
+            // - brightness(0.6): ลดความสว่างลงเพื่อให้ภาพดูมืดและน้ำตาลเข้ม
+            tempCtx.filter = 'grayscale(0.1) sepia(1) saturate(1.8) hue-rotate(-15deg) contrast(1.4) brightness(0.6)';
 
-            // Center Crop บังคับฟิตเฟรมเป๊ะๆ
+            // Center Crop: บังคับให้ภาพจากกล้องฟิตเต็มช่องสี่เหลี่ยมเป๊ะๆ โดยไม่เหลือขอบดำ
             const targetRatio = photoW / photoH;
             const picRatio = pic.width / pic.height;
             let sw, sh, sx, sy;
+            
             if (picRatio > targetRatio) {
-                sh = pic.height; sw = pic.height * targetRatio;
-                sx = (pic.width - sw) / 2; sy = 0;
+                sh = pic.height;
+                sw = pic.height * targetRatio;
+                sx = (pic.width - sw) / 2;
+                sy = 0;
             } else {
-                sw = pic.width; sh = pic.width / targetRatio;
-                sx = 0; sy = (pic.height - sh) / 2;
+                sw = pic.width;
+                sh = pic.width / targetRatio;
+                sx = 0;
+                sy = (pic.height - sh) / 2;
             }
 
+            // วาดรูปที่ตัดแล้วลงในพื้นที่ที่เตรียมไว้
             tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
             ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
 
-            // 2. วาดเฟรมหนังสือพิมพ์ทับ
+            // 2. วาดเฟรมหนังสือพิมพ์ทับ (Layer บนสุด)
             if (newsFrame.complete) {
                 ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
             }
             
             renderFinal();
         }
-
-
-
 
         function renderFinal() {
             canvas.toBlob(blob => {
