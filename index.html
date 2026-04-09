@@ -169,79 +169,93 @@
         }
 
         function buildReceipt(pics) {
-    // ตั้งค่าขนาดใบเสร็จ
-    canvas.width = 600;
-    canvas.height = 1520;
-
-    // 1. วาดพื้นหลังกระดาษใบเสร็จ (ขาวนวล)
-    ctx.fillStyle = "#fdfaf5";
+    ctx.clearRect(0,0,600,1560);
+    
+    // ขยายความยาวใบเสร็จเป็น 1520px
+    ctx.fillStyle = "#fdfaf5"; 
     ctx.fillRect(0, 0, 600, 1520);
-
-    // 2. ตั้งค่า Font และวาด Header
-    ctx.fillStyle = "#111";
-    ctx.textAlign = "center";
-    ctx.font = "bold 90px 'VT323'";
-    ctx.fillText("Jarawee Booth", 300, 115);
-    ctx.font = "24px 'Sarabun'";
-    ctx.fillText("Thank you for being together", 300, 165);
-    ctx.font = "30px 'VT323'";
-    ctx.fillText("---------------------------", 300, 210);
-
-    // 3. วาดรูปถ่าย (ส่วนที่แก้ไขให้ภาพฟิตพอดีขอบ)
+    
+    // วาดเม็ดกระดาษ Noise เต็มแผ่น
+    for(let i=0; i<5000; i++) { 
+        ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; 
+        ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); 
+    }
+    
+    ctx.fillStyle = "#111"; ctx.textAlign = "center";
+    ctx.font = "bold 90px 'VT323'"; 
+    ctx.fillText("Congrats!!", 300, 115);
+    
+    ctx.font = "48px 'VT323'"; 
+    ctx.fillText("To Jarawee <3", 300, 175);
+    
+    ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
+    
+    // แก้ Order No ไม่เอาตัวหนา
+    ctx.textAlign = "left"; 
+    ctx.font = "32px 'VT323'"; 
+    ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+    
+    // --- ส่วนที่แก้ไข: วาดภาพให้ฟิตเต็มช่องสี่เหลี่ยม ---
     pics.forEach((p, idx) => {
-        const y = 280 + (idx * 480); 
-        const targetSize = 440; // ขนาดช่องสี่เหลี่ยม
+        const y = 300 + (idx * 440);
+        const targetW = 420;
+        const targetH = 420;
 
-        const tempCanvas = document.createElement('canvas');
-        tempCanvas.width = targetSize;
-        tempCanvas.height = targetSize;
-        const tempCtx = tempCanvas.getContext('2d');
+        // สูตรคำนวณตัดกลางภาพ (Center Crop)
+        const s = Math.min(p.width, p.height);
+        const sx = (p.width - s) / 2;
+        const sy = (p.height - s) / 2;
 
-        // โทนขาวดำอมน้ำตาล
-        tempCtx.filter = 'grayscale(1) sepia(0.2) contrast(1.2) brightness(0.9)';
-
-        // --- สูตรคำนวณให้ภาพฟิตพอดีขอบ (Center Crop) ---
-        const targetRatio = 1; 
-        const picRatio = p.width / p.height;
-        let sw, sh, sx, sy;
-
-        if (picRatio > targetRatio) {
-            sh = p.height;
-            sw = p.height * targetRatio;
-            sx = (p.width - sw) / 2;
-            sy = 0;
-        } else {
-            sw = p.width;
-            sh = p.width / targetRatio;
-            sx = 0;
-            sy = (p.height - sh) / 2;
-        }
-
-        // วาดภาพที่คำนวณแล้วลง tempCanvas
-        tempCtx.drawImage(p, sx, sy, sw, sh, 0, 0, targetSize, targetSize);
-
-        // วาดลงใบเสร็จจริง
-        ctx.drawImage(tempCanvas, 80, y, targetSize, targetSize);
-
-        // วาดเส้นขอบรูป
-        ctx.strokeStyle = "#222";
-        ctx.lineWidth = 2;
-        ctx.strokeRect(80, y, targetSize, targetSize);
+        // วาดภาพโดยดึงส่วนกลาง (sx, sy) มาขยายลงช่อง 420x420
+        ctx.drawImage(p, sx, sy, s, s, 90, y, targetW, targetH);
+        
+        ctx.strokeStyle = "#222"; 
+        ctx.lineWidth = 2; 
+        ctx.strokeRect(90, y, targetW, targetH);
     });
+    // -------------------------------------------
 
-    // 4. วาด Footer ท้ายใบเสร็จ
-    const footerY = 1320;
-    ctx.font = "30px 'VT323'";
-    ctx.fillText("---------------------------", 300, footerY);
-    ctx.font = "22px 'Sarabun'";
-    ctx.fillText("MEMORIES WITH YOU", 300, footerY + 50);
-    const now = new Date();
-    ctx.font = "18px 'VT323'";
-    ctx.fillText(now.toLocaleString(), 300, footerY + 90);
+    ctx.textAlign = "left"; // คืนค่า textAlign ก่อนวาดรายการ
+    ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
+    
+    // วาดบาร์โค้ด
+    ctx.fillStyle = "#111";
+    for(let k=0; k<60; k++) { 
+        ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); 
+    }
+    
+    ctx.textAlign = "center"; 
+    ctx.font = "26px 'VT323'"; 
+    ctx.fillText(new Date().toLocaleString(), 300, 1380);
+    
+    // แก้ Thank You ไม่เอาตัวหนา
+    ctx.globalAlpha = 0.5;
+    ctx.fillStyle = "#111";
+    ctx.font = "32px 'VT323'"; 
+    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
+    ctx.globalAlpha = 1.0;
 
-    renderFinal();
+    // วาดรอยฉีกที่ตำแหน่ง 1520px
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.beginPath();
+    ctx.moveTo(0, 1520);
+    let step = 60;
+    for(let x=0; x<=600; x+=step) {
+        ctx.lineTo(x + step/2, 1490 + (Math.random()*20));
+        ctx.lineTo(x + step, 1520);
+    }
+    ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+
+    // ส่งออกไฟล์
+    canvas.toBlob(blob => {
+        finalBlob = blob;
+        resultImg.src = URL.createObjectURL(blob);
+        // เช็คว่ามีฟังก์ชัน startFlow หรือ renderFinal แล้วเรียกใช้ตามเดิมครับ
+        if (typeof startFlow === "function") startFlow();
+        else renderFinal(); 
+    }, 'image/png');
 }
-
         function buildNewspaper(pic) {
     if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
         canvas.width = newsFrame.naturalWidth;
