@@ -168,94 +168,70 @@
             else buildReceipt(pics);
         }
 
+        buildReceipt(pics);
+        }
+
         function buildReceipt(pics) {
-    ctx.clearRect(0,0,600,1560);
-    
-    // ขยายความยาวใบเสร็จเป็น 1520px
-    ctx.fillStyle = "#fdfaf5"; 
-    ctx.fillRect(0, 0, 600, 1520);
-    
-    // วาดเม็ดกระดาษ Noise เต็มแผ่น
-    for(let i=0; i<5000; i++) { 
-        ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; 
-        ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); 
-    }
-    
-    ctx.fillStyle = "#111"; ctx.textAlign = "center";
-    ctx.font = "bold 90px 'VT323'"; 
-    ctx.fillText("Congrats!!", 300, 115);
-    
-    ctx.font = "48px 'VT323'"; 
-    ctx.fillText("To Jarawee <3", 300, 175);
-    
-    ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
-    
-    // แก้ Order No ไม่เอาตัวหนา
-    ctx.textAlign = "left"; 
-    ctx.font = "32px 'VT323'"; 
-    ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
-    
-    // --- ส่วนที่แก้ไข: วาดภาพให้ฟิตเต็มช่องสี่เหลี่ยม ---
-    pics.forEach((p, idx) => {
-        const y = 300 + (idx * 440);
-        const targetW = 420;
-        const targetH = 420;
+            ctx.clearRect(0,0,600,1560);
+            
+            // ขยายความยาวใบเสร็จเป็น 1520px
+            ctx.fillStyle = "#fdfaf5"; 
+            ctx.fillRect(0, 0, 600, 1520);
+            
+            // วาดเม็ดกระดาษ Noise เต็มแผ่น
+            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
+            
+            ctx.fillStyle = "#111"; ctx.textAlign = "center";
+            ctx.font = "bold 90px 'VT323'"; 
+            ctx.fillText("Congrats!!", 300, 115);
+            
+            ctx.font = "48px 'VT323'"; 
+            ctx.fillText("To Jarawee <3", 300, 175);
+            
+            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
+            
+            // แก้ Order No ไม่เอาตัวหนา
+            ctx.textAlign = "left"; 
+            ctx.font = "32px 'VT323'"; // ลบคำว่า bold ออก
+            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            
+            pics.forEach((p, idx) => {
+                const y = 300 + (idx * 440);
+                ctx.drawImage(p, 90, y, 420, 420);
+                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
+            });
 
-        // สูตรคำนวณตัดกลางภาพ (Center Crop)
-        const s = Math.min(p.width, p.height);
-        const sx = (p.width - s) / 2;
-        const sy = (p.height - s) / 2;
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
+            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
+            
+            // แก้ Thank You ไม่เอาตัวหนา
+            ctx.globalAlpha = 0.5;
+            ctx.fillStyle = "#111";
+            ctx.font = "32px 'VT323'"; // ลบคำว่า bold ออก
+            ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
+            ctx.globalAlpha = 1.0;
 
-        // วาดภาพโดยดึงส่วนกลาง (sx, sy) มาขยายลงช่อง 420x420
-        ctx.drawImage(p, sx, sy, s, s, 90, y, targetW, targetH);
-        
-        ctx.strokeStyle = "#222"; 
-        ctx.lineWidth = 2; 
-        ctx.strokeRect(90, y, targetW, targetH);
-    });
-    // -------------------------------------------
+            // วาดรอยฉีกที่ตำแหน่งใหม่ (1520px)
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath();
+            ctx.moveTo(0, 1520);
+            let step = 60;
+            for(let x=0; x<=600; x+=step) {
+                ctx.lineTo(x + step/2, 1490 + (Math.random()*20));
+                ctx.lineTo(x + step, 1520);
+            }
+            ctx.fill();
+            ctx.globalCompositeOperation = 'source-over';
 
-    ctx.textAlign = "left"; // คืนค่า textAlign ก่อนวาดรายการ
-    ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
-    
-    // วาดบาร์โค้ด
-    ctx.fillStyle = "#111";
-    for(let k=0; k<60; k++) { 
-        ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); 
-    }
-    
-    ctx.textAlign = "center"; 
-    ctx.font = "26px 'VT323'"; 
-    ctx.fillText(new Date().toLocaleString(), 300, 1380);
-    
-    // แก้ Thank You ไม่เอาตัวหนา
-    ctx.globalAlpha = 0.5;
-    ctx.fillStyle = "#111";
-    ctx.font = "32px 'VT323'"; 
-    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
-    ctx.globalAlpha = 1.0;
+            canvas.toBlob(blob => {
+                finalBlob = blob;
+                resultImg.src = URL.createObjectURL(blob);
+                startFlow();
+            }, 'image/png');
+        }
 
-    // วาดรอยฉีกที่ตำแหน่ง 1520px
-    ctx.globalCompositeOperation = 'destination-out';
-    ctx.beginPath();
-    ctx.moveTo(0, 1520);
-    let step = 60;
-    for(let x=0; x<=600; x+=step) {
-        ctx.lineTo(x + step/2, 1490 + (Math.random()*20));
-        ctx.lineTo(x + step, 1520);
-    }
-    ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
-
-    // ส่งออกไฟล์
-    canvas.toBlob(blob => {
-        finalBlob = blob;
-        resultImg.src = URL.createObjectURL(blob);
-        // เช็คว่ามีฟังก์ชัน startFlow หรือ renderFinal แล้วเรียกใช้ตามเดิมครับ
-        if (typeof startFlow === "function") startFlow();
-        else renderFinal(); 
-    }, 'image/png');
-}
         function buildNewspaper(pic) {
     if (newsFrame.complete && newsFrame.naturalWidth !== 0) {
         canvas.width = newsFrame.naturalWidth;
