@@ -5,128 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jarawee Pro Booth - Magical Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <!-- 🎀 แก้เฉพาะส่วน UI ให้โทนน่ารัก + จอใหญ่ขึ้น (ขนาดไฟล์รูปหลังถ่ายเท่าเดิม) -->
-<style>
-:root {
-    --bg-color: #fff4fb;
-    --card-bg: #ffffff;
-    --accent: #ff6fae;
-    --accent-2: #ffd166;
-    --text-dim: #8b6f7d;
+    <style>
+        :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-dim: #a0a0a0; }
+        body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #fff; overflow-x: hidden; }
+
+        #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 25px; color: #a0a0a0; text-transform: uppercase; }
+
+        .mode-selector { display: flex; gap: 10px; margin-bottom: 25px; }
+        .m-btn { background: #333; color: #fff; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 10px; font-size: 14px; text-transform: uppercase; }
+        .m-btn.active { background: var(--accent); box-shadow: 0 0 15px rgba(255, 62, 62, 0.4); }
+
+        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; transition: all 0.3s ease; }
+        
+        #display-box video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transform: scaleX(-1);
+            z-index: 1;
+        }
+
+        #booth-machine.news-mode { max-width: 400px; }
+        #display-box.news-mode { 
+            aspect-ratio: 1000/1400 !important; 
+            background: #e3dccb; 
+        }
+
+        #display-box.news-mode video {
+    width: 80% !important;
+    height: 32.14% !important;
+    left: 14.5% !important;
+    top: 24.28% !important;
+
+    /* โทนเดียวกับรูป final */
+    filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
+
+    opacity: 0.96;
 }
 
-body {
-    background: linear-gradient(180deg, #fff4fb 0%, #ffe8f3 45%, #fff8dc 100%);
-    font-family: 'Sarabun', sans-serif;
-    text-align: center;
-    margin: 0;
-    padding: 0;
-    color: #5b4b55;
-    overflow-x: hidden;
-}
+        #preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none; 
+            z-index: 5;
+            object-fit: fill;
+        }
 
-.header-title {
-    font-family: 'VT323';
-    font-size: 36px;
-    letter-spacing: 2px;
-    margin-bottom: 25px;
-    color: #ff6fae;
-    text-transform: uppercase;
-}
+        #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
+        .timer { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-family: 'Press Start 2P'; text-shadow: 4px 4px 0px #000; }
 
-.m-btn {
-    background: #ffffff;
-    color: #ff6fae;
-    border: 2px solid #ffd4e8;
-    padding: 14px 26px;
-    font-weight: bold;
-    cursor: pointer;
-    border-radius: 16px;
-    font-size: 14px;
-}
+        .controls { margin-top: 25px; width: 100%; max-width: 360px; }
+        .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .f-btn { background: transparent; color: var(--text-dim); border: 2px solid #333; width: 60px; height: 60px; border-radius: 50%; font-size: 9px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
+        .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
+        .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
 
-.m-btn.active {
-    background: linear-gradient(135deg, #ff6fae, #ff9ec7);
-    color: white;
-    box-shadow: 0 8px 20px rgba(255, 111, 174, 0.35);
-}
+        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
+        .print-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 90%; max-width: 300px; }
+        .flow-animation { animation: slideDownPaper 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } }
 
-/* ⭐ ขยายจอ preview ให้เหมาะกับ iPad */
-#booth-machine {
-    position: relative;
-    width: 100%;
-    max-width: 520px;
-    background: rgba(255,255,255,0.9);
-    padding: 14px;
-    border-radius: 28px;
-    box-shadow: 0 18px 40px rgba(255, 182, 193, 0.35);
-    border: 3px solid rgba(255,255,255,0.8);
-}
-
-#display-box {
-    position: relative;
-    width: 100%;
-    aspect-ratio: 1/1;
-    background: #fff;
-    overflow: hidden;
-    border-radius: 24px;
-    border: 4px solid #ffd4e8;
-}
-
-#booth-machine.news-mode {
-    max-width: 620px;
-}
-
-.controls {
-    margin-top: 28px;
-    width: 100%;
-    max-width: 520px;
-}
-
-.f-btn {
-    background: rgba(255,255,255,0.9);
-    color: #ff6fae;
-    border: 2px solid #ffd4e8;
-    width: 64px;
-    height: 64px;
-    border-radius: 50%;
-    font-size: 10px;
-    font-weight: bold;
-}
-
-.f-btn.active {
-    background: #ff6fae;
-    color: #fff;
-    border-color: #ff6fae;
-    transform: scale(1.08);
-}
-
-.btn-snap {
-    background: linear-gradient(135deg, #ff6fae, #ffb347);
-    color: #fff;
-    padding: 24px;
-    font-size: 20px;
-    font-weight: bold;
-    border: none;
-    width: 100%;
-    border-radius: 999px;
-    cursor: pointer;
-    box-shadow: 0 12px 28px rgba(255, 111, 174, 0.35);
-}
-
-.btn-save {
-    background: linear-gradient(135deg, #ffffff, #fff0f7);
-    color: #ff6fae;
-    padding: 16px 32px;
-    font-size: 12px;
-    font-weight: bold;
-    border: 2px solid #ffd4e8;
-    border-radius: 100px;
-    cursor: pointer;
-    margin: 8px;
-}
-</style>
-
+        #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
+        #final-actions { position: absolute; bottom: 50px; left: 0; width: 100%; display: none; text-align: center; }
+        .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
+    </style>
 </head>
 <body>
 
