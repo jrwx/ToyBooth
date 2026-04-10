@@ -248,7 +248,6 @@ if(currentMode === 'news') {
     canvas.width = 1000; 
     canvas.height = 1400;
 
-    // พื้นหลังสีกระดาษหนังสือพิมพ์
     ctx.fillStyle = "#e3dccb"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -256,11 +255,6 @@ if(currentMode === 'news') {
     const photoH = 450;  
     const photoX = 145; 
     const photoY = 340; 
-
-    const tempCanvas = document.createElement('canvas');
-    tempCanvas.width = photoW;
-    tempCanvas.height = photoH;
-    const tempCtx = tempCanvas.getContext('2d');
 
     const targetRatio = photoW / photoH;
     const zoomFactor = 1.0;
@@ -276,21 +270,17 @@ if(currentMode === 'news') {
     let sx = (pic.width - sw) / 2;
     let sy = (pic.height - sh) / 2;
 
-    tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
-
-    // ✅ บังคับขาวดำตอน render final
+    // ✅ วาดลง canvas หลักตรง ๆ พร้อมบังคับขาวดำ
     ctx.filter = 'grayscale(1) contrast(1.4)';
-    ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
+    ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
     ctx.filter = 'none';
 
-    // วาดกรอบหนังสือพิมพ์ทับ
     if (newsFrame.complete) {
         ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
     }
 
     renderFinal();
 }
-
         function renderFinal() {
             canvas.toBlob(blob => {
                 finalBlob = blob; resultImg.src = URL.createObjectURL(blob);
