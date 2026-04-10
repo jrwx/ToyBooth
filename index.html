@@ -359,19 +359,31 @@ if(currentMode === 'news') {
         function printImage() {
     const printWindow = window.open('', '_blank');
 
+    const paperWidth = currentMode === 'receipt' ? '58mm' : '100mm';
+    const paperHeight = currentMode === 'receipt' ? '220mm' : '160mm';
+
     printWindow.document.write(`
         <html>
         <head>
-            <title>Print Photo</title>
+            <title>Print Strip</title>
             <style>
+                @page {
+                    size: ${paperWidth} ${paperHeight};
+                    margin: 0;
+                }
+
                 body {
                     margin: 0;
-                    text-align: center;
+                    padding: 0;
+                    width: ${paperWidth};
                     background: white;
+                    text-align: center;
                 }
+
                 img {
                     width: 100%;
-                    max-width: 800px;
+                    height: auto;
+                    display: block;
                 }
             </style>
         </head>
