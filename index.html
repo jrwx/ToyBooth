@@ -430,30 +430,96 @@ if(currentMode === 'news') {
         // =========================
         // 🧾 RECEIPT (แนวตั้ง 80mm)
         // =========================
-     if (!isNews) {
+  if (!isNews) {
 
-    const baseWidth = 576;
-    const scaleFactor = 1.25;
+    const width = 576; // 80mm thermal
+    canvas.width = width;
+    canvas.height = img.height * (width / img.width);
 
-    canvas.width = baseWidth * scaleFactor;
-    canvas.height = (img.height * baseWidth / img.width) * scaleFactor;
+    const ctx = canvas.getContext('2d');
 
-    const ctxScale = canvas.getContext('2d');
+    // background
+    ctx.fillStyle = "#fff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctxScale.fillStyle = "white";
-    ctxScale.fillRect(0, 0, canvas.width, canvas.height);
+    const padding = 24;
+    let y = 50;
 
-    ctxScale.scale(scaleFactor, scaleFactor);
+    // ===== RANDOM ORDER NUMBER =====
+    const orderNo = "ORD-" + Math.floor(100000 + Math.random() * 900000);
 
-    ctxScale.drawImage(
-        img,
-        0,
-        0,
-        baseWidth,
-        img.height * (baseWidth / img.width)
-    );
+    // ===== HEADER =====
+    ctx.fillStyle = "#000";
+    ctx.textAlign = "center";
+    ctx.font = "bold 28px monospace";
+    ctx.fillText("Congratulations to Jarawee!!", canvas.width / 2, y);
+
+    y += 40;
+
+    ctx.font = "16px monospace";
+    ctx.fillText("Order No: " + orderNo, canvas.width / 2, y);
+
+    y += 25;
+
+    ctx.font = "18px monospace";
+    ctx.fillText("Receipt / ใบเสร็จรับเงิน", canvas.width / 2, y);
+
+    y += 30;
+
+    ctx.font = "14px monospace";
+    ctx.fillText(new Date().toLocaleString(), canvas.width / 2, y);
+
+    y += 30;
+
+    // ===== LINE =====
+    ctx.textAlign = "left";
+    ctx.fillText("----------------------------------------", padding, y);
+
+    y += 30;
+
+    // ===== ITEM LIST =====
+    ctx.font = "18px monospace";
+    ctx.fillText("1 x แจงรักทุกคน อิอิ <3", padding, y);
+
+    y += 40;
+
+    // ===== IMAGE =====
+    const imgWidth = canvas.width - padding * 2;
+    const imgHeight = img.height * (imgWidth / img.width);
+
+    ctx.strokeStyle = "#000";
+    ctx.lineWidth = 2;
+    ctx.strokeRect(padding, y, imgWidth, imgHeight);
+
+    ctx.drawImage(img, padding, y, imgWidth, imgHeight);
+
+    y += imgHeight + 30;
+
+    // ===== BARCODE =====
+    const barcodeWidth = canvas.width - padding * 2;
+    const barcodeHeight = 80;
+
+    let x = padding;
+    for (let i = 0; i < 60; i++) {
+        const barHeight = Math.random() > 0.5 ? barcodeHeight : barcodeHeight / 2;
+        const barWidth = 2;
+
+        ctx.fillRect(x, y, barWidth, barHeight);
+        x += barWidth + 2;
+    }
+
+    y += barcodeHeight + 40;
+
+    // ===== FOOTER =====
+    ctx.textAlign = "center";
+    ctx.font = "16px monospace";
+    ctx.fillText("THANK YOU", canvas.width / 2, y);
+
+    y += 25;
+
+    ctx.font = "14px monospace";
+    ctx.fillText("Please come again", canvas.width / 2, y);
 }
-
         // =========================
         // 📰 NEWSPAPER (แนวนอน)
         // =========================
