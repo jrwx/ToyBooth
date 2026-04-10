@@ -246,11 +246,12 @@
             renderFinal();
         }        
 
-        function buildNewspaper(pic) {
+                function buildNewspaper(pic) {
             canvas.width = 1000; 
             canvas.height = 1400;
-            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillStyle = "#e3dccb"; // สีพื้นหลังกระดาษ
             ctx.fillRect(0, 0, canvas.width, canvas.height);
+            
             const photoW = 800;  
             const photoH = 450;  
             const photoX = 145; 
@@ -260,6 +261,10 @@
             tempCanvas.width = photoW;
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
+            
+            // --- [ จุดที่แก้ด่วน: บังคับรูปถ่ายคนให้เป็นขาวดำ ] ---
+            tempCtx.filter = 'grayscale(100%)'; // เปลี่ยนรูปคนเป็นขาวดำ 100%
+            // --------------------------------------------------
             
             const targetRatio = photoW / photoH;
             const zoomFactor = 1.0; 
@@ -274,11 +279,19 @@
             let sx = (pic.width - sw) / 2;
             let sy = (pic.height - sh) / 2;
 
+            // วาดรูปคน (ที่ตอนนี้เป็นขาวดำแล้ว) ลงใน Canvas ชั่วคราว
             tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
+            
+            // วาดรูปคนขาวดำลงบน Canvas หลัก
             ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
-            if (newsFrame.complete) { ctx.drawImage(newsFrame, 0, 0, 1000, 1400); }
+            
+            // วาดกรอบหนังสือพิมพ์ทับ (กรอบและข้อความจะเป็นสีตามไฟล์ harry.PNG ปกติ)
+            if (newsFrame.complete) { 
+                ctx.drawImage(newsFrame, 0, 0, 1000, 1400); 
+            }
             renderFinal();
         }
+
 
         function renderFinal() {
             // ใช้ dataURL แทน Blob เพื่อความแม่นยำในการกดเซฟลงเครื่อง
