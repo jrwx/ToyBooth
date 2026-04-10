@@ -430,21 +430,29 @@ if(currentMode === 'news') {
         // =========================
         // 🧾 RECEIPT (แนวตั้ง 80mm)
         // =========================
-        if (!isNews) {
+     if (!isNews) {
 
-            const targetWidth = 576; // 80mm thermal standard
-            const scale = targetWidth / img.width;
-            const targetHeight = img.height * scale;
+    const baseWidth = 576;
+    const scaleFactor = 1.25;
 
-            canvas.width = targetWidth;
-            canvas.height = targetHeight;
+    canvas.width = baseWidth * scaleFactor;
+    canvas.height = (img.height * baseWidth / img.width) * scaleFactor;
 
-            // background กันขอบขาว
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+    const ctxScale = canvas.getContext('2d');
 
-            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-        }
+    ctxScale.fillStyle = "white";
+    ctxScale.fillRect(0, 0, canvas.width, canvas.height);
+
+    ctxScale.scale(scaleFactor, scaleFactor);
+
+    ctxScale.drawImage(
+        img,
+        0,
+        0,
+        baseWidth,
+        img.height * (baseWidth / img.width)
+    );
+}
 
         // =========================
         // 📰 NEWSPAPER (แนวนอน)
