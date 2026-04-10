@@ -36,13 +36,16 @@
         }
 
         #display-box.news-mode video {
-            width: 80% !important;
-            height: 32.14% !important;
-            left: 14.5% !important;
-            top: 24.28% !important;
-            /* บังคับโทนสีน้ำตาลในหน้า Preview โหมดนสพ. เท่านั้น */
-            filter: sepia(1) saturate(1.8) contrast(1.5) brightness(0.6) grayscale(0.3) !important;
-        }
+    width: 80% !important;
+    height: 32.14% !important;
+    left: 14.5% !important;
+    top: 24.28% !important;
+
+    /* โทนเดียวกับรูป final */
+    filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
+
+    opacity: 0.96;
+}
 
         #preview-overlay {
             position: absolute;
