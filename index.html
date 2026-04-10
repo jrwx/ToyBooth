@@ -226,6 +226,16 @@ mix-blend-mode: screen;
                 for(let s=3; s>0; s--) { timer.innerText = s; await new Promise(r => setTimeout(r, 1000)); }
                 timer.style.display = 'none';
                 if (currentMode === 'news') {
+    document.body.style.transition = 'background 0.08s ease';
+    document.body.style.background = '#ffffff';
+
+    setTimeout(() => {
+        document.body.style.background = '';
+    }, 120);
+} else {
+    flash.style.opacity = '1';
+    setTimeout(() => flash.style.opacity = '0', 100);
+}
     flash.style.background = 'white';
     flash.style.opacity = '1';
 
