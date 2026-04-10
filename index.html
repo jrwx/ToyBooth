@@ -270,22 +270,43 @@ if(currentMode === 'news') {
     let sx = (pic.width - sw) / 2;
     let sy = (pic.height - sh) / 2;
 
-    // ✅ วาดรูปลงก่อน
+    // วาดรูปก่อน
     ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
 
-    // ✅ แปลง pixel เป็นขาวดำจริง
+    // ดึง pixel มาแต่งโทนหนังสือพิมพ์
     const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
     const data = imageData.data;
 
     for (let i = 0; i < data.length; i += 4) {
-        const gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-        data[i] = gray;     // R
-        data[i + 1] = gray; // G
-        data[i + 2] = gray; // B
+        // แปลงเป็น grayscale ก่อน
+        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+
+        // ✅ เพิ่ม grain แบบสุ่ม
+        const grain = (Math.random() - 0.5) * 30;
+        gray += grain;
+
+        // จำกัดค่า
+        gray = Math.max(0, Math.min(255, gray));
+
+        // ✅ ทำโทนน้ำตาลกระดาษเก่า
+        data[i]     = gray * 1.08; // R
+        data[i + 1] = gray * 0.95; // G
+        data[i + 2] = gray * 0.75; // B
     }
 
     ctx.putImageData(imageData, photoX, photoY);
 
+    // ✅ เพิ่ม halftone dots
+    ctx.fillStyle = "rgba(60,40,20,0.08)";
+    for (let y = photoY; y < photoY + photoH; y += 6) {
+        for (let x = photoX; x < photoX + photoW; x += 6) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+
+    // วาดกรอบทับ
     if (newsFrame.complete) {
         ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
     }
