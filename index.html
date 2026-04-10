@@ -129,10 +129,10 @@
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
-        let finalDataUrl = null;
+        let finalBlob = null;
 
-        // แก้ฟิลเตอร์ นสพ เป็นขาวดำธรรมดา (คมชัด)
-        const NEWS_FILTER = 'grayscale(1) contrast(1.5) brightness(0.9)';
+        // ฟิลเตอร์น้ำตาลไหม้ที่เน้นมาก
+        const NEWS_FILTER = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
 
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
@@ -158,6 +158,7 @@
                 display.classList.add('news-mode');
                 previewOverlay.style.display = 'block';
                 filterUI.style.visibility = 'hidden';
+                // บังคับเปลี่ยนฟิลเตอร์ทันที
                 filterStyle = NEWS_FILTER;
                 video.style.filter = filterStyle;
             } else {
@@ -165,6 +166,7 @@
                 display.classList.remove('news-mode');
                 previewOverlay.style.display = 'none';
                 filterUI.style.visibility = 'visible';
+                // กลับไปใช้ฟิลเตอร์ปกติ
                 filterStyle = 'none';
                 video.style.filter = filterStyle;
                 document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
@@ -173,7 +175,8 @@
         }
 
         function setF(mode, btn) {
-            if(currentMode === 'news') return;
+            if(currentMode === 'news') return; // ล็อคไว้ไม่ให้เปลี่ยนในโหมดนสพ.
+            
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if(mode === 'none') filterStyle = 'none';
@@ -198,8 +201,9 @@
                 pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
                 
-                // ถ่ายปุ๊บ บังคับใส่ฟิลเตอร์ปัจจุบันลงไปในรูปภาพทันที
+                // บังคับใช้สีตาม filterStyle ที่แสดงอยู่บนหน้าจอขณะนั้น
                 pCtx.filter = filterStyle;
+                
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
                 pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 
@@ -258,6 +262,7 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
+            // ใช้สีจากแผ่นที่ถ่ายมา (ซึ่งโดนใส่ Filter มาแล้วจากขั้นตอน takePhotos)
             const targetRatio = photoW / photoH;
             const zoomFactor = 1.0; 
             let sw = pic.width * zoomFactor;
@@ -278,23 +283,21 @@
         }
 
         function renderFinal() {
-            // ใช้ dataURL เพื่อความชัวร์ในการดาวน์โหลดลงแกลเลอรี
-            finalDataUrl = canvas.toDataURL('image/png');
-            resultImg.src = finalDataUrl;
-            document.getElementById('camera-ui').style.display = 'none';
-            printPage.style.display = 'block';
-            setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
-            setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
+            canvas.toBlob(blob => {
+                finalBlob = blob; resultImg.src = URL.createObjectURL(blob);
+                document.getElementById('camera-ui').style.display = 'none';
+                printPage.style.display = 'block';
+                setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
+                setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
+            }, 'image/png');
         }
 
         async function saveImage() {
-            if (!finalDataUrl) return;
+            if (!finalBlob) return;
             const link = document.createElement('a');
             link.download = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
-            link.href = finalDataUrl;
-            document.body.appendChild(link);
+            link.href = resultImg.src;
             link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>
