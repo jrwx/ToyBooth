@@ -36,10 +36,12 @@
         }
 
         #display-box.news-mode video {
-            width: 80% !important; /* photoW 800/1000 */
-            height: 32.14% !important; /* photoH 450/1400 */
-            left: 14.5% !important; /* photoX 145/1000 */
-            top: 24.28% !important; /* photoY 340/1400 */
+            width: 80% !important;
+            height: 32.14% !important;
+            left: 14.5% !important;
+            top: 24.28% !important;
+            /* บังคับโทนสีน้ำตาลในหน้า Preview โหมดนสพ. เท่านั้น */
+            filter: sepia(1) saturate(1.8) contrast(1.5) brightness(0.6) grayscale(0.3) !important;
         }
 
         #preview-overlay {
@@ -93,7 +95,7 @@
         </div>
 
         <div class="controls">
-            <div class="filter-group">
+            <div class="filter-group" id="filter-ui">
                 <button class="f-btn active" onclick="setF('none', this)">Normal</button>
                 <button class="f-btn" onclick="setF('kodak', this)">Film</button>
                 <button class="f-btn" onclick="setF('bw', this)">B&W</button>
@@ -125,6 +127,7 @@
         const printCont = document.getElementById('print-cont');
         const finalActions = document.getElementById('final-actions');
         const previewOverlay = document.getElementById('preview-overlay');
+        const filterUI = document.getElementById('filter-ui');
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
@@ -153,10 +156,12 @@
                 booth.classList.add('news-mode');
                 display.classList.add('news-mode');
                 previewOverlay.style.display = 'block';
+                filterUI.style.visibility = 'hidden'; // ซ่อนตัวเลือกฟิลเตอร์ในโหมดนสพ.
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
                 previewOverlay.style.display = 'none';
+                filterUI.style.visibility = 'visible';
             }
         }
 
@@ -166,7 +171,9 @@
             if(mode === 'none') filterStyle = 'none';
             else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
             else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4)';
-            video.style.filter = filterStyle;
+            
+            // ถ้าไม่ใช่โหมดนสพ. ให้เปลี่ยน Filter ตามปกติ
+            if(currentMode !== 'news') video.style.filter = filterStyle;
         }
 
         async function takePhotos() {
@@ -184,7 +191,14 @@
                 pCanvas.width = video.videoWidth;
                 pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
-                pCtx.filter = filterStyle;
+                
+                // บังคับฟิลเตอร์ถ้าเป็นโหมดนสพ.
+                if(currentMode === 'news') {
+                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+                } else {
+                    pCtx.filter = filterStyle;
+                }
+                
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
                 pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 
@@ -237,7 +251,6 @@
             ctx.fillRect(0, 0, canvas.width, canvas.height);
             const photoW = 800;  
             const photoH = 450;  
-
             const photoX = 145; 
             const photoY = 340; 
 
@@ -246,14 +259,13 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // --- [ ปรับโทนสีดำน้ำตาล: Deep Burnt Brown ] ---
-            // ปรับ contrast ขึ้น brightness ลง และบิดสี sepia ให้เข้มและติดไหม้มากขึ้น
-            tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-15deg) contrast(1.8) brightness(0.4)';
+            // --- [ บังคับฟิลเตอร์โทนขาวดำน้ำตาลไหม้เข้มข้น ] ---
+            tempCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
             
             const targetRatio = photoW / photoH;
             
-            // --- [ ปรับซูมออก: เปลี่ยนจาก 0.8 เป็น 0.9 ] ---
-            const zoomFactor = 0.9; 
+            // --- [ ซูมหน้าออก: ปรับเป็น 1.0 เพื่อให้ภาพกว้างที่สุด ] ---
+            const zoomFactor = 1.0; 
             let sw = pic.width * zoomFactor;
             let sh = sw / targetRatio;
             
@@ -291,4 +303,3 @@
     </script>
 </body>
 </html>
-
