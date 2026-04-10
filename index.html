@@ -428,39 +428,37 @@ if(currentMode === 'news') {
         const isNews = currentMode === 'news';
 
         // =========================
-        // 🧾 RECEIPT (แนวตั้ง 80mm)
+        // 🧾 RECEIPT (เพิ่มขนาดเฉพาะตอนพิมพ์)
         // =========================
-     if (!isNews) {
+        if (!isNews) {
 
-    const baseWidth = 576;
-    const scaleFactor = 1.25;
+            const baseWidth = 576;
+            const scaleFactor = 1.6; // 👈 ทำให้ตอนปริ้นต์ตัวใหญ่ขึ้น
 
-    canvas.width = baseWidth * scaleFactor;
-    canvas.height = (img.height * baseWidth / img.width) * scaleFactor;
+            canvas.width = baseWidth * scaleFactor;
+            canvas.height = (img.height * baseWidth / img.width) * scaleFactor;
 
-    const ctxScale = canvas.getContext('2d');
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctxScale.fillStyle = "white";
-    ctxScale.fillRect(0, 0, canvas.width, canvas.height);
+            ctx.scale(scaleFactor, scaleFactor);
 
-    ctxScale.scale(scaleFactor, scaleFactor);
-
-    ctxScale.drawImage(
-        img,
-        0,
-        0,
-        baseWidth,
-        img.height * (baseWidth / img.width)
-    );
-}
+            ctx.drawImage(
+                img,
+                0,
+                0,
+                baseWidth,
+                img.height * (baseWidth / img.width)
+            );
+        }
 
         // =========================
-        // 📰 NEWSPAPER (แนวนอน)
+        // 📰 NEWSPAPER (เหมือนเดิม)
         // =========================
         else {
 
             const targetWidth = 576;
-            const scale = targetWidth / img.height; // เพราะหมุน
+            const scale = targetWidth / img.height;
 
             const newW = img.height * scale;
             const newH = img.width * scale;
@@ -487,29 +485,22 @@ if(currentMode === 'news') {
         }
 
         // =========================
-        // 📤 SEND TO BLUETOOTH PRINTER
+        // 📤 SEND TO SHARE SHEET
         // =========================
         canvas.toBlob(async (blob) => {
 
-            const file = new File([blob], {
-                type: 'image/png'
-            });
-
-            const fileName = isNews
-                ? 'news.png'
-                : 'receipt.png';
+            const fileName = isNews ? 'news.png' : 'receipt.png';
 
             const finalFile = new File([blob], fileName, {
                 type: 'image/png'
             });
 
-            // iOS Share Sheet
             if (navigator.canShare && navigator.canShare({ files: [finalFile] })) {
                 try {
                     await navigator.share({
                         files: [finalFile],
                         title: 'Print',
-                        text: 'ส่งไปเครื่อง Barigan'
+                        text: 'ส่งไปเครื่องปริ้นต์'
                     });
                     return;
                 } catch (e) {}
