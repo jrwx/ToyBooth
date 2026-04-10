@@ -112,9 +112,10 @@
             <img id="result-img">
         </div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
-            <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">ถ่ายใหม่</button>
-        </div>
+    <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
+    <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
+    <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">ถ่ายใหม่</button>
+</div>
     </div>
 
     <canvas id="canvas" style="display:none;"></canvas>
@@ -327,12 +328,61 @@ if(currentMode === 'news') {
         }
 
         async function saveImage() {
-            if (!finalBlob) return;
-            const link = document.createElement('a');
-            link.download = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
-            link.href = resultImg.src;
-            link.click();
+    if (!finalBlob) return;
+
+    const fileName = (currentMode === 'news')
+        ? 'jarawee_newspaper.png'
+        : 'jarawee_receipt.png';
+
+    const file = new File([finalBlob], fileName, { type: 'image/png' });
+
+    // ✅ iPhone / Safari / PWA = เซฟเข้ารูปได้เลย
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+            await navigator.share({
+                files: [file],
+                title: 'Jarawee Booth',
+                text: 'บันทึกรูปภาพ'
+            });
+            return;
+        } catch (e) {
+            console.log("แชร์ถูกยกเลิก");
         }
+    }
+
+    // fallback ถ้า browser ไม่รองรับ
+    const link = document.createElement('a');
+    link.download = fileName;
+    link.href = resultImg.src;
+    link.click();
+}
+        function printImage() {
+    const printWindow = window.open('', '_blank');
+
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Print Photo</title>
+            <style>
+                body {
+                    margin: 0;
+                    text-align: center;
+                    background: white;
+                }
+                img {
+                    width: 100%;
+                    max-width: 800px;
+                }
+            </style>
+        </head>
+        <body>
+            <img src="${resultImg.src}" onload="window.print(); window.close();">
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+}
     </script>
 </body>
 </html>
