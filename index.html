@@ -40,8 +40,6 @@
             height: 32.14% !important;
             left: 14.5% !important;
             top: 24.28% !important;
-            /* บังคับโทนสีน้ำตาลในหน้า Preview โหมดนสพ. เท่านั้น */
-            filter: sepia(1) saturate(1.8) contrast(1.5) brightness(0.6) grayscale(0.3) !important;
         }
 
         #preview-overlay {
@@ -96,7 +94,7 @@
 
         <div class="controls">
             <div class="filter-group" id="filter-ui">
-                <button class="f-btn active" onclick="setF('none', this)">Normal</button>
+                <button class="f-btn active" id="f-none" onclick="setF('none', this)">Normal</button>
                 <button class="f-btn" onclick="setF('kodak', this)">Film</button>
                 <button class="f-btn" onclick="setF('bw', this)">B&W</button>
             </div>
@@ -133,6 +131,9 @@
         let currentMode = 'receipt';
         let finalBlob = null;
 
+        // ฟิลเตอร์น้ำตาลไหม้ที่เน้นมาก
+        const NEWS_FILTER = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
         newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
@@ -156,24 +157,32 @@
                 booth.classList.add('news-mode');
                 display.classList.add('news-mode');
                 previewOverlay.style.display = 'block';
-                filterUI.style.visibility = 'hidden'; // ซ่อนตัวเลือกฟิลเตอร์ในโหมดนสพ.
+                filterUI.style.visibility = 'hidden';
+                // บังคับเปลี่ยนฟิลเตอร์ทันที
+                filterStyle = NEWS_FILTER;
+                video.style.filter = filterStyle;
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
                 previewOverlay.style.display = 'none';
                 filterUI.style.visibility = 'visible';
+                // กลับไปใช้ฟิลเตอร์ปกติ
+                filterStyle = 'none';
+                video.style.filter = filterStyle;
+                document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('f-none').classList.add('active');
             }
         }
 
         function setF(mode, btn) {
+            if(currentMode === 'news') return; // ล็อคไว้ไม่ให้เปลี่ยนในโหมดนสพ.
+            
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if(mode === 'none') filterStyle = 'none';
             else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
             else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4)';
-            
-            // ถ้าไม่ใช่โหมดนสพ. ให้เปลี่ยน Filter ตามปกติ
-            if(currentMode !== 'news') video.style.filter = filterStyle;
+            video.style.filter = filterStyle;
         }
 
         async function takePhotos() {
@@ -192,12 +201,8 @@
                 pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
                 
-                // บังคับฟิลเตอร์ถ้าเป็นโหมดนสพ.
-                if(currentMode === 'news') {
-                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-                } else {
-                    pCtx.filter = filterStyle;
-                }
+                // บังคับใช้สีตาม filterStyle ที่แสดงอยู่บนหน้าจอขณะนั้น
+                pCtx.filter = filterStyle;
                 
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
                 pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
@@ -216,7 +221,6 @@
             ctx.clearRect(0,0,600,1520);
             ctx.fillStyle = "#fdfaf5"; 
             ctx.fillRect(0, 0, 600, 1520);
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
             ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
@@ -234,7 +238,6 @@
             ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
             for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
             ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
-            ctx.globalAlpha = 0.5; ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
             ctx.globalAlpha = 1.0;
             ctx.globalCompositeOperation = 'destination-out';
             ctx.beginPath(); ctx.moveTo(0, 1520);
@@ -259,12 +262,8 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // --- [ บังคับฟิลเตอร์โทนขาวดำน้ำตาลไหม้เข้มข้น ] ---
-            tempCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-            
+            // ใช้สีจากแผ่นที่ถ่ายมา (ซึ่งโดนใส่ Filter มาแล้วจากขั้นตอน takePhotos)
             const targetRatio = photoW / photoH;
-            
-            // --- [ ซูมหน้าออก: ปรับเป็น 1.0 เพื่อให้ภาพกว้างที่สุด ] ---
             const zoomFactor = 1.0; 
             let sw = pic.width * zoomFactor;
             let sh = sw / targetRatio;
