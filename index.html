@@ -214,84 +214,45 @@
             else buildReceipt(pics);
         }
 
-        function buildReceipt(pics) {
-            canvas.width = 600;
-            canvas.height = 1520;
-            ctx.clearRect(0,0,600,1520);
-            ctx.fillStyle = "#fdfaf5"; 
-            ctx.fillRect(0, 0, 600, 1520);
+                function buildReceipt(pics) {
+            canvas.width = 600; canvas.height = 1520;
+            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
             ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
             ctx.textAlign = "left"; ctx.font = "32px 'VT323'";
             ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            
+            // วาดรูปถ่าย
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
-                const s = Math.min(p.width, p.height);
-                const sx = (p.width - s) / 2;
-                const sy = (p.height - s) / 2;
-                ctx.drawImage(p, sx, sy, s, s, 90, y, 420, 420);
+                ctx.drawImage(p, (p.width-p.height)/2, 0, p.height, p.height, 90, y, 420, 420);
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
-            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
-            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
-            ctx.globalAlpha = 1.0;
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.moveTo(0, 1520);
-            let step = 60;
-            for(let x=0; x<=600; x+=step) { ctx.lineTo(x + step/2, 1490 + (Math.random()*20)); ctx.lineTo(x + step, 1520); }
-            ctx.fill(); ctx.globalCompositeOperation = 'source-over';
-            renderFinal();
-        }        
 
-                function buildNewspaper(pic) {
-            canvas.width = 1000; 
-            canvas.height = 1400;
-            ctx.fillStyle = "#e3dccb"; // สีพื้นหลังกระดาษ
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            
-            const photoW = 800;  
-            const photoH = 450;  
-            const photoX = 145; 
-            const photoY = 340; 
+            // รายการ
+            ctx.textAlign = "left";
+            ctx.font = "bold 25px Sarabun"; 
+            ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
 
-            const tempCanvas = document.createElement('canvas');
-            tempCanvas.width = photoW;
-            tempCanvas.height = photoH;
-            const tempCtx = tempCanvas.getContext('2d');
-            
-            // --- [ จุดที่แก้ด่วน: บังคับรูปถ่ายคนให้เป็นขาวดำ ] ---
-            tempCtx.filter = 'grayscale(100%)'; // เปลี่ยนรูปคนเป็นขาวดำ 100%
-            // --------------------------------------------------
-            
-            const targetRatio = photoW / photoH;
-            const zoomFactor = 1.0; 
-            let sw = pic.width * zoomFactor;
-            let sh = sw / targetRatio;
-            
-            if (sh > pic.height * zoomFactor) {
-                sh = pic.height * zoomFactor;
-                sw = sh * targetRatio;
+            // 1. บาร์โค้ด
+            ctx.fillStyle = "#111";
+            for(let k=0; k<60; k++) { 
+                ctx.fillRect(90+(k*7), 1230, [2,4,5][Math.floor(Math.random()*3)], 70); 
             }
 
-            let sx = (pic.width - sw) / 2;
-            let sy = (pic.height - sh) / 2;
+            // 2. วันที่
+            ctx.textAlign = "center";
+            ctx.font = "26px 'VT323'"; 
+            ctx.fillText(new Date().toLocaleString(), 300, 1340);
 
-            // วาดรูปคน (ที่ตอนนี้เป็นขาวดำแล้ว) ลงใน Canvas ชั่วคราว
-            tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
+            // 3. ข้อความขอบคุณ (ล่างสุด ใต้วันที่ ตามที่พี่สั่งครับ)
+            ctx.font = "italic 30px 'Sarabun'";
+            ctx.fillText("Thank you for being together", 300, 1390);
             
-            // วาดรูปคนขาวดำลงบน Canvas หลัก
-            ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
-            
-            // วาดกรอบหนังสือพิมพ์ทับ (กรอบและข้อความจะเป็นสีตามไฟล์ harry.PNG ปกติ)
-            if (newsFrame.complete) { 
-                ctx.drawImage(newsFrame, 0, 0, 1000, 1400); 
-            }
             renderFinal();
         }
-
 
         function renderFinal() {
             // ใช้ dataURL แทน Blob เพื่อความแม่นยำในการกดเซฟลงเครื่อง
