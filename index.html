@@ -35,11 +35,12 @@
             background: #e3dccb; 
         }
 
+        /* --- [ ปรับจอ Preview (Video) ให้ตรงกับตำแหน่งรูปถ่ายจริง ] --- */
         #display-box.news-mode video {
-            width: 80% !important;
-            height: 32.1% !important;
-            left: 10% !important;
-            top: 22.1% !important;
+            width: 80% !important; /* photoW 800/1000 */
+            height: 32.14% !important; /* photoH 450/1400 */
+            left: 14.5% !important; /* photoX 145/1000 */
+            top: 24.28% !important; /* photoY 340/1400 */
         }
 
         #preview-overlay {
@@ -238,9 +239,9 @@
             const photoW = 800;  
             const photoH = 450;  
 
-            // --- [ ขยับขวา + ขยับลง ] ---
-            const photoX = 145; // ขยับขวาจาก 130 เป็น 145
-            const photoY = 325; // ขยับลงจาก 310 เป็น 325 (ลงมา 15px เท่ากับที่ขยับขวาเพิ่ม)
+            // --- [ ขยับขวา 145 + ขยับลงมาที่ 340 ] ---
+            const photoX = 145; 
+            const photoY = 340; 
 
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = photoW;
