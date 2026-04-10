@@ -193,11 +193,11 @@
                 const pCtx = pCanvas.getContext('2d');
                 
                 // บังคับฟิลเตอร์ถ้าเป็นโหมดนสพ.
-                if(currentMode === 'news') {
-                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-                } else {
-                    pCtx.filter = filterStyle;
-                }
+if(currentMode === 'news') {
+    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+} else {
+    pCtx.filter = filterStyle;
+}
                 
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
                 pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
@@ -244,7 +244,7 @@
             renderFinal();
         }        
 
-        function buildNewspaper(pic) {
+     function buildNewspaper(pic) {
     canvas.width = 1000; 
     canvas.height = 1400;
 
@@ -262,9 +262,6 @@
     tempCanvas.height = photoH;
     const tempCtx = tempCanvas.getContext('2d');
 
-    // ✅ เปลี่ยนเป็นขาวดำแท้
-    tempCtx.filter = 'grayscale(1) contrast(1.4) brightness(1.0)';
-
     const targetRatio = photoW / photoH;
     const zoomFactor = 1.0;
 
@@ -281,8 +278,10 @@
 
     tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
 
-    // วาดภาพขาวดำลงหน้าหนังสือพิมพ์
+    // ✅ บังคับขาวดำตอน render final
+    ctx.filter = 'grayscale(1) contrast(1.4)';
     ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
+    ctx.filter = 'none';
 
     // วาดกรอบหนังสือพิมพ์ทับ
     if (newsFrame.complete) {
