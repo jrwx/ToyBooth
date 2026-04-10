@@ -238,10 +238,9 @@
             const photoW = 800;  
             const photoH = 450;  
 
-            // --- [ ขยับรูปไปทางขวา: เปลี่ยนจากกึ่งกลาง เป็นระบุพิกัด X เอง ] ---
-            // photoX เดิมคือ 100 ((1000-800)/2), เปลี่ยนเป็น 130 เพื่อขยับขวา 30px
-            const photoX = 130;  
-            const photoY = 310;  
+            // --- [ ขยับขวา + ขยับลง ] ---
+            const photoX = 145; // ขยับขวาจาก 130 เป็น 145
+            const photoY = 325; // ขยับลงจาก 310 เป็น 325 (ลงมา 15px เท่ากับที่ขยับขวาเพิ่ม)
 
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = photoW;
@@ -250,7 +249,6 @@
             tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
             
             const targetRatio = photoW / photoH;
-            // ซูมเพิ่มขึ้น 20% (คูณ 0.8)
             const zoomFactor = 0.8; 
             let sw = pic.width * zoomFactor;
             let sh = sw / targetRatio;
