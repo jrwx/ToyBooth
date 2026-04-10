@@ -71,8 +71,28 @@
         #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
         .print-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 90%; max-width: 300px; }
         .flow-animation { animation: slideDownPaper 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } }
+        @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } } 
+     .print-container.news-roll {
+    transform-origin: top center;
+    animation: newspaperUnroll 2.8s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
 
+@keyframes newspaperUnroll {
+    0% {
+        transform: translate(-50%, -100%) scaleY(0.05);
+        opacity: 0;
+    }
+    40% {
+        transform: translate(-50%, -10%) scaleY(0.08);
+        opacity: 1;
+    }
+    70% {
+        transform: translate(-50%, 15px) scaleY(0.6);
+    }
+    100% {
+        transform: translate(-50%, 40px) scaleY(1);
+    }
+}
         #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
         #final-actions { position: absolute; bottom: 50px; left: 0; width: 100%; display: none; text-align: center; }
         .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
@@ -322,7 +342,13 @@ if(currentMode === 'news') {
                 finalBlob = blob; resultImg.src = URL.createObjectURL(blob);
                 document.getElementById('camera-ui').style.display = 'none';
                 printPage.style.display = 'block';
-                setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
+                setTimeout(() => {
+    if (currentMode === 'news') {
+        printCont.classList.add('news-roll');
+    } else {
+        printCont.classList.add('flow-animation');
+    }
+}, 500);
                 setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
             }, 'image/png');
         }
