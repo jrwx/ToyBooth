@@ -307,19 +307,19 @@ else buildReceipt(pics);
             ctx.fill(); ctx.globalCompositeOperation = 'source-over';
             renderFinal();
         }        
-        function buildReceipt2(pic) {
+      function buildReceipt2(pic) {
     canvas.width = 600;
-    canvas.height = 1500;
-    ctx.clearRect(0,0,600,1500);
+    canvas.height = 1650;
+    ctx.clearRect(0,0,600,1650);
 
     // background
     ctx.fillStyle = "#fdfaf5";
-    ctx.fillRect(0, 0, 600, 1500);
+    ctx.fillRect(0, 0, 600, 1650);
 
     // noise
     for(let i=0;i<4000;i++){
         ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.05})`;
-        ctx.fillRect(Math.random()*600, Math.random()*1500,1,1);
+        ctx.fillRect(Math.random()*600, Math.random()*1650,1,1);
     }
 
     // ================= HEADER =================
@@ -335,13 +335,14 @@ else buildReceipt(pics);
     const sy = (pic.height - s)/2;
     ctx.drawImage(pic, sx, sy, s, s, 100, 180, 400, 400);
 
-    // ================= RECEIPT ID (3 digits) =================
+    // ================= RECEIPT ID =================
     const id = Math.floor(100 + Math.random()*900);
+
     ctx.textAlign = "left";
     ctx.font = "22px monospace";
-    ctx.fillText("RECEIPT " + id, 60, 650);
+    ctx.fillText("RECEIPT " + id, 60, 640);
 
-    // ================= STARS (REAL ★) =================
+    // ================= STARS (ใหญ่ขึ้น + 1-5) =================
     const star = Math.floor(1 + Math.random()*5);
     let starStr = "";
     for(let i=0;i<5;i++){
@@ -349,34 +350,37 @@ else buildReceipt(pics);
     }
 
     ctx.textAlign = "right";
-    ctx.font = "26px monospace";
-    ctx.fillText(starStr, 540, 650);
+    ctx.font = "42px monospace"; // ⭐ ใหญ่ขึ้น
+    ctx.fillText(starStr, 540, 640);
 
-    // ================= BY LINE =================
-    ctx.textAlign = "center";
+    // ================= BY LINE (ซ้าย ชิดใต้ receipt) =================
+    ctx.textAlign = "left";
     ctx.font = "bold 20px monospace";
-    ctx.fillText("BY NONGJANG", 300, 750);
-    ctx.fillText("PHOTO BOOTH", 300, 780);
+    ctx.fillText("BY NONGJANG", 60, 720);
 
-    // ================= BARCODE =================
-    const y = 840;
+    ctx.font = "20px monospace";
+    ctx.fillText("PHOTO BOOTH", 60, 750);
+
+    // ================= BARCODE (ไม่มีตัวเลข) =================
+    const y = 820;
     ctx.fillStyle = "#111";
+
     for(let i=0;i<120;i++){
         if(Math.random() > 0.3){
-            ctx.fillRect(80 + i*3.2, y, 2, 70 + Math.random()*40);
+            ctx.fillRect(60 + i*3.2, y, 2, 80 + Math.random()*40);
         }
     }
 
-    ctx.font = "16px monospace";
-    ctx.fillText(id + "-" + Math.floor(Math.random()*99999), 300, 940);
-
-    // ================= FOOTER =================
+    // ================= THANK YOU (อยู่ใต้ barcode + ไม่ยาวเกิน) =================
+    ctx.textAlign = "center";
     ctx.font = "22px monospace";
-    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1120);
+    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 980);
+
+    // เส้นจบสั้น
+    ctx.fillRect(200, 1010, 200, 2);
 
     renderFinal();
 }
-
     function buildNewspaper(pic) {
     canvas.width = 1000; 
     canvas.height = 1400;
