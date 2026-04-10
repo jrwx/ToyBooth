@@ -107,7 +107,7 @@
             <img id="result-img">
         </div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
+            <button class="btn-save" onclick="saveImage()">เซฟลงแกลเลอรี</button>
             <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">ถ่ายใหม่</button>
         </div>
     </div>
@@ -129,10 +129,10 @@
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
-        let finalBlob = null;
+        let finalDataUrl = null;
 
-        // ฟิลเตอร์น้ำตาลไหม้ที่เน้นมาก
-        const NEWS_FILTER = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+        // เปลี่ยนเป็นขาวดำแบบคลาสสิก ( grayscale + contrast )
+        const NEWS_FILTER = 'grayscale(1) contrast(1.5) brightness(0.9)';
 
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
@@ -158,7 +158,7 @@
                 display.classList.add('news-mode');
                 previewOverlay.style.display = 'block';
                 filterUI.style.visibility = 'hidden';
-                // บังคับเปลี่ยนฟิลเตอร์ทันที
+                // บังคับฟิลเตอร์ขาวดำที่ตัววิดีโอทันที
                 filterStyle = NEWS_FILTER;
                 video.style.filter = filterStyle;
             } else {
@@ -166,7 +166,7 @@
                 display.classList.remove('news-mode');
                 previewOverlay.style.display = 'none';
                 filterUI.style.visibility = 'visible';
-                // กลับไปใช้ฟิลเตอร์ปกติ
+                // กลับไปโหมดปกติ
                 filterStyle = 'none';
                 video.style.filter = filterStyle;
                 document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
@@ -175,8 +175,7 @@
         }
 
         function setF(mode, btn) {
-            if(currentMode === 'news') return; // ล็อคไว้ไม่ให้เปลี่ยนในโหมดนสพ.
-            
+            if(currentMode === 'news') return;
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if(mode === 'none') filterStyle = 'none';
@@ -201,7 +200,7 @@
                 pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
                 
-                // บังคับใช้สีตาม filterStyle ที่แสดงอยู่บนหน้าจอขณะนั้น
+                // แก้จุดนี้: บังคับให้ Canvas วาดรูปโดยใช้ฟิลเตอร์ที่เลือกอยู่
                 pCtx.filter = filterStyle;
                 
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
@@ -262,7 +261,6 @@
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
             
-            // ใช้สีจากแผ่นที่ถ่ายมา (ซึ่งโดนใส่ Filter มาแล้วจากขั้นตอน takePhotos)
             const targetRatio = photoW / photoH;
             const zoomFactor = 1.0; 
             let sw = pic.width * zoomFactor;
@@ -283,21 +281,23 @@
         }
 
         function renderFinal() {
-            canvas.toBlob(blob => {
-                finalBlob = blob; resultImg.src = URL.createObjectURL(blob);
-                document.getElementById('camera-ui').style.display = 'none';
-                printPage.style.display = 'block';
-                setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
-                setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
-            }, 'image/png');
+            // ใช้ dataURL แทน Blob เพื่อความแม่นยำในการกดเซฟลงเครื่อง
+            finalDataUrl = canvas.toDataURL('image/png');
+            resultImg.src = finalDataUrl;
+            document.getElementById('camera-ui').style.display = 'none';
+            printPage.style.display = 'block';
+            setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
+            setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
         }
 
         async function saveImage() {
-            if (!finalBlob) return;
+            if (!finalDataUrl) return;
             const link = document.createElement('a');
             link.download = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
-            link.href = resultImg.src;
+            link.href = finalDataUrl;
+            document.body.appendChild(link);
             link.click();
+            document.body.removeChild(link);
         }
     </script>
 </body>
