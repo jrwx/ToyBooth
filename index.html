@@ -414,39 +414,78 @@ if(currentMode === 'news') {
     link.href = resultImg.src;
     link.click();
 }
-        function printImage() {
+     function printImage() {
     const printWindow = window.open('', '_blank');
+    const isReceipt = currentMode === 'receipt';
 
-    const paperWidth = currentMode === 'receipt' ? '58mm' : '100mm';
-    const paperHeight = currentMode === 'receipt' ? '220mm' : '160mm';
+    // ✅ คำนวณความสูง receipt ตามสัดส่วนภาพจริง
+    let receiptHeight = '220mm';
+    if (isReceipt) {
+        const ratio = resultImg.naturalHeight / resultImg.naturalWidth;
+        const heightMm = 80 * ratio;
+        receiptHeight = `${heightMm}mm`;
+    }
+
+    const paperWidth = '80mm';
+    const paperHeight = isReceipt ? receiptHeight : '50mm';
 
     printWindow.document.write(`
         <html>
         <head>
-            <title>Print Strip</title>
+            <title>Print</title>
             <style>
                 @page {
                     size: ${paperWidth} ${paperHeight};
                     margin: 0;
                 }
 
-                body {
+                html, body {
                     margin: 0;
                     padding: 0;
                     width: ${paperWidth};
+                    height: ${paperHeight};
+                    overflow: hidden;
                     background: white;
-                    text-align: center;
+                }
+
+                .wrap {
+                    width: 100%;
+                    height: 100%;
+                    position: relative;
+                    overflow: hidden;
                 }
 
                 img {
-                    width: 100%;
-                    height: auto;
+                    position: absolute;
+                    top: 50%;
+                    left: 50%;
                     display: block;
+                }
+
+                /* 🧾 ใบเสร็จเต็มกว้าง 80 และยาวตามภาพ */
+                .receipt {
+                    width: 80mm;
+                    height: auto;
+                    transform: translate(-50%, -50%);
+                }
+
+                /* 📰 หนังสือพิมพ์หมุนเต็มแผ่น */
+                .news {
+                    width: 50mm;
+                    height: 80mm;
+                    transform: translate(-50%, -50%) rotate(90deg);
+                    object-fit: cover;
                 }
             </style>
         </head>
         <body>
-            <img src="${resultImg.src}" onload="window.print(); window.close();">
+            <div class="wrap">
+                <img
+                    src="${resultImg.src}"
+                    class="${isReceipt ? 'receipt' : 'news'}"
+                    onload="window.print(); window.close();"
+                >
+            </div>
         </body>
         </html>
     `);
