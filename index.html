@@ -414,83 +414,102 @@ if(currentMode === 'news') {
     link.href = resultImg.src;
     link.click();
 }
-     function printImage() {
-    const printWindow = window.open('', '_blank');
-    const isReceipt = currentMode === 'receipt';
+     async function printImage() {
+    if (!resultImg) return;
 
-    // ✅ คำนวณความสูง receipt ตามสัดส่วนภาพจริง
-    let receiptHeight = '220mm';
-    if (isReceipt) {
-        const ratio = resultImg.naturalHeight / resultImg.naturalWidth;
-        const heightMm = 80 * ratio;
-        receiptHeight = `${heightMm}mm`;
-    }
+    const img = new Image();
+    img.src = resultImg.src;
 
-    const paperWidth = '80mm';
-    const paperHeight = isReceipt ? receiptHeight : '50mm';
+    img.onload = async () => {
 
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Print</title>
-            <style>
-                @page {
-                    size: ${paperWidth} ${paperHeight};
-                    margin: 0;
-                }
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
 
-                html, body {
-                    margin: 0;
-                    padding: 0;
-                    width: ${paperWidth};
-                    height: ${paperHeight};
-                    overflow: hidden;
-                    background: white;
-                }
+        const isNews = currentMode === 'news';
 
-                .wrap {
-                    width: 100%;
-                    height: 100%;
-                    position: relative;
-                    overflow: hidden;
-                }
+        // =========================
+        // 🧾 RECEIPT (แนวตั้ง 80mm)
+        // =========================
+        if (!isNews) {
 
-                img {
-                    position: absolute;
-                    top: 50%;
-                    left: 50%;
-                    display: block;
-                }
+            const targetWidth = 576; // 80mm thermal standard
+            const scale = targetWidth / img.width;
+            const targetHeight = img.height * scale;
 
-                /* 🧾 ใบเสร็จเต็มกว้าง 80 และยาวตามภาพ */
-                .receipt {
-                    width: 80mm;
-                    height: auto;
-                    transform: translate(-50%, -50%);
-                }
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
 
-                /* 📰 หนังสือพิมพ์หมุนเต็มแผ่น */
-                .news {
-                    width: 50mm;
-                    height: 80mm;
-                    transform: translate(-50%, -50%) rotate(90deg);
-                    object-fit: cover;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="wrap">
-                <img
-                    src="${resultImg.src}"
-                    class="${isReceipt ? 'receipt' : 'news'}"
-                    onload="window.print(); window.close();"
-                >
-            </div>
-        </body>
-        </html>
-    `);
+            // background กันขอบขาว
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    printWindow.document.close();
+            ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        }
+
+        // =========================
+        // 📰 NEWSPAPER (แนวนอน)
+        // =========================
+        else {
+
+            const targetWidth = 576;
+            const scale = targetWidth / img.height; // เพราะหมุน
+
+            const newW = img.height * scale;
+            const newH = img.width * scale;
+
+            canvas.width = targetWidth;
+            canvas.height = newH;
+
+            ctx.fillStyle = "white";
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+            ctx.rotate(90 * Math.PI / 180);
+
+            ctx.drawImage(
+                img,
+                -newH / 2,
+                -canvas.width / 2,
+                newH,
+                canvas.width
+            );
+
+            ctx.restore();
+        }
+
+        // =========================
+        // 📤 SEND TO BLUETOOTH PRINTER
+        // =========================
+        canvas.toBlob(async (blob) => {
+
+            const file = new File([blob], {
+                type: 'image/png'
+            });
+
+            const fileName = isNews
+                ? 'news.png'
+                : 'receipt.png';
+
+            const finalFile = new File([blob], fileName, {
+                type: 'image/png'
+            });
+
+            // iOS Share Sheet
+            if (navigator.canShare && navigator.canShare({ files: [finalFile] })) {
+                try {
+                    await navigator.share({
+                        files: [finalFile],
+                        title: 'Print',
+                        text: 'ส่งไปเครื่อง Barigan'
+                    });
+                    return;
+                } catch (e) {}
+            }
+
+            alert("อุปกรณ์ไม่รองรับ Share Sheet");
+        }, 'image/png');
+    };
 }
     </script>
 </body>
