@@ -40,6 +40,8 @@
             height: 32.14% !important;
             left: 14.5% !important;
             top: 24.28% !important;
+            /* บังคับโทนสีน้ำตาลในหน้า Preview โหมดนสพ. เท่านั้น */
+            filter: sepia(1) saturate(1.8) contrast(1.5) brightness(0.6) grayscale(0.3) !important;
         }
 
         #preview-overlay {
@@ -94,7 +96,7 @@
 
         <div class="controls">
             <div class="filter-group" id="filter-ui">
-                <button class="f-btn active" id="f-none" onclick="setF('none', this)">Normal</button>
+                <button class="f-btn active" onclick="setF('none', this)">Normal</button>
                 <button class="f-btn" onclick="setF('kodak', this)">Film</button>
                 <button class="f-btn" onclick="setF('bw', this)">B&W</button>
             </div>
@@ -107,7 +109,7 @@
             <img id="result-img">
         </div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveImage()">เซฟลงแกลเลอรี</button>
+            <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
             <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">ถ่ายใหม่</button>
         </div>
     </div>
@@ -129,10 +131,7 @@
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
-        let finalDataUrl = null;
-
-        // เปลี่ยนเป็นขาวดำแบบคลาสสิก ( grayscale + contrast )
-        const NEWS_FILTER = 'grayscale(1) contrast(1.5) brightness(0.9)';
+        let finalBlob = null;
 
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
@@ -157,31 +156,24 @@
                 booth.classList.add('news-mode');
                 display.classList.add('news-mode');
                 previewOverlay.style.display = 'block';
-                filterUI.style.visibility = 'hidden';
-                // บังคับฟิลเตอร์ขาวดำที่ตัววิดีโอทันที
-                filterStyle = NEWS_FILTER;
-                video.style.filter = filterStyle;
+                filterUI.style.visibility = 'hidden'; // ซ่อนตัวเลือกฟิลเตอร์ในโหมดนสพ.
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
                 previewOverlay.style.display = 'none';
                 filterUI.style.visibility = 'visible';
-                // กลับไปโหมดปกติ
-                filterStyle = 'none';
-                video.style.filter = filterStyle;
-                document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
-                document.getElementById('f-none').classList.add('active');
             }
         }
 
         function setF(mode, btn) {
-            if(currentMode === 'news') return;
             document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
             if(mode === 'none') filterStyle = 'none';
             else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
             else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4)';
-            video.style.filter = filterStyle;
+            
+            // ถ้าไม่ใช่โหมดนสพ. ให้เปลี่ยน Filter ตามปกติ
+            if(currentMode !== 'news') video.style.filter = filterStyle;
         }
 
         async function takePhotos() {
@@ -200,8 +192,12 @@
                 pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
                 
-                // แก้จุดนี้: บังคับให้ Canvas วาดรูปโดยใช้ฟิลเตอร์ที่เลือกอยู่
-                pCtx.filter = filterStyle;
+                // บังคับฟิลเตอร์ถ้าเป็นโหมดนสพ.
+                if(currentMode === 'news') {
+                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+                } else {
+                    pCtx.filter = filterStyle;
+                }
                 
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
                 pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
@@ -214,64 +210,95 @@
             else buildReceipt(pics);
         }
 
-                function buildReceipt(pics) {
-            canvas.width = 600; canvas.height = 1520;
-            ctx.fillStyle = "#fdfaf5"; ctx.fillRect(0, 0, 600, 1520);
+        function buildReceipt(pics) {
+            canvas.width = 600;
+            canvas.height = 1520;
+            ctx.clearRect(0,0,600,1520);
+            ctx.fillStyle = "#fdfaf5"; 
+            ctx.fillRect(0, 0, 600, 1520);
+            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
             ctx.fillStyle = "#111"; ctx.textAlign = "center";
             ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
             ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
             ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
             ctx.textAlign = "left"; ctx.font = "32px 'VT323'";
             ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
-            
-            // วาดรูปถ่าย
             pics.forEach((p, idx) => {
                 const y = 300 + (idx * 440);
-                ctx.drawImage(p, (p.width-p.height)/2, 0, p.height, p.height, 90, y, 420, 420);
+                const s = Math.min(p.width, p.height);
+                const sx = (p.width - s) / 2;
+                const sy = (p.height - s) / 2;
+                ctx.drawImage(p, sx, sy, s, s, 90, y, 420, 420);
                 ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
             });
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
+            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
+            ctx.globalAlpha = 0.5; ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
+            ctx.globalAlpha = 1.0;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath(); ctx.moveTo(0, 1520);
+            let step = 60;
+            for(let x=0; x<=600; x+=step) { ctx.lineTo(x + step/2, 1490 + (Math.random()*20)); ctx.lineTo(x + step, 1520); }
+            ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+            renderFinal();
+        }        
 
-            // รายการ
-            ctx.textAlign = "left";
-            ctx.font = "bold 25px Sarabun"; 
-            ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
+        function buildNewspaper(pic) {
+            canvas.width = 1000; 
+            canvas.height = 1400;
+            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const photoW = 800;  
+            const photoH = 450;  
+            const photoX = 145; 
+            const photoY = 340; 
 
-            // 1. บาร์โค้ด
-            ctx.fillStyle = "#111";
-            for(let k=0; k<60; k++) { 
-                ctx.fillRect(90+(k*7), 1230, [2,4,5][Math.floor(Math.random()*3)], 70); 
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = photoW;
+            tempCanvas.height = photoH;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            // --- [ บังคับฟิลเตอร์โทนขาวดำน้ำตาลไหม้เข้มข้น ] ---
+            tempCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+            
+            const targetRatio = photoW / photoH;
+            
+            // --- [ ซูมหน้าออก: ปรับเป็น 1.0 เพื่อให้ภาพกว้างที่สุด ] ---
+            const zoomFactor = 1.0; 
+            let sw = pic.width * zoomFactor;
+            let sh = sw / targetRatio;
+            
+            if (sh > pic.height * zoomFactor) {
+                sh = pic.height * zoomFactor;
+                sw = sh * targetRatio;
             }
 
-            // 2. วันที่
-            ctx.textAlign = "center";
-            ctx.font = "26px 'VT323'"; 
-            ctx.fillText(new Date().toLocaleString(), 300, 1340);
+            let sx = (pic.width - sw) / 2;
+            let sy = (pic.height - sh) / 2;
 
-            // 3. ข้อความขอบคุณ (ล่างสุด ใต้วันที่ ตามที่พี่สั่งครับ)
-            ctx.font = "italic 30px 'Sarabun'";
-            ctx.fillText("Thank you for being together", 300, 1390);
-            
+            tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
+            ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
+            if (newsFrame.complete) { ctx.drawImage(newsFrame, 0, 0, 1000, 1400); }
             renderFinal();
         }
 
         function renderFinal() {
-            // ใช้ dataURL แทน Blob เพื่อความแม่นยำในการกดเซฟลงเครื่อง
-            finalDataUrl = canvas.toDataURL('image/png');
-            resultImg.src = finalDataUrl;
-            document.getElementById('camera-ui').style.display = 'none';
-            printPage.style.display = 'block';
-            setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
-            setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
+            canvas.toBlob(blob => {
+                finalBlob = blob; resultImg.src = URL.createObjectURL(blob);
+                document.getElementById('camera-ui').style.display = 'none';
+                printPage.style.display = 'block';
+                setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
+                setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
+            }, 'image/png');
         }
 
         async function saveImage() {
-            if (!finalDataUrl) return;
+            if (!finalBlob) return;
             const link = document.createElement('a');
             link.download = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
-            link.href = finalDataUrl;
-            document.body.appendChild(link);
+            link.href = resultImg.src;
             link.click();
-            document.body.removeChild(link);
         }
     </script>
 </body>
