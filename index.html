@@ -35,7 +35,6 @@
             background: #e3dccb; 
         }
 
-        /* --- [ ปรับจอ Preview (Video) ให้ตรงกับตำแหน่งรูปถ่ายจริง ] --- */
         #display-box.news-mode video {
             width: 80% !important; /* photoW 800/1000 */
             height: 32.14% !important; /* photoH 450/1400 */
@@ -239,7 +238,6 @@
             const photoW = 800;  
             const photoH = 450;  
 
-            // --- [ ขยับขวา 145 + ขยับลงมาที่ 340 ] ---
             const photoX = 145; 
             const photoY = 340; 
 
@@ -247,10 +245,15 @@
             tempCanvas.width = photoW;
             tempCanvas.height = photoH;
             const tempCtx = tempCanvas.getContext('2d');
-            tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-20deg) contrast(1.7) brightness(0.45)';
+            
+            // --- [ ปรับโทนสีดำน้ำตาล: Deep Burnt Brown ] ---
+            // ปรับ contrast ขึ้น brightness ลง และบิดสี sepia ให้เข้มและติดไหม้มากขึ้น
+            tempCtx.filter = 'sepia(1) saturate(2.3) hue-rotate(-15deg) contrast(1.8) brightness(0.4)';
             
             const targetRatio = photoW / photoH;
-            const zoomFactor = 0.8; 
+            
+            // --- [ ปรับซูมออก: เปลี่ยนจาก 0.8 เป็น 0.9 ] ---
+            const zoomFactor = 0.9; 
             let sw = pic.width * zoomFactor;
             let sh = sw / targetRatio;
             
@@ -288,3 +291,4 @@
     </script>
 </body>
 </html>
+
