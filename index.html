@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Video Edition</title>
+    <title>Jarawee Pro Booth - Magical Edition</title>
     <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
     <style>
-        :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --video-accent: #00ff88; --text-dim: #a0a0a0; }
+        :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-dim: #a0a0a0; }
         body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #fff; overflow-x: hidden; }
 
         #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
@@ -17,42 +17,69 @@
         .m-btn.active { background: var(--accent); box-shadow: 0 0 15px rgba(255, 62, 62, 0.4); }
 
         #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
-        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; }
+        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; transition: all 0.3s ease; }
         
         #display-box video {
-            position: absolute; top: 0; left: 0; width: 100% !important; height: 100% !important; object-fit: cover !important; transform: scaleX(-1); z-index: 1;
+            position: absolute;
+            top: 0; left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transform: scaleX(-1);
+            z-index: 1;
         }
 
         #booth-machine.news-mode { max-width: 400px; }
-        #display-box.news-mode { aspect-ratio: 1000/1400 !important; background: #e3dccb; }
-        #display-box.news-mode video { width: 80% !important; height: 32.14% !important; left: 14.5% !important; top: 24.28% !important; }
+        #display-box.news-mode { 
+            aspect-ratio: 1000/1400 !important; 
+            background: #e3dccb; 
+        }
 
-        #preview-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; display: none; z-index: 5; object-fit: fill; }
+        #display-box.news-mode video {
+            width: 80% !important;
+            height: 32.14% !important;
+            left: 14.5% !important;
+            top: 24.28% !important;
+        }
+
+        #preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none; 
+            z-index: 5;
+            object-fit: fill;
+        }
+
         #flash { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: white; opacity: 0; z-index: 10; pointer-events: none; }
         .timer { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-family: 'Press Start 2P'; text-shadow: 4px 4px 0px #000; }
-        #rec-indicator { position: absolute; top: 20px; right: 20px; color: red; font-family: 'VT323'; z-index: 12; display: none; animation: blink 1s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
 
-        .controls { margin-top: 25px; width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 15px; }
-        .action-btns { display: flex; gap: 10px; }
-        .btn-snap { background: var(--accent); color: #fff; padding: 18px; font-size: 16px; font-weight: bold; border: none; flex: 1; border-radius: 100px; cursor: pointer; text-transform: uppercase; }
-        .btn-video { background: #333; color: #fff; padding: 18px; font-size: 16px; font-weight: bold; border: 2px solid var(--video-accent); flex: 1; border-radius: 100px; cursor: pointer; text-transform: uppercase; }
-        .btn-video.recording { background: var(--video-accent); color: #000; }
+        .controls { margin-top: 25px; width: 100%; max-width: 360px; }
+        .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
+        .f-btn { background: transparent; color: var(--text-dim); border: 2px solid #333; width: 60px; height: 60px; border-radius: 50%; font-size: 9px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
+        .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
+        .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
 
-        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: auto; padding-bottom: 100px; }
-        .result-container { margin: 40px auto; width: 90%; max-width: 350px; }
-        #result-img, #result-video { width: 100%; display: block; border-radius: 5px; box-shadow: 0 0 50px rgba(0,0,0,1); }
-        #final-actions { position: fixed; bottom: 30px; left: 0; width: 100%; text-align: center; z-index: 110; }
-        .btn-save { background: #fff; color: #000; padding: 15px 30px; font-size: 12px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 5px; }
+        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
+        .print-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 90%; max-width: 300px; }
+        .flow-animation { animation: slideDownPaper 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } }
+
+        #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
+        #final-actions { position: absolute; bottom: 50px; left: 0; width: 100%; display: none; text-align: center; }
+        .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
     <div id="camera-ui">
-        <div class="header-title">Jarawee Studio</div>
+        <div class="header-title">Congratulations to Jarawee!</div>
         
         <div class="mode-selector">
-            <button class="m-btn active" id="btn-m-receipt" onclick="changeMode('receipt')">Receipt</button>
+            <button class="m-btn active" id="btn-m-receipt" onclick="changeMode('receipt')">Receipt Strip</button>
             <button class="m-btn" id="btn-m-news" onclick="changeMode('news')">Newspaper</button>
         </div>
 
@@ -62,26 +89,26 @@
                 <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
                 <div id="flash"></div>
                 <div id="timer" class="timer">3</div>
-                <div id="rec-indicator">● REC</div>
             </div>
         </div>
 
         <div class="controls">
-            <div class="action-btns">
-                <button class="btn-snap" id="snap-btn" onclick="takePhotos()">Take Photo</button>
-                <button class="btn-video" id="vid-btn" onclick="toggleVideo()">Record Video</button>
+            <div class="filter-group" id="filter-ui">
+                <button class="f-btn active" id="f-none" onclick="setF('none', this)">Normal</button>
+                <button class="f-btn" onclick="setF('kodak', this)">Film</button>
+                <button class="f-btn" onclick="setF('bw', this)">B&W</button>
             </div>
+            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">กดถ่ายเลย!</button>
         </div>
     </div>
 
     <div id="print-page">
-        <div class="result-container" id="res-cont">
-            <img id="result-img" style="display:none;">
-            <video id="result-video" controls style="display:none;"></video>
+        <div class="print-container" id="print-cont">
+            <img id="result-img">
         </div>
         <div id="final-actions">
-            <button class="btn-save" onclick="saveToDevice()">Save to Gallery</button>
-            <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">Back</button>
+            <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
+            <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">ถ่ายใหม่</button>
         </div>
     </div>
 
@@ -89,28 +116,35 @@
 
     <script>
         const video = document.getElementById('video');
+        const timer = document.getElementById('timer');
+        const flash = document.getElementById('flash');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const resultImg = document.getElementById('result-img');
-        const resultVid = document.getElementById('result-video');
-        const recIndicator = document.getElementById('rec-indicator');
-        
+        const printPage = document.getElementById('print-page');
+        const printCont = document.getElementById('print-cont');
+        const finalActions = document.getElementById('final-actions');
+        const previewOverlay = document.getElementById('preview-overlay');
+        const filterUI = document.getElementById('filter-ui');
+
+        let filterStyle = 'none';
         let currentMode = 'receipt';
-        let isRecording = false;
-        let mediaRecorder;
-        let recordedChunks = [];
-        let finalFileUrl = null;
-        let newsFrame = new Image();
+        let finalDataUrl = null;
+
+        // แก้ฟิลเตอร์ นสพ เป็นขาวดำธรรมดา (คมชัด)
+        const NEWS_FILTER = 'grayscale(1) contrast(1.5) brightness(0.9)';
+
+        const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
-        newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG';
+        newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
 
-        const NEWS_FILTER = 'grayscale(1) contrast(1.5) brightness(0.8)';
-
-        async function init() {
-            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: true });
-            video.srcObject = stream;
+        async function startCam() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
+                video.srcObject = stream;
+            } catch(e) { alert("กรุณาเปิดกล้องจ้า"); }
         }
-        init();
+        startCam();
 
         function changeMode(mode) {
             currentMode = mode;
@@ -122,103 +156,142 @@
             if (mode === 'news') {
                 booth.classList.add('news-mode');
                 display.classList.add('news-mode');
-                document.getElementById('preview-overlay').style.display = 'block';
-                video.style.filter = NEWS_FILTER;
+                previewOverlay.style.display = 'block';
+                filterUI.style.visibility = 'hidden';
+                filterStyle = NEWS_FILTER;
+                video.style.filter = filterStyle;
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
-                document.getElementById('preview-overlay').style.display = 'none';
-                video.style.filter = 'none';
+                previewOverlay.style.display = 'none';
+                filterUI.style.visibility = 'visible';
+                filterStyle = 'none';
+                video.style.filter = filterStyle;
+                document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+                document.getElementById('f-none').classList.add('active');
             }
         }
 
-        // --- Photo Logic ---
+        function setF(mode, btn) {
+            if(currentMode === 'news') return;
+            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            if(mode === 'none') filterStyle = 'none';
+            else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
+            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4)';
+            video.style.filter = filterStyle;
+        }
+
         async function takePhotos() {
             const pics = [];
-            const count = (currentMode === 'news') ? 1 : 2;
-            for(let i=0; i<count; i++) {
-                document.getElementById('timer').style.display = 'block';
-                for(let s=3; s>0; s--) { document.getElementById('timer').innerText = s; await new Promise(r => setTimeout(r, 1000)); }
-                document.getElementById('timer').style.display = 'none';
-                document.getElementById('flash').style.opacity = '1'; setTimeout(() => document.getElementById('flash').style.opacity = '0', 100);
-                
-                const pCanvas = document.createElement('canvas');
-                pCanvas.width = video.videoWidth; pCanvas.height = video.videoHeight;
-                const pCtx = pCanvas.getContext('2d');
-                if(currentMode === 'news') pCtx.filter = NEWS_FILTER;
-                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0);
-                pics.push(pCanvas);
-            }
-            if(currentMode === 'news') buildNews(pics[0]); else buildReceipt(pics);
-        }
+            const photoCount = (currentMode === 'news') ? 1 : 2;
+            document.getElementById('snap-btn').style.opacity = '0';
 
-        function buildNews(pic) {
-            canvas.width = 1000; canvas.height = 1400;
-            ctx.fillStyle = "#e3dccb"; ctx.fillRect(0,0,1000,1400);
-            ctx.drawImage(pic, 0, 0, pic.width, pic.height, 145, 340, 800, 450);
-            if(newsFrame.complete) ctx.drawImage(newsFrame, 0,0,1000,1400);
-            showResult('img');
+            for(let i=0; i<photoCount; i++) {
+                timer.style.display = 'block';
+                for(let s=3; s>0; s--) { timer.innerText = s; await new Promise(r => setTimeout(r, 1000)); }
+                timer.style.display = 'none';
+                flash.style.opacity = '1'; setTimeout(() => flash.style.opacity = '0', 100);
+
+                const pCanvas = document.createElement('canvas');
+                pCanvas.width = video.videoWidth;
+                pCanvas.height = video.videoHeight;
+                const pCtx = pCanvas.getContext('2d');
+                
+                // ถ่ายปุ๊บ บังคับใส่ฟิลเตอร์ปัจจุบันลงไปในรูปภาพทันที
+                pCtx.filter = filterStyle;
+                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
+                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                
+                pics.push(pCanvas);
+                if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
+            }
+            
+            if (currentMode === 'news') buildNewspaper(pics[0]);
+            else buildReceipt(pics);
         }
 
         function buildReceipt(pics) {
-            canvas.width = 600; canvas.height = 1200;
-            ctx.fillStyle = "#fff"; ctx.fillRect(0,0,600,1200);
-            pics.forEach((p, i) => ctx.drawImage(p, 0, 0, p.width, p.height, 50, 50 + (i*500), 500, 450));
-            showResult('img');
-        }
+            canvas.width = 600;
+            canvas.height = 1520;
+            ctx.clearRect(0,0,600,1520);
+            ctx.fillStyle = "#fdfaf5"; 
+            ctx.fillRect(0, 0, 600, 1520);
+            ctx.fillStyle = "#111"; ctx.textAlign = "center";
+            ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
+            ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
+            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
+            ctx.textAlign = "left"; ctx.font = "32px 'VT323'";
+            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            pics.forEach((p, idx) => {
+                const y = 300 + (idx * 440);
+                const s = Math.min(p.width, p.height);
+                const sx = (p.width - s) / 2;
+                const sy = (p.height - s) / 2;
+                ctx.drawImage(p, sx, sy, s, s, 90, y, 420, 420);
+                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
+            });
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: ค่ารักเอ็ง ;-)", 90, 1200);
+            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
+            ctx.globalAlpha = 1.0;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath(); ctx.moveTo(0, 1520);
+            let step = 60;
+            for(let x=0; x<=600; x+=step) { ctx.lineTo(x + step/2, 1490 + (Math.random()*20)); ctx.lineTo(x + step, 1520); }
+            ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+            renderFinal();
+        }        
 
-        // --- Video Logic ---
-        function toggleVideo() {
-            if(!isRecording) startRecording(); else stopRecording();
-        }
+        function buildNewspaper(pic) {
+            canvas.width = 1000; 
+            canvas.height = 1400;
+            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const photoW = 800;  
+            const photoH = 450;  
+            const photoX = 145; 
+            const photoY = 340; 
 
-        function startRecording() {
-            recordedChunks = [];
-            const stream = video.captureStream ? video.captureStream() : video.mozCaptureStream();
-            mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm;codecs=vp9' });
-            mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
-            mediaRecorder.onstop = () => {
-                const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                finalFileUrl = URL.createObjectURL(blob);
-                resultVid.src = finalFileUrl;
-                showResult('vid');
-            };
-            mediaRecorder.start();
-            isRecording = true;
-            recIndicator.style.display = 'block';
-            document.getElementById('vid-btn').classList.add('recording');
-            document.getElementById('vid-btn').innerText = "Stop (Max 10s)";
-            setTimeout(() => { if(isRecording) stopRecording(); }, 10000);
-        }
-
-        function stopRecording() {
-            mediaRecorder.stop();
-            isRecording = false;
-            recIndicator.style.display = 'none';
-            document.getElementById('vid-btn').classList.remove('recording');
-            document.getElementById('vid-btn').innerText = "Record Video";
-        }
-
-        // --- Finalize ---
-        function showResult(type) {
-            document.getElementById('camera-ui').style.display = 'none';
-            document.getElementById('print-page').style.display = 'block';
-            if(type === 'img') {
-                finalFileUrl = canvas.toDataURL('image/png');
-                resultImg.src = finalFileUrl;
-                resultImg.style.display = 'block';
-                resultVid.style.display = 'none';
-            } else {
-                resultVid.style.display = 'block';
-                resultImg.style.display = 'none';
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = photoW;
+            tempCanvas.height = photoH;
+            const tempCtx = tempCanvas.getContext('2d');
+            
+            const targetRatio = photoW / photoH;
+            const zoomFactor = 1.0; 
+            let sw = pic.width * zoomFactor;
+            let sh = sw / targetRatio;
+            
+            if (sh > pic.height * zoomFactor) {
+                sh = pic.height * zoomFactor;
+                sw = sh * targetRatio;
             }
+
+            let sx = (pic.width - sw) / 2;
+            let sy = (pic.height - sh) / 2;
+
+            tempCtx.drawImage(pic, sx, sy, sw, sh, 0, 0, photoW, photoH);
+            ctx.drawImage(tempCanvas, photoX, photoY, photoW, photoH);
+            if (newsFrame.complete) { ctx.drawImage(newsFrame, 0, 0, 1000, 1400); }
+            renderFinal();
         }
 
-        function saveToDevice() {
+        function renderFinal() {
+            // ใช้ dataURL เพื่อความชัวร์ในการดาวน์โหลดลงแกลเลอรี
+            finalDataUrl = canvas.toDataURL('image/png');
+            resultImg.src = finalDataUrl;
+            document.getElementById('camera-ui').style.display = 'none';
+            printPage.style.display = 'block';
+            setTimeout(() => { printCont.classList.add('flow-animation'); }, 500);
+            setTimeout(() => { finalActions.style.display = 'block'; }, 6500);
+        }
+
+        async function saveImage() {
+            if (!finalDataUrl) return;
             const link = document.createElement('a');
-            link.href = finalFileUrl;
-            link.download = currentMode + (resultVid.style.display === 'block' ? '_video.webm' : '_photo.png');
+            link.download = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
+            link.href = finalDataUrl;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
