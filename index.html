@@ -80,8 +80,29 @@ mix-blend-mode: screen;
         .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
         .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
 
-        #print-page { display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: #000; z-index: 100; overflow: hidden; }
-        .print-container { position: absolute; top: 0; left: 50%; transform: translate(-50%, -100%); width: 90%; max-width: 300px; }
+        #print-page {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: #000;
+    z-index: 100;
+
+    /* ✅ จัดทุกอย่างเรียงลงมา */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
+    overflow-y: auto;
+    padding-top: 20px;
+    padding-bottom: 40px;
+}
+        .print-container {
+    position: relative;
+    width: 90%;
+    max-width: 300px;
+    margin: 0 auto;
+}
         .flow-animation { animation: slideDownPaper 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } } 
     .print-container.news-roll {
@@ -111,11 +132,12 @@ mix-blend-mode: screen;
 }
         #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
         #final-actions {
-    margin-top: 20px;
+    margin-top: 18px;
     width: 100%;
     display: none;
     text-align: center;
     position: relative;
+    z-index: 20;
 }
         .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
     </style>
