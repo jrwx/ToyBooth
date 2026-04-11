@@ -193,10 +193,29 @@ mix-blend-mode: screen;
 .paper-window{
     width:300px;
     height:80vh;
-    margin:0 auto;
     overflow:hidden;
-    background:#111;
-    border-radius:0 0 20px 20px;
+    margin:0 auto;
+    margin-top:-5px; /* 👈 ดึงให้ชิดปากเครื่อง */
+
+}
+.printer-slot-only{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    margin-top:40px;
+    position:relative;
+    z-index:5;
+}
+
+/* ปากเครื่อง */
+.printer-slot{
+    width:220px;
+    height:14px;
+    background:#000;
+    border-radius:20px;
+    box-shadow:
+        inset 0 0 10px rgba(255,255,255,0.15),
+        0 10px 20px rgba(0,0,0,0.6);
 }
     </style>
 </head>
@@ -233,22 +252,14 @@ mix-blend-mode: screen;
 
 <div id="print-page">
 
-    <div class="printer-shell">
+    <div class="printer-slot-only">
+        <div class="printer-slot"></div>
+    </div>
 
-        <div class="printer-body">
-
-            <div class="printer-top">
-                <div class="printer-slot"></div>
-            </div>
-
-            <div class="paper-window">
-                <div class="print-container" id="print-cont">
-                    <img id="result-img">
-                </div>
-            </div>
-
+    <div class="paper-window">
+        <div class="print-container" id="print-cont">
+            <img id="result-img">
         </div>
-
     </div>
 
     <div id="final-actions">
