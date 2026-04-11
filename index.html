@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="th">
 <head>
     <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
@@ -501,56 +501,55 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
                 timer.style.display = 'none';
 
 if (currentMode === 'news') {
+
+    // flash เหมือนเดิม
     flash.style.background = 'white';
     flash.style.opacity = '1';
     setTimeout(() => { flash.style.opacity = '0.85'; }, 60);
     setTimeout(() => { flash.style.opacity = '0'; }, 180);
+
+    await new Promise(r => requestAnimationFrame(r));
+
+    const vw = video.videoWidth;
+    const vh = video.videoHeight;
+
+    // 🔥 snapshot จริง (freeze frame)
+    const snap = document.createElement('canvas');
+    snap.width = vw;
+    snap.height = vh;
+
+    const sctx = snap.getContext('2d');
+    sctx.drawImage(video, 0, 0, vw, vh);
+
+    // 🔥 render canvas ใหม่
+    pCanvas.width = vw;
+    pCanvas.height = vh;
+
+    const pCtx2 = pCanvas.getContext('2d');
+
+    pCtx2.save();
+    pCtx2.translate(vw, 0);
+    pCtx2.scale(-1, 1);
+
+    pCtx2.filter =
+        'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+
+    pCtx2.drawImage(snap, 0, 0);
+    pCtx2.restore();
+
 } else {
-    flash.style.opacity = '1';
-    setTimeout(() => flash.style.opacity = '0', 100);
+    // โหมดอื่นใช้ของเดิมได้เลย
+    const pCanvas = document.createElement('canvas');
+    pCanvas.width = video.videoWidth;
+    pCanvas.height = video.videoHeight;
+    const pCtx = pCanvas.getContext('2d');
+
+    pCtx.filter = filterStyle;
+    pCtx.translate(pCanvas.width, 0);
+    pCtx.scale(-1, 1);
+
+    pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 }
-
-                const pCanvas = document.createElement('canvas');
-                pCanvas.width = video.videoWidth;
-                pCanvas.height = video.videoHeight;
-                const pCtx = pCanvas.getContext('2d');
-                
-                if(currentMode === 'news') {
-                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-                } else {
-                    pCtx.filter = filterStyle;
-                }
-                
-                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                await new Promise(r => requestAnimationFrame(r));
-
-const vw = video.videoWidth;
-const vh = video.videoHeight;
-
-// 🔥 สร้าง snapshot frame ก่อน (หยุด live stream)
-const snap = document.createElement('canvas');
-snap.width = vw;
-snap.height = vh;
-
-const sctx = snap.getContext('2d');
-
-// wait 1 frame ให้ภาพนิ่งจริง
-await new Promise(r => requestAnimationFrame(r));
-
-// วาดเฟรมจาก video ลง snapshot ก่อน
-sctx.drawImage(video, 0, 0, vw, vh);
-
-// ===== ใช้ snapshot แทน video =====
-pCanvas.width = vw;
-pCanvas.height = vh;
-
-pCtx.setTransform(-1, 0, 0, 1, vw, 0);
-
-// ฟิลเตอร์หนังสือพิมพ์
-pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-
-// วาดจาก snapshot (ไม่ใช่ video แล้ว)
-pCtx.drawImage(snap, 0, 0);
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
