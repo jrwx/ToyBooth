@@ -20,27 +20,40 @@
         .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 25px; color: #a0a0a0; text-transform: uppercase; }
 
         .mode-selector { display: flex; gap: 10px; margin-bottom: 25px; }
-        .m-btn {
-    background: rgba(255, 255, 255, 0.35);
-    color: #5a4a3b;
-    border: 1px solid rgba(90, 74, 59, 0.15);
-    padding: 10px 16px;
-    font-weight: 500;
-    cursor: pointer;
+.m-btn {
+    background: rgba(255, 255, 255, 0.7);   /* 👈 เข้มขึ้นจาก 0.35 */
+    color: #4a3b2f;                         /* 👈 ตัวหนังสือเข้มขึ้น */
+
+    border: 1px solid rgba(74, 59, 47, 0.25);
+
+    padding: 12px 18px;
+    font-size: 13px;
+    font-weight: 600;
+
     border-radius: 999px;
-    font-size: 12px;
-    letter-spacing: 0.5px;
-    backdrop-filter: blur(8px);
+
+    cursor: pointer;
+
+    backdrop-filter: blur(10px);
+
     transition: all 0.2s ease;
+
+    min-width: 110px;
+    text-align: center;
+
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 👈 เพิ่มมิติ */
 }
 
 .m-btn.active {
     background: #5a4a3b;
     color: #fff;
     border-color: transparent;
+    box-shadow: 0 4px 12px rgba(90, 74, 59, 0.25);
 }
-        .m-btn.active { background: var(--accent); box-shadow: 0 0 15px rgba(255, 62, 62, 0.4); }
-
+.m-btn:hover {
+    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.85);
+}
         #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
         #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; transition: all 0.3s ease; }
         
