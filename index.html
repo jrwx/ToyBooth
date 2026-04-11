@@ -309,17 +309,17 @@ else buildReceipt(pics);
         }        
   function buildReceipt2(pic) {
     canvas.width = 600;
-    canvas.height = 900; // ✅ สั้นลงอีก
-    ctx.clearRect(0,0,600,900);
+    canvas.height = 930;
+    ctx.clearRect(0,0,600,930);
 
     // background
     ctx.fillStyle = "#fdfaf5";
-    ctx.fillRect(0, 0, 600, 900);
+    ctx.fillRect(0, 0, 600, 930);
 
     // noise
     for(let i=0;i<2200;i++){
         ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.04})`;
-        ctx.fillRect(Math.random()*600, Math.random()*900,1,1);
+        ctx.fillRect(Math.random()*600, Math.random()*930,1,1);
     }
 
     ctx.fillStyle = "#111";
@@ -328,26 +328,27 @@ else buildReceipt(pics);
     ctx.textAlign = "center";
     ctx.font = "bold 34px monospace";
     ctx.fillText("R E C E I P T   P H O T O", 300, 85);
-ctx.fillText("B O O T H", 300, 120);
+    ctx.fillText("B O O T H", 300, 120);
 
     // ================= IMAGE =================
     const s = Math.min(pic.width, pic.height);
     const sx = (pic.width - s)/2;
     const sy = (pic.height - s)/2;
 
-    ctx.drawImage(pic, sx, sy, s, s, 100, 130, 400, 400);
+    // ✅ ขยับรูปลง
+    ctx.drawImage(pic, sx, sy, s, s, 100, 155, 400, 400);
 
     // ✅ กรอบบางๆ
     ctx.strokeStyle = "#222";
     ctx.lineWidth = 1.5;
-    ctx.strokeRect(100, 130, 400, 400);
+    ctx.strokeRect(100, 155, 400, 400);
 
     // ================= RECEIPT =================
     const id = Math.floor(100 + Math.random()*900);
 
     ctx.textAlign = "left";
     ctx.font = "bold 28px monospace";
-    ctx.fillText("RECEIPT " + id, 70, 575);
+    ctx.fillText("RECEIPT " + id, 70, 600);
 
     // ⭐ ดาวใหญ่
     const star = Math.floor(1 + Math.random()*5);
@@ -358,26 +359,26 @@ ctx.fillText("B O O T H", 300, 120);
 
     ctx.textAlign = "right";
     ctx.font = "bold 40px monospace";
-    ctx.fillText(starStr, 530, 575);
+    ctx.fillText(starStr, 530, 600);
 
     // ================= LEFT INFO =================
     ctx.textAlign = "left";
-    ctx.font = "24px monospace"; // ✅ บางลง
-    ctx.fillText("BY NONGJANG", 70, 620);
-    ctx.fillText("PHOTO BOOTH", 70, 652);
+    ctx.font = "24px monospace";
+    ctx.fillText("BY NONGJANG", 70, 645);
+    ctx.fillText("PHOTO BOOTH", 70, 677);
 
     // ✅ เส้นยาวเกือบสุดขวา
     ctx.beginPath();
-    ctx.moveTo(70, 675);
-    ctx.lineTo(540, 675);
+    ctx.moveTo(70, 700);
+    ctx.lineTo(540, 700);
     ctx.lineWidth = 1;
     ctx.strokeStyle = "#111";
     ctx.stroke();
 
     // ================= BARCODE =================
-    const barcodeY = 700;
-    const barcodeWidth = 360; // ✅ กว้างขึ้น
-    const startX = (600 - barcodeWidth) / 2; // ✅ กึ่งกลาง
+    const barcodeY = 725;
+    const barcodeWidth = 360;
+    const startX = (600 - barcodeWidth) / 2;
     const lineH = 58;
     const barGap = 3.4;
 
@@ -390,7 +391,7 @@ ctx.fillText("B O O T H", 300, 120);
     // ================= FOOTER =================
     ctx.textAlign = "center";
     ctx.font = "18px monospace";
-    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 800);
+    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 845);
 
     renderFinal();
 }
