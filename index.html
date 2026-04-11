@@ -96,19 +96,18 @@ border: 0.25px solid rgba(90,74,59,0.12);
             aspect-ratio: 1000/1400 !important; 
             background: #e3dccb; 
         }
-#display-box.news-mode video {
+
+        #display-box.news-mode video {
     width: 80% !important;
     height: 32.14% !important;
-    /* ✅ ปรับให้กึ่งกลางพอดีเป๊ะ */
-    left: 10% !important; 
+    left: 14.5% !important;
     top: 24.28% !important;
-    transform: scaleX(-1); /* คงการกลับด้านกระจกไว้ */
-    filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
-    opacity: 0.96;
-    object-fit: cover !important;
-    border-radius: 4px; /* เติมโค้งมนนิดนึงให้เข้ากับกรอบ */
-}
 
+    /* โทนเดียวกับรูป final */
+    filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
+
+    opacity: 0.96;
+}
 
         #preview-overlay {
             position: absolute;
@@ -489,9 +488,8 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
             if(currentMode !== 'news') video.style.filter = filterStyle;
         }
 
-                async function takePhotos() {
+        async function takePhotos() {
             const pics = [];
-            // โหมดหนังสือพิมพ์ ถ่ายแค่ 1 รูปพอ
             const photoCount = (currentMode === 'news') ? 1 : (currentMode === 'receipt2') ? 1 : 2;
             document.getElementById('snap-btn').style.opacity = '0';
 
@@ -500,90 +498,156 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
                 for(let s=3; s>0; s--) { timer.innerText = s; await new Promise(r => setTimeout(r, 1000)); }
                 timer.style.display = 'none';
 
-                if (currentMode === 'news') {
-                    flash.style.background = 'white';
-                    flash.style.opacity = '1';
-                    setTimeout(() => { flash.style.opacity = '0.85'; }, 60);
-                    setTimeout(() => { flash.style.opacity = '0'; }, 180);
-                } else {
-                    flash.style.opacity = '1';
-                    setTimeout(() => flash.style.opacity = '0', 100);
-                }
+if (currentMode === 'news') {
+    flash.style.background = 'white';
+    flash.style.opacity = '1';
+    setTimeout(() => { flash.style.opacity = '0.85'; }, 60);
+    setTimeout(() => { flash.style.opacity = '0'; }, 180);
+} else {
+    flash.style.opacity = '1';
+    setTimeout(() => flash.style.opacity = '0', 100);
+}
 
-                // --- ส่วนที่แก้เพื่อจับภาพหน้าจอ ---
                 const pCanvas = document.createElement('canvas');
+                pCanvas.width = video.videoWidth;
+                pCanvas.height = video.videoHeight;
                 const pCtx = pCanvas.getContext('2d');
-                const displayBox = document.getElementById('display-box');
                 
-                if (currentMode === 'news') {
-                    // ✅ จับภาพทั้ง display-box (รวมเฟรมและวิดีโอ)
-                    // เราต้องกำหนดขนาด Canvas ให้เท่ากับสัดส่วนจริงของหน้าจอพรีวิว
-                    pCanvas.width = 1000; 
-                    pCanvas.height = 1400; 
-                    
-                    // วาดพื้นหลังสีหนังสือพิมพ์
-                    pCtx.fillStyle = "#e3dccb"; 
-                    pCtx.fillRect(0, 0, pCanvas.width, pCanvas.height);
-                    
-                    // จับภาพตัววิดีโอ (อันเล็กๆ) มาวางในตำแหน่งเดียวกับบนหน้าจอ
-                    // โดยเราต้องคำนวณสัดส่วน % ให้เป็น Pixel จริงบน Canvas
-                    const vW = video.videoWidth;
-                    const vH = video.videoHeight;
-                    const vS = Math.min(vW, vH); // จับภาพสัดส่วน 1:1 จากวิดีโอ
-
-                    const canvasVW = 800; // 80% ของ 1000
-                    const canvasVH = 450; // 32.14% ของ 1400
-                    const canvasVX = 100; // 10% ของ 1000
-                    const canvasVY = 340; // 24.28% ของ 1400
-                    
-                    // จับภาพวิดีโอแบบกลับด้านกระจก
-                    pCtx.save();
-                    pCtx.translate(canvasVX + canvasVW, canvasVY);
-                    pCtx.scale(-1, 1);
-                    pCtx.drawImage(video, (vW-vS)/2, (vH-vS)/2, vS, vS, 0, 0, canvasVW, canvasVH);
-                    pCtx.restore();
-                    
-                    // วาดลาย Harry ทับลงไป (ถ้ามี)
-                    const overlayImg = document.getElementById('preview-overlay');
-                    if (overlayImg && overlayImg.style.display !== 'none') {
-                        // รูปเฟรม Harry จะครอบคลุมทั้งหน้าจอพรีวิว
-                        pCtx.drawImage(overlayImg, 0, 0, pCanvas.width, pCanvas.height);
-                    }
-                    
+                if(currentMode === 'news') {
+                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
                 } else {
-                    // โหมดปกติ จับภาพวิดีโอเต็มจอเหมือนเดิม
-                    pCanvas.width = video.videoWidth;
-                    pCanvas.height = video.videoHeight;
                     pCtx.filter = filterStyle;
-                    pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                    pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 }
+                
+                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
+                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
             }
             
-            // เรียกฟังก์ชันสร้างรูปสำเร็จตามโหมด
             if (currentMode === 'news') { buildNewspaper(pics[0]); } 
             else if (currentMode === 'receipt2') { buildReceipt2(pics[0]); } 
             else { buildReceipt(pics); }
         }
 
-        // --- ส่วนที่แก้ buildNewspaper (เพื่อให้รับรูปที่จับภาพมาแล้ว) ---
-        function buildNewspaper(finalPic) {
+        function buildReceipt(pics) {
+            canvas.width = 600;
+            canvas.height = 1520;
+            ctx.clearRect(0,0,600,1520);
+            ctx.fillStyle = "#fdfaf5"; 
+            ctx.fillRect(0, 0, 600, 1520);
+            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
+            ctx.fillStyle = "#111"; ctx.textAlign = "center";
+            ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
+            ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
+            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
+            ctx.textAlign = "left"; ctx.font = "32px 'VT323'";
+            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
+            pics.forEach((p, idx) => {
+                const y = 300 + (idx * 440);
+                const s = Math.min(p.width, p.height);
+                const sx = (p.width - s) / 2;
+                const sy = (p.height - s) / 2;
+                ctx.drawImage(p, sx, sy, s, s, 90, y, 420, 420);
+                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
+            });
+            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: แจงรักทุกคน อิอิ <3", 90, 1200);
+            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
+            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
+            ctx.globalAlpha = 0.5; ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
+            ctx.globalAlpha = 1.0;
+            ctx.globalCompositeOperation = 'destination-out';
+            ctx.beginPath(); ctx.moveTo(0, 1520);
+            let step = 60;
+            for(let x=0; x<=600; x+=step) { ctx.lineTo(x + step/2, 1490 + (Math.random()*20)); ctx.lineTo(x + step, 1520); }
+            ctx.fill(); ctx.globalCompositeOperation = 'source-over';
+            renderFinal();
+        }        
+
+        function buildReceipt2(pic) {
+            canvas.width = 600;
+            canvas.height = 930;
+            ctx.clearRect(0,0,600,930);
+            ctx.fillStyle = "#fdfaf5";
+            ctx.fillRect(0, 0, 600, 930);
+            for(let i=0;i<2200;i++){
+                ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.04})`;
+                ctx.fillRect(Math.random()*600, Math.random()*930,1,1);
+            }
+            ctx.fillStyle = "#111";
+            ctx.textAlign = "center";
+            ctx.font = "bold 34px monospace";
+            ctx.fillText("R E C E I P T   P H O T O", 300, 85);
+            ctx.fillText("B O O T H", 300, 120);
+            const s = Math.min(pic.width, pic.height);
+            const sx = (pic.width - s)/2;
+            const sy = (pic.height - s)/2;
+            ctx.drawImage(pic, sx, sy, s, s, 100, 155, 400, 400);
+            ctx.strokeStyle = "#222";
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(100, 155, 400, 400);
+            const id = Math.floor(100 + Math.random()*900);
+            ctx.textAlign = "left";
+            ctx.font = "bold 28px monospace";
+            ctx.fillText("RECEIPT " + id, 70, 600);
+            const star = Math.floor(1 + Math.random()*5);
+            let starStr = "";
+            for(let i=0;i<5;i++){ starStr += i < star ? "★" : "☆"; }
+            ctx.textAlign = "right";
+            ctx.font = "bold 40px monospace";
+            ctx.fillText(starStr, 530, 600);
+            ctx.textAlign = "left";
+            ctx.font = "24px monospace";
+            ctx.fillText("BY NONGJANG", 70, 645);
+            ctx.fillText("PHOTO BOOTH", 70, 677);
+            ctx.beginPath();
+            ctx.moveTo(70, 700);
+            ctx.lineTo(540, 700);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = "#111";
+            ctx.stroke();
+            const barcodeY = 725;
+            const barcodeWidth = 360;
+            const startX = (600 - barcodeWidth) / 2;
+            const lineH = 58;
+            const barGap = 3.4;
+            for(let i=0;i<110;i++){
+                if(Math.random() > 0.35){ ctx.fillRect(startX + i*barGap, barcodeY, 2.2, lineH); }
+            }
+            ctx.textAlign = "center";
+            ctx.font = "18px monospace";
+            ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 845);
+            renderFinal();
+        }
+
+        function buildNewspaper(pic) {
             canvas.width = 1000; 
             canvas.height = 1400;
-            // วาดรูปที่เราเตรียมมาแล้ว (ที่รวมเฟรมและวิดีโอในตำแหน่งที่ถูกต้อง)
-            ctx.drawImage(finalPic, 0, 0);
-
-            // ใส่จุดๆ (Halftone) ทับทั้งหมดเพื่อให้ดูเป็นหนังสือพิมพ์เก่า
+            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const photoW = 800;  
+            const photoH = 450;  
+            const photoX = 145; 
+            const photoY = 340; 
+            const targetRatio = photoW / photoH;
+            const zoomFactor = 1.0;
+            let sw = pic.width * zoomFactor;
+            let sh = sw / targetRatio;
+            if (sh > pic.height * zoomFactor) { sh = pic.height * zoomFactor; sw = sh * targetRatio; }
+            let sx = (pic.width - sw) / 2;
+            let sy = (pic.height - sh) / 2;
+            ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+            const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                const grain = (Math.random() - 0.5) * 30;
+                gray = Math.max(0, Math.min(255, gray + grain));
+                data[i] = gray * 1.08; data[i + 1] = gray * 0.95; data[i + 2] = gray * 0.75;
+            }
+            ctx.putImageData(imageData, photoX, photoY);
             ctx.fillStyle = "rgba(60,40,20,0.08)";
-            // เราจะใส่จุดๆ ทับเฉพาะส่วนที่เป็นรูปถ่าย (พื้นที่ 80% ตรงกลาง)
-            const photoX = 100; // 10% ของ 1000
-            const photoY = 340; // 24.28% ของ 1400
-            const photoW = 800; // 80% ของ 1000
-            const photoH = 450; // 32.14% ของ 1400
-
             for (let y = photoY; y < photoY + photoH; y += 6) {
                 for (let x = photoX; x < photoX + photoW; x += 6) {
                     ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
@@ -591,7 +655,6 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
             }
             renderFinal();
         }
-
 
         function renderFinal() {
             canvas.toBlob((blob) => {
