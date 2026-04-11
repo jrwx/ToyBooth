@@ -287,9 +287,9 @@ mix-blend-mode: screen;
 
     <!-- 🔥 ย้ายปุ่มมาไว้ตรงนี้ -->
     <div id="final-actions">
-        <button class="btn-save" onclick="playPop(); saveImage()">เซฟรูปภาพ</button>
-<button class="btn-save" onclick="playPop(); printImage()">ปริ้นต์</button>
-<button class="btn-save" onclick="playPop(); location.reload()">ถ่ายใหม่</button>
+    <button onclick="playPop(); saveImage()">เซฟ</button>
+<button onclick="playPop(); printImage()">ปริ้นต์</button>
+<button onclick="playPop(); location.reload()">ถ่ายใหม่</button>
     </div>
 </div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -306,6 +306,10 @@ mix-blend-mode: screen;
         const finalActions = document.getElementById('final-actions');
         const previewOverlay = document.getElementById('preview-overlay');
         const filterUI = document.getElementById('filter-ui');
+        const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
+printSound.volume = 0.45;
+        const popSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_5c9d6d4f5f.mp3');
+popSound.volume = 0.6;
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
@@ -314,10 +318,8 @@ mix-blend-mode: screen;
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
         newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
-        const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
-printSound.volume = 0.45;
-const popSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=click-124467.mp3');
-popSound.volume = 0.6;
+        
+
 
 function unlockAudio(){
     popSound.play().then(()=>{
@@ -326,12 +328,18 @@ function unlockAudio(){
     }).catch(()=>{});
 }
 
+document.addEventListener('click', unlockAudio, { once: true });
+
 function playPop(){
-    try{
-        popSound.currentTime = 0;
-        popSound.play();
-    }catch(e){}
+    popSound.currentTime = 0;
+    popSound.play();
 }
+document.addEventListener('click', () => {
+    popSound.play().then(()=>{
+        popSound.pause();
+        popSound.currentTime = 0;
+    }).catch(()=>{});
+}, { once: true });
 
         async function startCam() {
             try {
