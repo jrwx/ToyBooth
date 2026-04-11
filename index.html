@@ -80,14 +80,20 @@ mix-blend-mode: screen;
         .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
         .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
 
-     #print-page {
+    #print-page {
     display: none;
     position: fixed;
     inset: 0;
     background: #000;
     z-index: 100;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+
     overflow-y: auto;
-    padding-top: 20px;
+    padding-top: 0;
     padding-bottom: 40px;
 }
 .printer-top {
@@ -99,52 +105,49 @@ mix-blend-mode: screen;
     position: relative;
     box-shadow: 0 12px 30px rgba(0,0,0,0.45);
 }
+.printer-top {
+    width: 340px;
+    height: 88px;
+    background: linear-gradient(to bottom, #2d2d2d, #111);
+    border-radius: 0 0 18px 18px;
+    position: relative;
+    z-index: 30;
+}
 
-.printer-top::after {
-    content: "";
+.printer-slot {
     position: absolute;
-    left: 20px;
-    right: 20px;
-    bottom: 14px;
-    height: 12px;
+    left: 50%;
+    bottom: 12px;
+    transform: translateX(-50%);
+    width: 300px;
+    height: 10px;
     background: #000;
     border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.85);
 }
+
     .print-container {
     position: relative;
     width: 90%;
     max-width: 300px;
-    margin: -8px auto 0;
+    margin: -6px auto 0;
     overflow: hidden;
 }
-.printer-slot {
-    width: 90%;
-    max-width: 300px;
-    height: 10px;
-    background: #111;
-    margin: 0 auto;
-    border-radius: 0 0 8px 8px;
-    box-shadow:
-        inset 0 3px 5px rgba(0,0,0,0.9),
-        0 2px 6px rgba(0,0,0,0.4);
-    position: relative;
-    z-index: 10;
-}
+
    .flow-animation {
-    animation: printReceiptOut 4.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    transform: translateY(-92%);
+    animation: printReceiptOut 4.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    clip-path: inset(0 0 94% 0);
 }
 
 @keyframes printReceiptOut {
     0% {
-        transform: translateY(-92%);
-    }
-    100% {
+        clip-path: inset(0 0 94% 0);
         transform: translateY(0);
     }
-}
-    .print-container.news-roll {
-    animation: newspaperUnroll 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    100% {
+        clip-path: inset(0 0 0 0);
+        transform: translateY(0);
+    }
 }
 
 @keyframes newspaperUnroll {
@@ -202,9 +205,16 @@ mix-blend-mode: screen;
         </div>
     </div>
 
-    <div id="print-page">
-    <div class="printer-top"></div>
+   <div id="print-page">
+    <div class="printer-top">
+        <div class="printer-slot"></div>
+    </div>
 
+    <div class="print-container" id="print-cont">
+        <img id="result-img">
+    </div>
+
+    <div id="final-actions">
     <div class="print-container" id="print-cont">
             <img id="result-img">
         </div>
