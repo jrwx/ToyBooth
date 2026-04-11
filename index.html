@@ -131,16 +131,16 @@ mix-blend-mode: screen;
     z-index: 10;
 }
    .flow-animation {
-    animation: printReceiptOut 4.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    clip-path: inset(calc(100% - 20px) 0 0 0);
+    animation: printReceiptOut 4.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    transform: translateY(-92%);
 }
 
 @keyframes printReceiptOut {
     0% {
-        clip-path: inset(calc(100% - 20px) 0 0 0);
+        transform: translateY(-92%);
     }
     100% {
-        clip-path: inset(0 0 0 0);
+        transform: translateY(0);
     }
 }
     .print-container.news-roll {
