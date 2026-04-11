@@ -309,40 +309,40 @@ else buildReceipt(pics);
         }        
       function buildReceipt2(pic) {
     canvas.width = 600;
-    canvas.height = 1650;
-    ctx.clearRect(0,0,600,1650);
+    canvas.height = 1450; // 🔥 สั้นลง
+    ctx.clearRect(0,0,600,1450);
 
     // background
     ctx.fillStyle = "#fdfaf5";
-    ctx.fillRect(0, 0, 600, 1650);
+    ctx.fillRect(0, 0, 600, 1450);
 
     // noise
-    for(let i=0;i<4000;i++){
+    for(let i=0;i<3500;i++){
         ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.05})`;
-        ctx.fillRect(Math.random()*600, Math.random()*1650,1,1);
+        ctx.fillRect(Math.random()*600, Math.random()*1450,1,1);
     }
 
-    // ================= HEADER =================
+    // HEADER
     ctx.fillStyle = "#111";
     ctx.textAlign = "center";
     ctx.font = "bold 34px monospace";
-    ctx.fillText("R E C E I P T   P H O T O", 300, 90);
-    ctx.fillText("B O O T H", 300, 130);
+    ctx.fillText("R E C E I P T   P H O T O", 300, 80);
+    ctx.fillText("B O O T H", 300, 120);
 
-    // ================= IMAGE =================
+    // IMAGE
     const s = Math.min(pic.width, pic.height);
     const sx = (pic.width - s)/2;
     const sy = (pic.height - s)/2;
-    ctx.drawImage(pic, sx, sy, s, s, 100, 180, 400, 400);
+    ctx.drawImage(pic, sx, sy, s, s, 100, 160, 400, 400);
 
-    // ================= RECEIPT ID =================
+    // RECEIPT ID
     const id = Math.floor(100 + Math.random()*900);
 
     ctx.textAlign = "left";
     ctx.font = "22px monospace";
-    ctx.fillText("RECEIPT " + id, 60, 640);
+    ctx.fillText("RECEIPT " + id, 60, 600);
 
-    // ================= STARS (ใหญ่ขึ้น + 1-5) =================
+    // ⭐ STARS (ใหญ่)
     const star = Math.floor(1 + Math.random()*5);
     let starStr = "";
     for(let i=0;i<5;i++){
@@ -350,34 +350,36 @@ else buildReceipt(pics);
     }
 
     ctx.textAlign = "right";
-    ctx.font = "42px monospace"; // ⭐ ใหญ่ขึ้น
-    ctx.fillText(starStr, 540, 640);
+    ctx.font = "42px monospace";
+    ctx.fillText(starStr, 540, 600);
 
-    // ================= BY LINE (ซ้าย ชิดใต้ receipt) =================
+    // BY LINE
     ctx.textAlign = "left";
     ctx.font = "bold 20px monospace";
-    ctx.fillText("BY NONGJANG", 60, 720);
+    ctx.fillText("BY NONGJANG", 60, 670);
+    ctx.fillText("PHOTO BOOTH", 60, 700);
 
-    ctx.font = "20px monospace";
-    ctx.fillText("PHOTO BOOTH", 60, 750);
+    // ================= BARCODE (ยาวเท่ากัน + กึ่งกลาง) =================
+    const barY = 760;
+    const barWidth = 420; // 🔥 กำหนดความยาวเท่ากัน
+    const startX = (600 - barWidth) / 2;
 
-    // ================= BARCODE (ไม่มีตัวเลข) =================
-    const y = 820;
     ctx.fillStyle = "#111";
 
     for(let i=0;i<120;i++){
         if(Math.random() > 0.3){
-            ctx.fillRect(60 + i*3.2, y, 2, 80 + Math.random()*40);
+            const x = startX + i * (barWidth / 120);
+            ctx.fillRect(x, barY, 2, 90 + Math.random()*40);
         }
     }
 
-    // ================= THANK YOU (อยู่ใต้ barcode + ไม่ยาวเกิน) =================
+    // THANK YOU (อยู่ใต้ barcode)
     ctx.textAlign = "center";
     ctx.font = "22px monospace";
-    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 980);
+    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 930);
 
     // เส้นจบสั้น
-    ctx.fillRect(200, 1010, 200, 2);
+    ctx.fillRect(200, 960, 200, 2);
 
     renderFinal();
 }
