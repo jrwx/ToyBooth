@@ -475,10 +475,16 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
             document.getElementById('btn-m-receipt2').classList.toggle('active', mode === 'receipt2');
             
             if (mode === 'news') {
-                booth.classList.add('news-mode');
-                display.classList.add('news-mode');
-                previewOverlay.style.display = 'block';
-                filterUI.style.visibility = 'hidden'; 
+    booth.classList.add('news-mode');
+    display.classList.add('news-mode');
+
+    previewOverlay.style.display = 'none'; // 👈 เอากรอบออก
+
+    filterUI.style.visibility = 'hidden';
+}
+else {
+    previewOverlay.style.display = 'none';
+}
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
