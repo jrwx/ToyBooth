@@ -80,19 +80,12 @@ mix-blend-mode: screen;
         .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
         .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
 
-        #print-page {
+     #print-page {
     display: none;
     position: fixed;
     inset: 0;
     background: #000;
     z-index: 100;
-
-    /* ✅ จัดทุกอย่างเรียงลงมา */
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-
     overflow-y: auto;
     padding-top: 20px;
     padding-bottom: 40px;
@@ -504,7 +497,10 @@ if(currentMode === 'news') {
         resultImg.src = URL.createObjectURL(blob);
 
         document.getElementById('camera-ui').style.display = 'none';
-        printPage.style.display = 'block';
+        printPage.style.display = 'flex';
+printPage.style.flexDirection = 'column';
+printPage.style.alignItems = 'center';
+printPage.style.justifyContent = 'flex-start';
 
         setTimeout(() => {
             if (currentMode === 'news') {
