@@ -211,15 +211,19 @@ mix-blend-mode: screen;
     opacity: 0.9;
 }
 
-   #print-page {
+#print-page {
     display: none;
     position: fixed;
     inset: 0;
     background: #000;
     z-index: 100;
+
+    display: flex;
     flex-direction: column;
     align-items: center;
+
     justify-content: flex-start;
+
     overflow-y: auto;
     padding-bottom: 40px;
 }
@@ -329,13 +333,13 @@ mix-blend-mode: screen;
     bottom: 20px;
     left: 50%;
     transform: translateX(-50%);
-    width: 300px;
 
+    width: 300px;
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
 
-    z-index: 9999;
+    z-index: 99999;
 }
 
 #final-actions button {
@@ -353,6 +357,17 @@ mix-blend-mode: screen;
 
 #final-actions button:active {
     transform: scale(0.97);
+}
+#print-cont * {
+    pointer-events: none;
+}
+
+#result-img {
+    pointer-events: none;
+}
+
+#final-actions {
+    z-index: 99999;
 }
 
     </style>
