@@ -295,6 +295,20 @@ mix-blend-mode: screen;
     <canvas id="canvas" style="display:none;"></canvas>
 
     <script>
+    function unlockAudio() {
+    popSound.play().then(() => {
+        popSound.pause();
+        popSound.currentTime = 0;
+    }).catch(() => {});
+
+    printSound.play().then(() => {
+        printSound.pause();
+        printSound.currentTime = 0;
+    }).catch(() => {});
+}
+
+document.addEventListener('click', unlockAudio, { once: true });
+
         const video = document.getElementById('video');
         const timer = document.getElementById('timer');
         const flash = document.getElementById('flash');
@@ -306,10 +320,8 @@ mix-blend-mode: screen;
         const finalActions = document.getElementById('final-actions');
         const previewOverlay = document.getElementById('preview-overlay');
         const filterUI = document.getElementById('filter-ui');
-        const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
-printSound.volume = 0.45;
-        const popSound = new Audio('https://cdn.pixabay.com/audio/2022/03/15/audio_5c9d6d4f5f.mp3');
-popSound.volume = 0.6;
+       const popSound = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer_short.ogg');
 
         let filterStyle = 'none';
         let currentMode = 'receipt';
@@ -319,21 +331,18 @@ popSound.volume = 0.6;
         newsFrame.crossOrigin = "anonymous";
         newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
         
-
-
-function unlockAudio(){
-    popSound.play().then(()=>{
-        popSound.pause();
-        popSound.currentTime = 0;
-    }).catch(()=>{});
-}
-
-document.addEventListener('click', unlockAudio, { once: true });
-
 function playPop(){
-    popSound.currentTime = 0;
-    popSound.play();
+    try{
+        popSound.currentTime = 0;
+        popSound.play();
+    }catch(e){}
 }
+popSound.play().then(()=>{
+    console.log("sound ok");
+}).catch(err=>{
+    console.log("sound blocked", err);
+});
+
 document.addEventListener('click', () => {
     popSound.play().then(()=>{
         popSound.pause();
