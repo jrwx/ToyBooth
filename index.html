@@ -66,18 +66,19 @@
     background: rgba(255, 255, 255, 0.85);
 }
         #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
-       #display-box {
+    #display-box {
     position: relative;
     width: 100%;
     aspect-ratio: 1/1;
     background: #000;
     overflow: hidden;
 
-    border-radius: 12px; /* 👈 นิดเดียวพอ */
-    
-    border: 1px solid rgba(90, 74, 59, 0.25); /* 👈 เส้นบางชัดขึ้นนิด */
+    border-radius: 12px;
 
-    box-shadow: none; /* 👈 ตัดเงาออกให้คลีน */
+    /* 👇 กรอบบางมาก */
+    border: 0.8px solid rgba(107, 91, 77, 0.35);
+
+    box-shadow: none;
 
     transition: all 0.2s ease;
 }
