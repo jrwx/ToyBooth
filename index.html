@@ -651,8 +651,27 @@ if (currentMode === 'news') {
     const photoW = 800;
     const photoH = 450;
 
-    // 👉 วาดแบบเต็มภาพ (ไม่ตัด ไม่ crop)
-    ctx.drawImage(pic, photoX, photoY, photoW, photoH);
+// =========================
+// 🖼️ FULL IMAGE ไม่บีบ ไม่ยืด
+// =========================
+
+const targetW = photoW;
+const targetH = photoH;
+
+// หา scale ให้ "เต็มกรอบแบบไม่บีบ"
+const scale = Math.max(
+    targetW / pic.width,
+    targetH / pic.height
+);
+
+const drawW = pic.width * scale;
+const drawH = pic.height * scale;
+
+// จัดให้อยู่กลาง
+const dx = photoX + (targetW - drawW) / 2;
+const dy = photoY + (targetH - drawH) / 2;
+
+ctx.drawImage(pic, dx, dy, drawW, drawH);
 
     // =========================
     // 🧠 ค่อยเอา filter ทีหลัง
