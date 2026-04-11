@@ -305,6 +305,15 @@ mix-blend-mode: screen;
         newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
         const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
 printSound.volume = 0.45;
+const popSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=click-124467.mp3');
+popSound.volume = 0.5;
+
+function playPop(){
+    try{
+        popSound.currentTime = 0;
+        popSound.play();
+    }catch(e){}
+}
 
         async function startCam() {
             try {
@@ -625,7 +634,7 @@ if(currentMode === 'news') {
         printCont.classList.add('flow-animation');
 
         printSound.currentTime = 0;
-        printSound.play().catch(() => {});
+        playPrintSound();
     }
 
 }, 100);
