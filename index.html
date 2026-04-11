@@ -145,13 +145,18 @@ mix-blend-mode: screen;
     }
 }
         #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
-        #final-actions {
-    margin-top: 18px;
-    width: 100%;
-    display: none;
-    text-align: center;
+#final-actions{
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+
     position: relative;
     z-index: 20;
+
+    width: 300px;
+
+    flex-wrap: nowrap;   /* 👈 ห้ามขึ้นบรรทัดใหม่ */
 }
         .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
         .printer-shell{
@@ -230,6 +235,12 @@ mix-blend-mode: screen;
     position:relative;
     z-index:20;
 }
+.btn-save{
+    flex: 1;              /* 👈 ให้ปุ่มแบ่งพื้นที่เท่ากัน */
+    padding: 14px 10px;   /* 👈 ลด padding กันล้น */
+    font-size: 11px;
+    white-space: nowrap;  /* 👈 ห้ามตัดบรรทัด */
+}
     </style>
 </head>
 <body>
@@ -276,9 +287,9 @@ mix-blend-mode: screen;
 
     <!-- 🔥 ย้ายปุ่มมาไว้ตรงนี้ -->
     <div id="final-actions">
-        <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
-        <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
-        <button class="btn-save" onclick="location.reload()">ถ่ายใหม่</button>
+        <button class="btn-save" onclick="playPop(); saveImage()">เซฟรูปภาพ</button>
+<button class="btn-save" onclick="playPop(); printImage()">ปริ้นต์</button>
+<button class="btn-save" onclick="playPop(); location.reload()">ถ่ายใหม่</button>
     </div>
 </div>
     <canvas id="canvas" style="display:none;"></canvas>
@@ -306,7 +317,14 @@ mix-blend-mode: screen;
         const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
 printSound.volume = 0.45;
 const popSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=click-124467.mp3');
-popSound.volume = 0.5;
+popSound.volume = 0.6;
+
+function unlockAudio(){
+    popSound.play().then(()=>{
+        popSound.pause();
+        popSound.currentTime = 0;
+    }).catch(()=>{});
+}
 
 function playPop(){
     try{
