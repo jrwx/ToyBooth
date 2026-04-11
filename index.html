@@ -622,39 +622,55 @@ if (currentMode === 'news') {
         }
 
         function buildNewspaper(pic) {
-            canvas.width = 1000; 
-            canvas.height = 1400;
-            ctx.fillStyle = "#e3dccb"; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const photoW = 800;  
-            const photoH = 450;  
-            const photoX = 145; 
-            const photoY = 340; 
-            const targetRatio = photoW / photoH;
-            const zoomFactor = 1.0;
-            let sw = pic.width * zoomFactor;
-            let sh = sw / targetRatio;
-            if (sh > pic.height * zoomFactor) { sh = pic.height * zoomFactor; sw = sh * targetRatio; }
-            let sx = (pic.width - sw) / 2;
-            let sy = (pic.height - sh) / 2;
-            ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
-            const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
-            const data = imageData.data;
-            for (let i = 0; i < data.length; i += 4) {
-                let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                const grain = (Math.random() - 0.5) * 30;
-                gray = Math.max(0, Math.min(255, gray + grain));
-                data[i] = gray * 1.08; data[i + 1] = gray * 0.95; data[i + 2] = gray * 0.75;
-            }
-            ctx.putImageData(imageData, photoX, photoY);
-            ctx.fillStyle = "rgba(60,40,20,0.08)";
-            for (let y = photoY; y < photoY + photoH; y += 6) {
-                for (let x = photoX; x < photoX + photoW; x += 6) {
-                    ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
-                }
-            }
-            renderFinal();
+    canvas.width = 1000; 
+    canvas.height = 1400;
+    ctx.fillStyle = "#e3dccb"; 
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const photoW = 800;  
+    const photoH = 450;  
+    const photoX = 145; 
+    const photoY = 340; 
+
+    // 1. วาดรูปคนก่อน
+    const targetRatio = photoW / photoH;
+    const zoomFactor = 1.0;
+    let sw = pic.width * zoomFactor;
+    let sh = sw / targetRatio;
+    if (sh > pic.height * zoomFactor) { sh = pic.height * zoomFactor; sw = sh * targetRatio; }
+    let sx = (pic.width - sw) / 2;
+    let sy = (pic.height - sh) / 2;
+    ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+
+    // 2. ใส่ฟิลเตอร์เม็ดสี (Grain) ให้รูปคน
+    const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+        const grain = (Math.random() - 0.5) * 30;
+        gray = Math.max(0, Math.min(255, gray + grain));
+        data[i] = gray * 1.08; data[i + 1] = gray * 0.95; data[i + 2] = gray * 0.75;
+    }
+    ctx.putImageData(imageData, photoX, photoY);
+
+    // 3. ✨ วาดรูปเฟรม (Overlay) ทับลงไปบนหน้าคน
+    // ใช้รูปเดียวกับที่โชว์บนหน้าจอพรีวิวนะจ๊ะ
+    const overlayImg = document.getElementById('preview-overlay');
+    if (overlayImg && overlayImg.style.display !== 'none') {
+        // วาดทับลงไปในตำแหน่งและขนาดเดียวกับรูปถ่ายเป๊ะๆ
+        ctx.drawImage(overlayImg, photoX, photoY, photoW, photoH);
+    }
+
+    // 4. ใส่จุดๆ (Halftone) ทับทั้งหมดเพื่อให้ดูเป็นหนังสือพิมพ์เก่า
+    ctx.fillStyle = "rgba(60,40,20,0.08)";
+    for (let y = photoY; y < photoY + photoH; y += 6) {
+        for (let x = photoX; x < photoX + photoW; x += 6) {
+            ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
         }
+    }
+    renderFinal();
+}
+
 
         function renderFinal() {
             canvas.toBlob((blob) => {
