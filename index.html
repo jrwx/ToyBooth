@@ -135,31 +135,36 @@ mix-blend-mode: screen;
     pointer-events: none;
     transition: opacity 0.08s ease;
 }
-        .timer {
+    .timer {
     position: absolute;
-    top: 40%;
+    top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
 
-    color: #5a4a3b;
-    z-index: 11;
+    z-index: 20;
 
-    font-size: 80px;
-    font-family: 'Patrick Hand', cursive; /* 👈 น่ารักขึ้น */
-    font-weight: 600;
+    font-size: 90px;
+    font-family: 'Patrick Hand', cursive;
 
-    text-shadow: 2px 2px 0px rgba(255,255,255,0.4);
+    color: #ffffff;  /* 👈 ขาวชัดๆ */
+    
+    text-shadow: 
+        0 4px 12px rgba(0,0,0,0.6),
+        0 0 20px rgba(0,0,0,0.3);
 
     display: none;
+
+    pointer-events: none;
 }
 .timer {
-    animation: pop 0.2s ease;
+    animation: pop 0.15s ease;
 }
 
 @keyframes pop {
-    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+    0% { transform: translate(-50%, -50%) scale(0.6); opacity: 0.3; }
     100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
 }
+
 
         .controls { margin-top: 25px; width: 100%; max-width: 360px; }
         .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
