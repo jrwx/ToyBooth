@@ -221,6 +221,15 @@ mix-blend-mode: screen;
     background:radial-gradient(circle,rgba(0,0,0,0.5),transparent);
     opacity:0.6;
 }
+#final-actions{
+    margin-top:15px;
+    display:flex;
+    justify-content:center;
+    gap:10px;
+    flex-wrap:wrap;
+    position:relative;
+    z-index:20;
+}
     </style>
 </head>
 <body>
@@ -260,20 +269,18 @@ mix-blend-mode: screen;
         <div class="printer-slot"></div>
     </div>
 
-    <div class="paper-window">
-        <div class="print-container" id="print-cont">
-            <img id="result-img">
-        </div>
+   <div class="paper-window">
+    <div class="print-container" id="print-cont">
+        <img id="result-img">
     </div>
 
+    <!-- 🔥 ย้ายปุ่มมาไว้ตรงนี้ -->
     <div id="final-actions">
         <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
         <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
         <button class="btn-save" onclick="location.reload()">ถ่ายใหม่</button>
     </div>
-
 </div>
-
     <canvas id="canvas" style="display:none;"></canvas>
 
     <script>
