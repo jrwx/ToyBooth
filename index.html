@@ -90,25 +90,42 @@ mix-blend-mode: screen;
     padding-top: 20px;
     padding-bottom: 40px;
 }
+.printer-top {
+    width: 340px;
+    height: 90px;
+    background: linear-gradient(to bottom, #2d2d2d, #111);
+    border-radius: 20px 20px 10px 10px;
+    margin: 0 auto;
+    position: relative;
+    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+}
+
+.printer-top::after {
+    content: "";
+    position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 14px;
+    height: 12px;
+    background: #000;
+    border-radius: 8px;
+}
         .print-container {
     position: relative;
     width: 90%;
     max-width: 300px;
-    margin: 0 auto;
-    opacity: 0;
+    margin: -4px auto 0;
 }
         .flow-animation {
-    animation: slideDownPaper 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    animation: printReceiptOut 2.8s linear forwards;
+    clip-path: inset(0 0 100% 0);
 }
-
-@keyframes slideDownPaper {
-    0% {
-        transform: translateY(-100%);
-        opacity: 0;
+@keyframes printReceiptOut {
+    from {
+        clip-path: inset(0 0 100% 0);
     }
-    100% {
-        transform: translateY(0);
-        opacity: 1;
+    to {
+        clip-path: inset(0 0 0 0);
     }
 }
     .print-container.news-roll {
@@ -171,7 +188,9 @@ mix-blend-mode: screen;
     </div>
 
     <div id="print-page">
-        <div class="print-container" id="print-cont">
+    <div class="printer-top"></div>
+
+    <div class="print-container" id="print-cont">
             <img id="result-img">
         </div>
         <div id="final-actions">
