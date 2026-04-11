@@ -154,6 +154,50 @@ mix-blend-mode: screen;
     z-index: 20;
 }
         .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
+        .printer-shell{
+    width:100%;
+    display:flex;
+    justify-content:center;
+    margin-top:40px;
+}
+
+.printer-body{
+    width:340px;
+    background:linear-gradient(to bottom,#2a2a2a,#0f0f0f);
+    border-radius:25px;
+    padding-bottom:20px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.7);
+    position:relative;
+}
+
+.printer-top{
+    width:100%;
+    height:90px;
+    background:linear-gradient(to bottom,#3a3a3a,#151515);
+    border-radius:25px 25px 0 0;
+    position:relative;
+}
+
+.printer-slot{
+    width:70%;
+    height:10px;
+    background:#000;
+    position:absolute;
+    bottom:12px;
+    left:50%;
+    transform:translateX(-50%);
+    border-radius:10px;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+}
+
+.paper-window{
+    width:300px;
+    height:80vh;
+    margin:0 auto;
+    overflow:hidden;
+    background:#111;
+    border-radius:0 0 20px 20px;
+}
     </style>
 </head>
 <body>
@@ -188,23 +232,31 @@ mix-blend-mode: screen;
     </div>
 
 <div id="print-page">
+
     <div class="printer-shell">
-        <div class="printer-top">
-            <div class="printer-slot"></div>
+
+        <div class="printer-body">
+
+            <div class="printer-top">
+                <div class="printer-slot"></div>
+            </div>
+
+            <div class="paper-window">
+                <div class="print-container" id="print-cont">
+                    <img id="result-img">
+                </div>
+            </div>
+
         </div>
 
-        <div class="paper-window">
-            <div class="print-container" id="print-cont">
-                <img id="result-img">
-            </div>
-        </div>
     </div>
 
     <div id="final-actions">
         <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
         <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
-        <button class="btn-save" style="background:#333;color:#fff;" onclick="location.reload()">ถ่ายใหม่</button>
+        <button class="btn-save" onclick="location.reload()">ถ่ายใหม่</button>
     </div>
+
 </div>
 
     <canvas id="canvas" style="display:none;"></canvas>
