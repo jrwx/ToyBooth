@@ -67,9 +67,17 @@
     background: rgba(255, 255, 255, 0.85);
 }
         #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+#display-box {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1/1;
+    background: #000;
+    overflow: hidden;
 
-#display-box{
-    border: 0.5px solid rgba(0,0,0,0.08);
+   border-radius: 12px;
+border: 0.25px solid rgba(90,74,59,0.12);
+
+
     box-shadow: none;
 }
         
@@ -202,18 +210,17 @@ mix-blend-mode: screen;
     opacity: 0.9;
 }
 
-   #print-page{
+   #print-page {
     display: none;
     position: fixed;
     inset: 0;
     background: #000;
     z-index: 100;
-
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-
-    overflow: hidden;
+    overflow-y: auto;
+    padding-bottom: 40px;
 }
 .print-container{
     width: 100%;
@@ -259,7 +266,7 @@ mix-blend-mode: screen;
 
 .paper-window{
     width:300px;
-    height:600vh;
+    height:80vh;
     overflow:hidden;
     margin:0 auto;
     margin-top:-10px; /* 👈 ดึงให้ชิดปากเครื่อง */
@@ -316,11 +323,15 @@ mix-blend-mode: screen;
     background:radial-gradient(circle,rgba(0,0,0,0.5),transparent);
     opacity:0.6;
 }
-#final-actions{
-    position: sticky;
-    bottom: 20px;   /* 🔥 ล็อกตำแหน่ง */
-    background: transparent;
-    z-index: 50;
+#final-actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+
+    width: 300px;
+    margin: 18px auto 0;
+
+    position: relative;
 }
 
 #final-actions button {
@@ -729,8 +740,6 @@ if(currentMode === 'news') {
         printCont.style.animation = 'none';
         void printCont.offsetHeight;
         printCont.style.animation = '';
-        printCont.style.height = "600px";
-printCont.style.overflow = "hidden";
 
         setTimeout(() => {
 
