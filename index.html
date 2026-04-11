@@ -130,15 +130,14 @@ mix-blend-mode: screen;
     position: relative;
     z-index: 10;
 }
-    .flow-animation {
+   .flow-animation {
     animation: printReceiptOut 4.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    transform-origin: top center;
-    clip-path: inset(0 0 calc(100% - 12px) 0);
+    clip-path: inset(calc(100% - 20px) 0 0 0);
 }
 
 @keyframes printReceiptOut {
     0% {
-        clip-path: inset(0 0 calc(100% - 12px) 0);
+        clip-path: inset(calc(100% - 20px) 0 0 0);
     }
     100% {
         clip-path: inset(0 0 0 0);
