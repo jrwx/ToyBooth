@@ -96,15 +96,13 @@ mix-blend-mode: screen;
     padding-top: 0;
     padding-bottom: 40px;
 }
-.printer-top {
-    width: 340px;
-    height: 90px;
-    background: linear-gradient(to bottom, #2d2d2d, #111);
-    border-radius: 20px 20px 10px 10px;
-    margin: 0 auto;
-    position: relative;
-    box-shadow: 0 12px 30px rgba(0,0,0,0.45);
+.printer-shell {
+    margin-top: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
 }
+
 .printer-top {
     width: 340px;
     height: 88px;
@@ -117,39 +115,38 @@ mix-blend-mode: screen;
 .printer-slot {
     position: absolute;
     left: 50%;
-    bottom: 12px;
+    bottom: 10px;
     transform: translateX(-50%);
     width: 300px;
-    height: 10px;
+    height: 12px;
     background: #000;
-    border-radius: 8px;
-    box-shadow: inset 0 2px 4px rgba(0,0,0,.85);
+    border-radius: 10px;
+    box-shadow: inset 0 2px 6px rgba(0,0,0,.9);
 }
 
-    .print-container {
-    position: relative;
-    width: 90%;
-    max-width: 300px;
-    margin: -6px auto 0;
+.paper-window {
+    width: 300px;
     overflow: hidden;
+    margin-top: -2px; /* ให้ติดปากเครื่อง */
+}
+
+.print-container {
+    width: 100%;
+    transform: translateY(-92%);
 }
 
    .flow-animation {
-    animation: printReceiptOut 4.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    clip-path: inset(0 0 94% 0);
+    animation: printReceiptOut 4.8s linear forwards;
 }
 
 @keyframes printReceiptOut {
-    0% {
-        clip-path: inset(0 0 94% 0);
-        transform: translateY(0);
+    from {
+        transform: translateY(-92%);
     }
-    100% {
-        clip-path: inset(0 0 0 0);
+    to {
         transform: translateY(0);
     }
 }
-
 @keyframes newspaperUnroll {
     0% {
         transform: translateY(-100%);
@@ -206,9 +203,24 @@ mix-blend-mode: screen;
     </div>
 
    <div id="print-page">
-    <div class="printer-top">
-        <div class="printer-slot"></div>
+    <div class="printer-shell">
+        <div class="printer-top">
+            <div class="printer-slot"></div>
+        </div>
+
+        <div class="paper-window">
+            <div class="print-container" id="print-cont">
+                <img id="result-img">
+            </div>
+        </div>
     </div>
+
+    <div id="final-actions">
+        <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
+        <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
+        <button class="btn-save" style="background:#333;color:#fff;" onclick="location.reload()">ถ่ายใหม่</button>
+    </div>
+</div>
 
     <div class="print-container" id="print-cont">
         <img id="result-img">
