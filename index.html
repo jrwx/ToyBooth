@@ -66,53 +66,33 @@
     transform: translateY(-1px);
     background: rgba(255, 255, 255, 0.85);
 }
-        
-#booth-machine { 
-    position: relative; 
-    width: 100%; 
-    max-width: 360px; 
-    /* 🤎 เปลี่ยนเป็นสีน้ำตาลอ่อนแบบละมุน */
-    background: #d2b48c; 
-    /* 📏 ปรับความหนาขอบเครื่องให้บางลงเหลือ 3px */
-    padding: 3px; 
-    border-radius: 22px; 
-    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
-    transition: all 0.3s ease;
-    /* ✅ บังคับไม่ให้เครื่องเอียง */
-    transform: rotate(0deg) !important;
-    margin: 0 auto;
-}
-
+        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
 #display-box {
     position: relative;
     width: 100%;
     aspect-ratio: 1/1;
-    /* 🎨 สีเดียวกับพื้นหลังเว็บ */
-    background: #f7f1e3; 
+    background: #000;
     overflow: hidden;
-    border-radius: 19px; 
-    /* 🖌️ เส้นตัดขอบจอให้ดูคมแต่บางเบา */
-    border: 1px solid rgba(107, 91, 77, 0.15);
-    box-shadow: inset 0 0 8px rgba(0,0,0,0.02);
-}
 
-#display-box video {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    transform: scaleX(-1);
-    z-index: 1;
-    /* ป้องกันขอบวิดีโอเกินกรอบ */
-    border-radius: 18px;
-}
+   border-radius: 12px;
+border: 0.25px solid rgba(90,74,59,0.12);
 
-#booth-machine.news-mode { 
-    max-width: 400px; 
-}
 
-#display-box.news-mode { 
+    box-shadow: none;
+}
+        
+        #display-box video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transform: scaleX(-1);
+            z-index: 1;
+        }
+
+        #booth-machine.news-mode { max-width: 400px; }
+        #display-box.news-mode { 
             aspect-ratio: 1000/1400 !important; 
             background: #e3dccb; 
         }
@@ -129,7 +109,17 @@
     opacity: 0.96;
 }
 
-
+        #preview-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            display: none; 
+            z-index: 5;
+            object-fit: fill;
+        }
 
         #flash {
     position: absolute;
@@ -456,7 +446,6 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
             popSound.play().catch(()=>{});
         }
         
-        
         async function startCam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -474,16 +463,10 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
             document.getElementById('btn-m-receipt2').classList.toggle('active', mode === 'receipt2');
             
             if (mode === 'news') {
-    booth.classList.add('news-mode');
-    display.classList.add('news-mode');
-
-    previewOverlay.style.display = 'none'; // 👈 เอากรอบออก
-
-    filterUI.style.visibility = 'hidden';
-}
-else {
-    previewOverlay.style.display = 'none';
-}
+                booth.classList.add('news-mode');
+                display.classList.add('news-mode');
+                previewOverlay.style.display = 'block';
+                filterUI.style.visibility = 'hidden'; 
             } else {
                 booth.classList.remove('news-mode');
                 display.classList.remove('news-mode');
@@ -639,82 +622,39 @@ if (currentMode === 'news') {
         }
 
         function buildNewspaper(pic) {
-    canvas.width = 1000; 
-    canvas.height = 1400;
-
-    ctx.fillStyle = "#e3dccb"; 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // =========================
-    // 🖼️ ใช้ "เต็มภาพ" ไม่ crop
-    // =========================
-
-    const photoX = 145;
-    const photoY = 340;
-    const photoW = 800;
-    const photoH = 450;
-
-// =========================
-// 🖼️ FULL IMAGE ไม่บีบ ไม่ยืด
-// =========================
-
-const targetW = photoW;
-const targetH = photoH;
-
-// หา scale ให้ "เต็มกรอบแบบไม่บีบ"
-const scale = Math.max(
-    targetW / pic.width,
-    targetH / pic.height
-);
-
-const drawW = pic.width * scale;
-const drawH = pic.height * scale;
-
-// จัดให้อยู่กลาง
-const dx = photoX + (targetW - drawW) / 2;
-const dy = photoY + (targetH - drawH) / 2;
-
-ctx.drawImage(pic, dx, dy, drawW, drawH);
-
-    // =========================
-    // 🧠 ค่อยเอา filter ทีหลัง
-    // =========================
-    const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-
-        const grain = (Math.random() - 0.5) * 30;
-        gray += grain;
-
-        gray = Math.max(0, Math.min(255, gray));
-
-        data[i]     = gray * 1.08;
-        data[i + 1] = gray * 0.95;
-        data[i + 2] = gray * 0.75;
-    }
-
-    ctx.putImageData(imageData, photoX, photoY);
-
-    // =========================
-    // dot overlay + frame เหมือนเดิม
-    // =========================
-    ctx.fillStyle = "rgba(60,40,20,0.08)";
-    for (let y = photoY; y < photoY + photoH; y += 6) {
-        for (let x = photoX; x < photoX + photoW; x += 6) {
-            ctx.beginPath();
-            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
-            ctx.fill();
+            canvas.width = 1000; 
+            canvas.height = 1400;
+            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const photoW = 800;  
+            const photoH = 450;  
+            const photoX = 145; 
+            const photoY = 340; 
+            const targetRatio = photoW / photoH;
+            const zoomFactor = 1.0;
+            let sw = pic.width * zoomFactor;
+            let sh = sw / targetRatio;
+            if (sh > pic.height * zoomFactor) { sh = pic.height * zoomFactor; sw = sh * targetRatio; }
+            let sx = (pic.width - sw) / 2;
+            let sy = (pic.height - sh) / 2;
+            ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+            const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                const grain = (Math.random() - 0.5) * 30;
+                gray = Math.max(0, Math.min(255, gray + grain));
+                data[i] = gray * 1.08; data[i + 1] = gray * 0.95; data[i + 2] = gray * 0.75;
+            }
+            ctx.putImageData(imageData, photoX, photoY);
+            ctx.fillStyle = "rgba(60,40,20,0.08)";
+            for (let y = photoY; y < photoY + photoH; y += 6) {
+                for (let x = photoX; x < photoX + photoW; x += 6) {
+                    ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+            renderFinal();
         }
-    }
-
-    if (newsFrame.complete) {
-        ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
-    }
-
-    renderFinal();
-}
 
         function renderFinal() {
             canvas.toBlob((blob) => {
