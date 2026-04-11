@@ -522,7 +522,22 @@ if (currentMode === 'news') {
                 }
                 
                 pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                await new Promise(r => requestAnimationFrame(r));
+
+const vw = video.videoWidth;
+const vh = video.videoHeight;
+
+pCanvas.width = vw;
+pCanvas.height = vh;
+
+// freeze frame + flip แบบนิ่ง
+pCtx.setTransform(-1, 0, 0, 1, vw, 0);
+
+// ฟิลเตอร์หนังสือพิมพ์
+pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+
+// วาด “เฟรมภาพนิ่ง” ไม่ใช่ stream
+pCtx.drawImage(video, 0, 0, vw, vh);
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
