@@ -421,6 +421,8 @@ mix-blend-mode: screen;
         printSound.currentTime = 0;
     }).catch(() => {});
 }
+const newsFrame = new Image();
+newsFrame.src = "https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG";
 
         const video = document.getElementById('video');
         const timer = document.getElementById('timer');
@@ -680,6 +682,16 @@ if (currentMode === 'news') {
                     ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
                 }
             }
+            // ===== FRAME OVERLAY (harry.png) =====
+if (newsFrame.complete) {
+    ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
+} else {
+    newsFrame.onload = () => {
+        ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
+        renderFinal();
+    };
+    return; // รอเฟรมโหลดก่อน
+}
 
             renderFinal();
         }
