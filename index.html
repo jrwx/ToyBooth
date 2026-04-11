@@ -307,19 +307,19 @@ else buildReceipt(pics);
             ctx.fill(); ctx.globalCompositeOperation = 'source-over';
             renderFinal();
         }        
-      function buildReceipt2(pic) {
+   function buildReceipt2(pic) {
     canvas.width = 600;
-    canvas.height = 1450; // 🔥 สั้นลง
-    ctx.clearRect(0,0,600,1450);
+    canvas.height = 930; // 🔥 จบพอดีใต้ THANK YOU
+    ctx.clearRect(0,0,600,930);
 
     // background
     ctx.fillStyle = "#fdfaf5";
-    ctx.fillRect(0, 0, 600, 1450);
+    ctx.fillRect(0, 0, 600, 930);
 
     // noise
-    for(let i=0;i<3500;i++){
+    for(let i=0;i<2500;i++){
         ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.05})`;
-        ctx.fillRect(Math.random()*600, Math.random()*1450,1,1);
+        ctx.fillRect(Math.random()*600, Math.random()*930,1,1);
     }
 
     // HEADER
@@ -342,7 +342,7 @@ else buildReceipt(pics);
     ctx.font = "22px monospace";
     ctx.fillText("RECEIPT " + id, 60, 600);
 
-    // ⭐ STARS (ใหญ่)
+    // ⭐ STARS
     const star = Math.floor(1 + Math.random()*5);
     let starStr = "";
     for(let i=0;i<5;i++){
@@ -353,33 +353,31 @@ else buildReceipt(pics);
     ctx.font = "42px monospace";
     ctx.fillText(starStr, 540, 600);
 
-    // BY LINE
+    // ✅ BY LINE = ให้เหมือน RECEIPT ทุกอย่าง
     ctx.textAlign = "left";
-    ctx.font = "bold 20px monospace";
-    ctx.fillText("BY NONGJANG", 60, 670);
-    ctx.fillText("PHOTO BOOTH", 60, 700);
+    ctx.font = "22px monospace";
+    ctx.fillText("BY NONGJANG", 60, 640);
+    ctx.fillText("PHOTO BOOTH", 60, 670);
 
-    // ================= BARCODE (ยาวเท่ากัน + กึ่งกลาง) =================
-    const barY = 760;
-    const barWidth = 420; // 🔥 กำหนดความยาวเท่ากัน
+    // ================= BARCODE (สั้นขึ้น + อยู่กลาง + สูงเท่ากันหมด) =================
+    const barY = 710; // 🔥 ขยับขึ้น
+    const barWidth = 300; // 🔥 สั้นลง
     const startX = (600 - barWidth) / 2;
+    const lineHeight = 70; // 🔥 สูงเท่ากันหมด
 
     ctx.fillStyle = "#111";
 
-    for(let i=0;i<120;i++){
-        if(Math.random() > 0.3){
-            const x = startX + i * (barWidth / 120);
-            ctx.fillRect(x, barY, 2, 90 + Math.random()*40);
+    for(let i=0;i<90;i++){
+        if(Math.random() > 0.25){
+            const x = startX + i * (barWidth / 90);
+            ctx.fillRect(x, barY, 2, lineHeight);
         }
     }
 
-    // THANK YOU (อยู่ใต้ barcode)
+    // THANK YOU
     ctx.textAlign = "center";
     ctx.font = "22px monospace";
-    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 930);
-
-    // เส้นจบสั้น
-    ctx.fillRect(200, 960, 200, 2);
+    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 830);
 
     renderFinal();
 }
