@@ -113,21 +113,20 @@
 }
 
 #display-box.news-mode { 
-    aspect-ratio: 1000/1400 !important; 
-    background: #e3dccb; 
-}
+            aspect-ratio: 1000/1400 !important; 
+            background: #e3dccb; 
+        }
 
-/* ✅ โหมดหนังสือพิมพ์: ให้วิดีโอแสดงผลเต็มกรอบเหมือนเดิม ไม่ต้องย่อ */
-#display-box.news-mode video {
-    width: 100% !important;
-    height: 100% !important;
-    left: 0 !important;
-    top: 0 !important;
-    
-    /* คงฟิลเตอร์สีแนววินเทจไว้เพื่อให้เข้ากับธีม */
+        #display-box.news-mode video {
+    width: 80% !important;
+    height: 32.14% !important;
+    left: 14.5% !important;
+    top: 24.28% !important;
+
+    /* โทนเดียวกับรูป final */
     filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
+
     opacity: 0.96;
-    object-fit: cover !important;
 }
 
 
