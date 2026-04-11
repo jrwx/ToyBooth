@@ -228,14 +228,6 @@ mix-blend-mode: screen;
     will-change: transform;
 }
 
-
-@keyframes paperFeed{
-    0%{ transform: translateY(-100%); }
-    10%{ transform: translateY(-95%); }
-    60%{ transform: translateY(-20%); }
-    100%{ transform: translateY(0%); }
-}
-
    .flow-animation {
     animation: printReceiptOut 4.8s linear forwards;
 }
@@ -364,16 +356,7 @@ mix-blend-mode: screen;
 #final-actions button:active {
     transform: scale(0.97);
 }
-.btn-save{
-    flex: 1;
-    padding: 16px 12px;
-    font-size: 13px;
-    font-weight: bold;
-    border-radius: 999px;
-    white-space: nowrap;
-    min-width: 90px;
-    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
-}
+
     </style>
 </head>
 <body>
@@ -440,8 +423,6 @@ mix-blend-mode: screen;
     }).catch(() => {});
 }
 
-document.addEventListener('click', unlockAudio, { once: true });
-
         const video = document.getElementById('video');
         const timer = document.getElementById('timer');
         const flash = document.getElementById('flash');
@@ -460,17 +441,7 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
         let currentMode = 'receipt';
         let finalBlob = null;
 
-        const newsFrame = new Image();
-        newsFrame.crossOrigin = "anonymous";
-        newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
         
-function playPop(){
-    try{
-        popSound.currentTime = 0;
-        popSound.play();
-    }catch(e){}
-}
-
         async function startCam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
@@ -790,7 +761,7 @@ if(currentMode === 'news') {
         printCont.classList.add('flow-animation');
 
         printSound.currentTime = 0;
-        playPrintSound();
+        printSound.play();
     }
 
 }, 100);
