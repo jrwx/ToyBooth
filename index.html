@@ -71,64 +71,61 @@
     position: relative; 
     width: 100%; 
     max-width: 360px; 
-    background: var(--card-bg); 
-    padding: 2px; /* 👈 ลดจาก 8px เหลือ 2px เพื่อให้ขอบบางลง */
-    border-radius: 20px; 
-    box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
-    transition: all 0.3s ease; 
+    /* 🤎 เปลี่ยนเป็นสีน้ำตาลอ่อนแบบละมุน */
+    background: #d2b48c; 
+    /* 📏 ปรับความหนาขอบเครื่องให้บางลงเหลือ 3px */
+    padding: 3px; 
+    border-radius: 22px; 
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+    transition: all 0.3s ease;
+    /* ✅ บังคับไม่ให้เครื่องเอียง */
+    transform: rotate(0deg) !important;
+    margin: 0 auto;
 }
 
 #display-box {
     position: relative;
     width: 100%;
     aspect-ratio: 1/1;
-    background: #000;
+    /* 🎨 สีเดียวกับพื้นหลังเว็บ */
+    background: #f7f1e3; 
     overflow: hidden;
-    border-radius: 18px; /* ปรับโค้งให้เข้ากับขอบเครื่องที่บางลง */
-    border: 1px solid rgba(255, 255, 255, 0.05); /* 👈 เส้นขอบบางๆ พอให้ดูมีมิติ */
-    box-shadow: none;
+    border-radius: 19px; 
+    /* 🖌️ เส้นตัดขอบจอให้ดูคมแต่บางเบา */
+    border: 1px solid rgba(107, 91, 77, 0.15);
+    box-shadow: inset 0 0 8px rgba(0,0,0,0.02);
 }
 
-        
-        #display-box video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            transform: scaleX(-1);
-            z-index: 1;
-        }
+#display-box video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: scaleX(-1);
+    z-index: 1;
+    /* ป้องกันขอบวิดีโอเกินกรอบ */
+    border-radius: 18px;
+}
 
-        #booth-machine.news-mode { max-width: 400px; }
-        #display-box.news-mode { 
-            aspect-ratio: 1000/1400 !important; 
-            background: #e3dccb; 
-        }
+#booth-machine.news-mode { 
+    max-width: 400px; 
+}
 
-        #display-box.news-mode video {
+#display-box.news-mode { 
+    aspect-ratio: 1000/1400 !important; 
+    background: #e3dccb; 
+}
+
+#display-box.news-mode video {
     width: 80% !important;
     height: 32.14% !important;
-    left: 14.5% !important;
+    left: 10% !important; /* ปรับตำแหน่งให้กึ่งกลางพอดี */
     top: 24.28% !important;
-
-    /* โทนเดียวกับรูป final */
     filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
-
     opacity: 0.96;
 }
 
-        #preview-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: none; 
-            z-index: 5;
-            object-fit: fill;
-        }
 
         #flash {
     position: absolute;
