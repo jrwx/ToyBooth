@@ -527,17 +527,30 @@ if (currentMode === 'news') {
 const vw = video.videoWidth;
 const vh = video.videoHeight;
 
+// 🔥 สร้าง snapshot frame ก่อน (หยุด live stream)
+const snap = document.createElement('canvas');
+snap.width = vw;
+snap.height = vh;
+
+const sctx = snap.getContext('2d');
+
+// wait 1 frame ให้ภาพนิ่งจริง
+await new Promise(r => requestAnimationFrame(r));
+
+// วาดเฟรมจาก video ลง snapshot ก่อน
+sctx.drawImage(video, 0, 0, vw, vh);
+
+// ===== ใช้ snapshot แทน video =====
 pCanvas.width = vw;
 pCanvas.height = vh;
 
-// freeze frame + flip แบบนิ่ง
 pCtx.setTransform(-1, 0, 0, 1, vw, 0);
 
 // ฟิลเตอร์หนังสือพิมพ์
 pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
 
-// วาด “เฟรมภาพนิ่ง” ไม่ใช่ stream
-pCtx.drawImage(video, 0, 0, vw, vh);
+// วาดจาก snapshot (ไม่ใช่ video แล้ว)
+pCtx.drawImage(snap, 0, 0);
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
