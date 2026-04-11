@@ -138,7 +138,9 @@ mix-blend-mode: screen;
    .flow-animation {
     animation: printReceiptOut 4.8s linear forwards;
 }
-
+.news-roll {
+    animation: newspaperUnroll 2.8s ease forwards;
+}
 @keyframes printReceiptOut {
     from {
         transform: translateY(-92%);
@@ -222,14 +224,6 @@ mix-blend-mode: screen;
     </div>
 </div>
 
-    <div class="print-container" id="print-cont">
-        <img id="result-img">
-    </div>
-
-    <div id="final-actions">
-    <div class="print-container" id="print-cont">
-            <img id="result-img">
-        </div>
         <div id="final-actions">
     <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
     <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
@@ -553,37 +547,37 @@ if(currentMode === 'news') {
 
     renderFinal();
 }
-        function renderFinal() {
+      function renderFinal() {
     canvas.toBlob((blob) => {
         finalBlob = blob;
         resultImg.src = URL.createObjectURL(blob);
 
         document.getElementById('camera-ui').style.display = 'none';
         printPage.style.display = 'flex';
+
+        // ✅ วางตรงนี้
         printCont.classList.remove('flow-animation', 'news-roll');
-printPage.style.flexDirection = 'column';
-printPage.style.alignItems = 'center';
-printPage.style.justifyContent = 'flex-start';
+        printCont.style.animation = 'none';
+        void printCont.offsetHeight;
+        printCont.style.animation = '';
 
         setTimeout(() => {
-    if (currentMode === 'news') {
-        printCont.classList.add('news-roll');
-    } else {
-        printCont.classList.add('flow-animation');
+            if (currentMode === 'news') {
+                printCont.classList.add('news-roll');
+            } else {
+                printCont.classList.add('flow-animation');
+                printSound.currentTime = 0;
+                printSound.play().catch(() => {});
+            }
+        }, 50);
 
-        // 🔊 เล่นเสียงปริ้น
-        printSound.currentTime = 0;
-        printSound.play().catch(() => {});
-    }
-}, 300);
         setTimeout(() => {
-    finalActions.style.display = 'block';
-    printSound.pause();
-}, 4700);
+            finalActions.style.display = 'block';
+            printSound.pause();
+        }, 4700);
 
     }, 'image/png');
 }
-
         async function saveImage() {
     if (!finalBlob) return;
 
