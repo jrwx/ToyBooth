@@ -324,15 +324,19 @@ mix-blend-mode: screen;
     opacity:0.6;
 }
 #final-actions {
-    display: grid;
+    display: none; /* เริ่มต้นซ่อนไว้ก่อน */
     grid-template-columns: repeat(3, 1fr);
     gap: 10px;
-
-    width: 300px;
-    margin: 18px auto 0;
-
-    position: relative;
+    width: 320px; /* ปรับความกว้างให้พอดีหน้าจอ */
+    
+    /* ✅ แก้เป็น Fixed หรือ Absolute เพื่อให้อยู่นิ่งๆ */
+    position: fixed; 
+    bottom: 40px; 
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 110; /* ให้อยู่เหนือรูป */
 }
+
 
 #final-actions button {
     width: 100%;
@@ -385,23 +389,23 @@ mix-blend-mode: screen;
     </div>
 
 <div id="print-page">
-
     <div class="printer-slot-only">
         <div class="printer-slot"></div>
     </div>
 
-   <div class="paper-window">
-    <div class="print-container" id="print-cont">
-        <img id="result-img">
-    </div>
+    <div class="paper-window">
+        <div class="print-container" id="print-cont">
+            <img id="result-img">
+        </div>
+        </div>
 
-    <!-- 🔥 ย้ายปุ่มมาไว้ตรงนี้ -->
-    <div id="final-actions">
-    <button onclick="playPop(); saveImage()">เซฟ</button>
-<button onclick="playPop(); printImage()">ปริ้นต์</button>
-<button onclick="playPop(); location.reload()">ถ่ายใหม่</button>
+    <div id="final-actions" style="display: none;">
+        <button onclick="playPop(); saveImage()">เซฟ</button>
+        <button onclick="playPop(); printImage()">ปริ้นต์</button>
+        <button onclick="playPop(); location.reload()">ถ่ายใหม่</button>
     </div>
 </div>
+
     <canvas id="canvas" style="display:none;"></canvas>
 
     <script>
@@ -761,7 +765,7 @@ if(currentMode === 'news') {
 }, 100);
 
         setTimeout(() => {
-            finalActions.style.display = 'block';
+            finalActions.style.display = 'grid';
             printSound.pause();
         }, 4700);
 
