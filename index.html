@@ -456,6 +456,10 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
             popSound.play().catch(()=>{});
         }
         
+        const newsFrame = new Image();
+        newsFrame.crossOrigin = "anonymous";
+        newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
+        
         async function startCam() {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
