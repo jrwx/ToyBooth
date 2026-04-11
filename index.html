@@ -20,7 +20,7 @@
         #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 25px; color: #a0a0a0; text-transform: uppercase; }
 
-        .mode-selector {
+.mode-selector {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -30,19 +30,20 @@
     margin: 20px auto 25px;
 }
 .m-btn {
-    flex: 1;                  /* 👈 ทำให้ขนาดเท่ากัน */
-    max-width: 140px;        /* 👈 กันไม่ให้ยาวเกิน */
+    flex: 1;
+    max-width: 140px;
+
+    height: 52px;              /* 👈 ทำให้สูงเท่ากัน */
     
-    background: rgba(255, 255, 255, 0.25); /* 👈 เหมือนฟิลเตอร์ */
+    background: rgba(255, 255, 255, 0.25);
     color: #6b5b4d;
 
     border: 1px solid rgba(107, 91, 77, 0.15);
 
-    padding: 14px 10px;      /* 👈 ใหญ่ขึ้น */
     font-size: 13px;
     font-weight: 600;
 
-    border-radius: 999px;
+    border-radius: 14px;       /* 👈 สี่เหลี่ยมมุมโค้งนิดเดียว */
 
     cursor: pointer;
 
@@ -50,14 +51,14 @@
 
     transition: all 0.2s ease;
 
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;   /* 👈 ตัวหนังสือกลางปุ่ม */
 }
-
 .m-btn.active {
-    background: #6b5b4d;   /* 👈 สีเดียวกับ filter active */
+    background: #6b5b4d;
     color: #fff;
     border-color: transparent;
-
     transform: scale(1.03);
 }
 
