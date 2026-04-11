@@ -66,20 +66,29 @@
     transform: translateY(-1px);
     background: rgba(255, 255, 255, 0.85);
 }
-        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
+        
+#booth-machine { 
+    position: relative; 
+    width: 100%; 
+    max-width: 360px; 
+    background: var(--card-bg); 
+    padding: 2px; /* 👈 ลดจาก 8px เหลือ 2px เพื่อให้ขอบบางลง */
+    border-radius: 20px; 
+    box-shadow: 0 15px 35px rgba(0,0,0,0.5); 
+    transition: all 0.3s ease; 
+}
+
 #display-box {
     position: relative;
     width: 100%;
     aspect-ratio: 1/1;
     background: #000;
     overflow: hidden;
-
-   border-radius: 12px;
-border: 0.25px solid rgba(90,74,59,0.12);
-
-
+    border-radius: 18px; /* ปรับโค้งให้เข้ากับขอบเครื่องที่บางลง */
+    border: 1px solid rgba(255, 255, 255, 0.05); /* 👈 เส้นขอบบางๆ พอให้ดูมีมิติ */
     box-shadow: none;
 }
+
         
         #display-box video {
             position: absolute;
