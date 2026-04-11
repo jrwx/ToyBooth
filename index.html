@@ -19,14 +19,25 @@
         #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
         .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 25px; color: #a0a0a0; text-transform: uppercase; }
 
-        .mode-selector { display: flex; gap: 10px; margin-bottom: 25px; }
+        .mode-selector {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+
+    width: 100%;
+    margin: 20px auto 25px;
+}
 .m-btn {
-    background: rgba(255, 255, 255, 0.7);   /* 👈 เข้มขึ้นจาก 0.35 */
-    color: #4a3b2f;                         /* 👈 ตัวหนังสือเข้มขึ้น */
+    flex: 1;                  /* 👈 ทำให้ขนาดเท่ากัน */
+    max-width: 140px;        /* 👈 กันไม่ให้ยาวเกิน */
+    
+    background: rgba(255, 255, 255, 0.25); /* 👈 เหมือนฟิลเตอร์ */
+    color: #6b5b4d;
 
-    border: 1px solid rgba(74, 59, 47, 0.25);
+    border: 1px solid rgba(107, 91, 77, 0.15);
 
-    padding: 12px 18px;
+    padding: 14px 10px;      /* 👈 ใหญ่ขึ้น */
     font-size: 13px;
     font-weight: 600;
 
@@ -34,22 +45,21 @@
 
     cursor: pointer;
 
-    backdrop-filter: blur(10px);
+    backdrop-filter: blur(8px);
 
     transition: all 0.2s ease;
 
-    min-width: 110px;
     text-align: center;
-
-    box-shadow: 0 2px 8px rgba(0,0,0,0.05); /* 👈 เพิ่มมิติ */
 }
 
 .m-btn.active {
-    background: #5a4a3b;
+    background: #6b5b4d;   /* 👈 สีเดียวกับ filter active */
     color: #fff;
     border-color: transparent;
-    box-shadow: 0 4px 12px rgba(90, 74, 59, 0.25);
+
+    transform: scale(1.03);
 }
+
 .m-btn:hover {
     transform: translateY(-1px);
     background: rgba(255, 255, 255, 0.85);
