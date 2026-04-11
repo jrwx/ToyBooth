@@ -95,32 +95,36 @@ mix-blend-mode: screen;
     width: 90%;
     max-width: 300px;
     margin: 0 auto;
+    opacity: 0;
 }
-        .flow-animation { animation: slideDownPaper 7s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
-        @keyframes slideDownPaper { 0% { transform: translate(-50%, -100%); } 100% { transform: translate(-50%, 40px); } } 
+        .flow-animation {
+    animation: slideDownPaper 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes slideDownPaper {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
     .print-container.news-roll {
-    animation: newspaperUnroll 2.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    clip-path: inset(0 0 100% 0);
+    animation: newspaperUnroll 1.2s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
 @keyframes newspaperUnroll {
     0% {
-        transform: translate(-50%, -40px);
+        transform: translateY(-100%);
         clip-path: inset(0 0 100% 0);
-        opacity: 0.4;
-    }
-    30% {
-        transform: translate(-50%, -10px);
-        clip-path: inset(0 0 85% 0);
-        opacity: 1;
-    }
-    60% {
-        transform: translate(-50%, 10px);
-        clip-path: inset(0 0 40% 0);
+        opacity: 0;
     }
     100% {
-        transform: translate(-50%, 40px);
-        clip-path: inset(0 0 0% 0);
+        transform: translateY(0);
+        clip-path: inset(0 0 0 0);
+        opacity: 1;
     }
 }
         #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
@@ -498,18 +502,21 @@ if(currentMode === 'news') {
 
         document.getElementById('camera-ui').style.display = 'none';
         printPage.style.display = 'flex';
+        printCont.classList.remove('flow-animation', 'news-roll');
+printCont.style.opacity = '0';
 printPage.style.flexDirection = 'column';
 printPage.style.alignItems = 'center';
 printPage.style.justifyContent = 'flex-start';
 
         setTimeout(() => {
-            if (currentMode === 'news') {
-                printCont.classList.add('news-roll');
-            } else {
-                printCont.classList.add('flow-animation');
-            }
-        }, 500);
+    printCont.style.opacity = '1';
 
+    if (currentMode === 'news') {
+        printCont.classList.add('news-roll');
+    } else {
+        printCont.classList.add('flow-animation');
+    }
+}, 80);
         // ✅ ปุ่มขึ้นไวขึ้น
         setTimeout(() => {
             finalActions.style.display = 'block';
