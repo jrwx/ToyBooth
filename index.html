@@ -247,6 +247,8 @@ mix-blend-mode: screen;
         const newsFrame = new Image();
         newsFrame.crossOrigin = "anonymous";
         newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
+        const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
+printSound.volume = 0.45;
 
         async function startCam() {
             try {
@@ -553,18 +555,20 @@ printPage.style.alignItems = 'center';
 printPage.style.justifyContent = 'flex-start';
 
         setTimeout(() => {
-    printCont.style.opacity = '1';
-
     if (currentMode === 'news') {
         printCont.classList.add('news-roll');
     } else {
         printCont.classList.add('flow-animation');
+
+        // 🔊 เล่นเสียงปริ้น
+        printSound.currentTime = 0;
+        printSound.play().catch(() => {});
     }
-}, 80);
-        // ✅ ปุ่มขึ้นไวขึ้น
+}, 300);
         setTimeout(() => {
-            finalActions.style.display = 'block';
-        }, 800);
+    finalActions.style.display = 'block';
+    printSound.pause();
+}, 4700);
 
     }, 'image/png');
 }
