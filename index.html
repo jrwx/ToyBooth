@@ -227,19 +227,24 @@ mix-blend-mode: screen;
     opacity:0.6;
 }
 #final-actions{
-    margin-top:15px;
-    display:flex;
-    justify-content:center;
-    gap:10px;
-    flex-wrap:wrap;
-    position:relative;
-    z-index:20;
+    margin-top: 18px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 360px;
+    padding: 0 10px;
+    box-sizing: border-box;
 }
 .btn-save{
-    flex: 1;              /* 👈 ให้ปุ่มแบ่งพื้นที่เท่ากัน */
-    padding: 14px 10px;   /* 👈 ลด padding กันล้น */
-    font-size: 11px;
-    white-space: nowrap;  /* 👈 ห้ามตัดบรรทัด */
+    flex: 1;
+    padding: 16px 12px;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 999px;
+    white-space: nowrap;
+    min-width: 90px;
+    box-shadow: 0 6px 15px rgba(0,0,0,0.25);
 }
     </style>
 </head>
