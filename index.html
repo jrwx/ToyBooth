@@ -1,715 +1,149 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Jarawee Pro Booth - Magical Edition</title>
-    <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
-    <style>
-        :root { --bg-color: #121212; --card-bg: #1e1e1e; --accent: #ff3e3e; --text-dim: #a0a0a0; }
-        body { background-color: var(--bg-color); font-family: 'Sarabun', sans-serif; text-align: center; margin: 0; padding: 0; color: #fff; overflow-x: hidden; }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<title>Jarawee Pro Booth - Fixed</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;700&family=VT323&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root{--bg-color:#121212;--card-bg:#1e1e1e;--accent:#ff3e3e;--text-dim:#a0a0a0}
+body{background:#121212;font-family:'Sarabun',sans-serif;text-align:center;margin:0;color:#fff;overflow-x:hidden}
+#camera-ui{padding:40px 20px;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+.header-title{font-family:'VT323';font-size:28px;margin-bottom:25px;color:#a0a0a0}
+.mode-selector{display:flex;gap:10px;margin-bottom:25px}.m-btn{background:#333;color:#fff;border:none;padding:12px 24px;border-radius:10px}.m-btn.active{background:var(--accent)}
+#booth-machine{width:100%;max-width:360px;background:#1e1e1e;padding:8px;border-radius:20px}
+#display-box{position:relative;width:100%;aspect-ratio:1/1;background:#000;overflow:hidden;border-radius:15px}
+#display-box video{position:absolute;inset:0;width:100%!important;height:100%!important;object-fit:cover!important;transform:scaleX(-1)}
+#preview-overlay{position:absolute;inset:0;display:none;width:100%;height:100%;object-fit:fill}
+#flash{position:absolute;inset:0;background:#fff;opacity:0;transition:opacity .08s ease}
+.timer{position:absolute;top:40%;left:50%;transform:translate(-50%,-50%);font-size:70px;display:none;font-family:'Press Start 2P'}
+.controls{margin-top:25px;width:100%;max-width:360px}.btn-snap{background:var(--accent);color:#fff;padding:22px;border:none;width:100%;border-radius:100px}
 
-        #camera-ui { padding: 40px 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
-        .header-title { font-family: 'VT323'; font-size: 28px; letter-spacing: 2px; margin-bottom: 25px; color: #a0a0a0; text-transform: uppercase; }
-
-        .mode-selector { display: flex; gap: 10px; margin-bottom: 25px; }
-        .m-btn { background: #333; color: #fff; border: none; padding: 12px 24px; font-weight: bold; cursor: pointer; border-radius: 10px; font-size: 14px; text-transform: uppercase; }
-        .m-btn.active { background: var(--accent); box-shadow: 0 0 15px rgba(255, 62, 62, 0.4); }
-
-        #booth-machine { position: relative; width: 100%; max-width: 360px; background: var(--card-bg); padding: 8px; border-radius: 20px; box-shadow: 0 15px 35px rgba(0,0,0,0.5); transition: all 0.3s ease; }
-        #display-box { position: relative; width: 100%; aspect-ratio: 1/1; background: #000; overflow: hidden; border-radius: 15px; border: 3px solid #333; transition: all 0.3s ease; }
-        
-        #display-box video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            transform: scaleX(-1);
-            z-index: 1;
-        }
-
-        #booth-machine.news-mode { max-width: 400px; }
-        #display-box.news-mode { 
-            aspect-ratio: 1000/1400 !important; 
-            background: #e3dccb; 
-        }
-
-        #display-box.news-mode video {
-    width: 80% !important;
-    height: 32.14% !important;
-    left: 14.5% !important;
-    top: 24.28% !important;
-
-    /* โทนเดียวกับรูป final */
-    filter: sepia(1) saturate(0.7) contrast(1.2) brightness(0.9) grayscale(0.4) !important;
-
-    opacity: 0.96;
-}
-
-        #preview-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            display: none; 
-            z-index: 5;
-            object-fit: fill;
-        }
-
-        #flash {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: white;
-    opacity: 0;
-    z-index: 99;
-mix-blend-mode: screen;
-    pointer-events: none;
-    transition: opacity 0.08s ease;
-}
-        .timer { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-family: 'Press Start 2P'; text-shadow: 4px 4px 0px #000; }
-
-        .controls { margin-top: 25px; width: 100%; max-width: 360px; }
-        .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
-        .f-btn { background: transparent; color: var(--text-dim); border: 2px solid #333; width: 60px; height: 60px; border-radius: 50%; font-size: 9px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; text-transform: uppercase; }
-        .f-btn.active { background: #fff; color: #000; border-color: #fff; transform: scale(1.1); }
-        .btn-snap { background: var(--accent); color: #fff; padding: 22px; font-size: 18px; font-weight: bold; border: none; width: 100%; border-radius: 100px; cursor: pointer; box-shadow: 0 10px 25px rgba(255, 62, 62, 0.4); text-transform: uppercase; }
-
-    #print-page {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: #000;
-    z-index: 100;
-
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-
-    overflow-y: auto;
-    padding-top: 0;
-    padding-bottom: 40px;
-}
-.printer-shell {
-    margin-top: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.printer-top {
-    width: 340px;
-    height: 88px;
-    background: linear-gradient(to bottom, #2d2d2d, #111);
-    border-radius: 0 0 18px 18px;
-    position: relative;
-    z-index: 30;
-}
-
-.printer-slot {
-    position: absolute;
-    left: 50%;
-    bottom: 10px;
-    transform: translateX(-50%);
-    width: 300px;
-    height: 12px;
-    background: #000;
-    border-radius: 10px;
-    box-shadow: inset 0 2px 6px rgba(0,0,0,.9);
-}
-
-.paper-window {
-    width: 300px;
-    overflow: hidden;
-    margin-top: -2px; /* ให้ติดปากเครื่อง */
-}
-
-.print-container {
-    width: 100%;
-    transform: translateY(-92%);
-}
-
-   .flow-animation {
-    animation: printReceiptOut 4.8s linear forwards;
-}
-
-@keyframes printReceiptOut {
-    from {
-        transform: translateY(-92%);
-    }
-    to {
-        transform: translateY(0);
-    }
-}
-@keyframes newspaperUnroll {
-    0% {
-        transform: translateY(-100%);
-        clip-path: inset(0 0 100% 0);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0);
-        clip-path: inset(0 0 0 0);
-        opacity: 1;
-    }
-}
-        #result-img { width: 100%; display: block; box-shadow: 0 0 70px rgba(0,0,0,1); }
-        #final-actions {
-    margin-top: 18px;
-    width: 100%;
-    display: none;
-    text-align: center;
-    position: relative;
-    z-index: 20;
-}
-        .btn-save { background: rgba(255, 255, 255, 0.9); color: #000; padding: 16px 32px; font-size: 11px; font-weight: bold; border: none; border-radius: 100px; cursor: pointer; margin: 8px; text-transform: uppercase; }
-    </style>
+/* FIXED PRINT AREA */
+#print-page{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:flex-start;overflow-y:auto;padding-bottom:40px}
+.printer-shell{display:flex;flex-direction:column;align-items:center}
+.printer-top{width:340px;height:88px;background:linear-gradient(to bottom,#2d2d2d,#111);border-radius:0 0 18px 18px;position:relative;z-index:30}
+.printer-slot{position:absolute;left:50%;bottom:10px;transform:translateX(-50%);width:300px;height:12px;background:#000;border-radius:10px;box-shadow:inset 0 2px 6px rgba(0,0,0,.9)}
+.paper-window{width:300px;overflow:hidden;margin-top:-2px}
+.print-container{width:100%;transform:translateY(-94%)}
+.flow-animation{animation:printReceiptOut 4.8s linear forwards}
+@keyframes printReceiptOut{from{transform:translateY(-94%)}to{transform:translateY(0)}}
+.news-roll{animation:newspaperUnroll 2.8s ease forwards}
+@keyframes newspaperUnroll{from{transform:translateY(-100%);opacity:0}to{transform:translateY(0);opacity:1}}
+#result-img{width:100%;display:block;box-shadow:0 0 70px rgba(0,0,0,1)}
+#final-actions{margin-top:18px;width:100%;display:none;text-align:center}
+.btn-save{background:rgba(255,255,255,.9);color:#000;padding:16px 32px;border:none;border-radius:100px;margin:8px}
+</style>
 </head>
 <body>
-
-    <div id="camera-ui">
-        <div class="header-title">Congratulations to Jarawee!</div>
-        
-        <div class="mode-selector">
-    <button class="m-btn active" id="btn-m-receipt" onclick="changeMode('receipt')">Receipt Strip</button>
-    <button class="m-btn" id="btn-m-news" onclick="changeMode('news')">Newspaper</button>
-    <button class="m-btn" id="btn-m-receipt2" onclick="changeMode('receipt2')">Receipt Photo</button>
+<div id="camera-ui">
+  <div class="header-title">Congratulations to Jarawee!</div>
+  <div id="booth-machine">
+    <div id="display-box">
+      <video id="video" autoplay playsinline muted></video>
+      <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
+      <div id="flash"></div>
+      <div id="timer" class="timer">3</div>
+    </div>
+  </div>
+  <div class="controls">
+    <button class="btn-snap" id="snap-btn" onclick="takePhotos()">กดถ่ายเลย!</button>
+  </div>
 </div>
 
-        <div id="booth-machine">
-            <div id="display-box">
-                <video id="video" autoplay playsinline muted></video>
-                <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
-                <div id="flash"></div>
-                <div id="timer" class="timer">3</div>
-            </div>
-        </div>
-
-        <div class="controls">
-            <div class="filter-group" id="filter-ui">
-    <button class="f-btn active" onclick="setF('none', this)">Normal</button>
-    <button class="f-btn" onclick="setF('kodak', this)">Film</button>
-    <button class="f-btn" onclick="setF('bw', this)">B&W</button>
-    <button class="f-btn" onclick="setF('beauty', this)">Beauty</button>
-</div>
-            <button class="btn-snap" id="snap-btn" onclick="takePhotos()">กดถ่ายเลย!</button>
-        </div>
+<div id="print-page">
+  <div class="printer-shell">
+    <div class="printer-top"><div class="printer-slot"></div></div>
+    <div class="paper-window">
+      <div class="print-container" id="print-cont"><img id="result-img"></div>
     </div>
-
-   <div id="print-page">
-    <div class="printer-shell">
-        <div class="printer-top">
-            <div class="printer-slot"></div>
-        </div>
-
-        <div class="paper-window">
-            <div class="print-container" id="print-cont">
-                <img id="result-img">
-            </div>
-        </div>
-    </div>
-
-    <div id="final-actions">
-        <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
-        <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
-        <button class="btn-save" style="background:#333;color:#fff;" onclick="location.reload()">ถ่ายใหม่</button>
-    </div>
-</div>
-
-    <div class="print-container" id="print-cont">
-        <img id="result-img">
-    </div>
-
-    <div id="final-actions">
-    <div class="print-container" id="print-cont">
-            <img id="result-img">
-        </div>
-        <div id="final-actions">
+  </div>
+  <div id="final-actions">
     <button class="btn-save" onclick="saveImage()">เซฟรูปภาพ</button>
-    <button class="btn-save" onclick="printImage()">ปริ้นต์</button>
-    <button class="btn-save" style="background: #333; color: #fff;" onclick="location.reload()">ถ่ายใหม่</button>
+    <button class="btn-save" onclick="location.reload()">ถ่ายใหม่</button>
+  </div>
 </div>
-    </div>
 
-    <canvas id="canvas" style="display:none;"></canvas>
+<canvas id="canvas" style="display:none"></canvas>
+<script>
+const video=document.getElementById('video');
+const timer=document.getElementById('timer');
+const flash=document.getElementById('flash');
+const canvas=document.getElementById('canvas');
+const ctx=canvas.getContext('2d');
+const resultImg=document.getElementById('result-img');
+const printPage=document.getElementById('print-page');
+const printCont=document.getElementById('print-cont');
+const finalActions=document.getElementById('final-actions');
+let finalBlob=null;
 
-    <script>
-        const video = document.getElementById('video');
-        const timer = document.getElementById('timer');
-        const flash = document.getElementById('flash');
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const resultImg = document.getElementById('result-img');
-        const printPage = document.getElementById('print-page');
-        const printCont = document.getElementById('print-cont');
-        const finalActions = document.getElementById('final-actions');
-        const previewOverlay = document.getElementById('preview-overlay');
-        const filterUI = document.getElementById('filter-ui');
+const printSound=new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
+printSound.volume=0.45;
 
-        let filterStyle = 'none';
-        let currentMode = 'receipt';
-        let finalBlob = null;
-
-        const newsFrame = new Image();
-        newsFrame.crossOrigin = "anonymous";
-        newsFrame.src = 'https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG'; 
-        const printSound = new Audio('https://cdn.pixabay.com/download/audio/2022/03/15/audio_5c9d6d4f5f.mp3?filename=receipt-printer-110021.mp3');
-printSound.volume = 0.45;
-
-        async function startCam() {
-            try {
-                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' } });
-                video.srcObject = stream;
-            } catch(e) { alert("กรุณาเปิดกล้องจ้า"); }
-        }
-        startCam();
-
-        function changeMode(mode) {
-            currentMode = mode;
-            const booth = document.getElementById('booth-machine');
-            const display = document.getElementById('display-box');
-            document.getElementById('btn-m-receipt').classList.toggle('active', mode === 'receipt');
-            document.getElementById('btn-m-news').classList.toggle('active', mode === 'news');
-            document.getElementById('btn-m-receipt2').classList.toggle('active', mode === 'receipt2');
-            
-            if (mode === 'news') {
-                booth.classList.add('news-mode');
-                display.classList.add('news-mode');
-                previewOverlay.style.display = 'block';
-                filterUI.style.visibility = 'hidden'; // ซ่อนตัวเลือกฟิลเตอร์ในโหมดนสพ.
-            } else {
-                booth.classList.remove('news-mode');
-                display.classList.remove('news-mode');
-                previewOverlay.style.display = 'none';
-                filterUI.style.visibility = 'visible';
-            }
-        }
-
-        function setF(mode, btn) {
-            document.querySelectorAll('.f-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            if(mode === 'none') filterStyle = 'none';
-            else if(mode === 'kodak') filterStyle = 'contrast(1.2) saturate(1.4) sepia(0.1)';
-            else if(mode === 'bw') filterStyle = 'grayscale(1) contrast(1.4)';
-            else if(mode === 'beauty') {
-    filterStyle = 'brightness(1.1) contrast(1.06) saturate(1.18) blur(1px)';
+async function startCam(){
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'user'}});
+    video.srcObject=stream;
+  }catch(e){alert('กรุณาเปิดกล้องจ้า')}
 }
-            
-            // ถ้าไม่ใช่โหมดนสพ. ให้เปลี่ยน Filter ตามปกติ
-            if(currentMode !== 'news') video.style.filter = filterStyle;
-        }
+startCam();
 
-        async function takePhotos() {
-            const pics = [];
-            const photoCount =
-    (currentMode === 'news') ? 1 :
-    (currentMode === 'receipt2') ? 1 : 2;
-            document.getElementById('snap-btn').style.opacity = '0';
+async function takePhotos(){
+  timer.style.display='block';
+  for(let s=3;s>0;s--){timer.innerText=s;await new Promise(r=>setTimeout(r,1000));}
+  timer.style.display='none';
+  flash.style.opacity='1';setTimeout(()=>flash.style.opacity='0',100);
 
-            for(let i=0; i<photoCount; i++) {
-                timer.style.display = 'block';
-                for(let s=3; s>0; s--) { timer.innerText = s; await new Promise(r => setTimeout(r, 1000)); }
-                timer.style.display = 'none';
-
-/* ✅ แฟลชวาบหน้าจอเว็บตอนโหมดหนังสือพิมพ์ */
-if (currentMode === 'news') {
-    flash.style.background = 'white';
-    flash.style.opacity = '1';
-
-    setTimeout(() => {
-        flash.style.opacity = '0.85';
-    }, 60);
-
-    setTimeout(() => {
-        flash.style.opacity = '0';
-    }, 180);
-} else {
-    flash.style.opacity = '1';
-    setTimeout(() => flash.style.opacity = '0', 100);
+  const pCanvas=document.createElement('canvas');
+  pCanvas.width=video.videoWidth;
+  pCanvas.height=video.videoHeight;
+  const pCtx=pCanvas.getContext('2d');
+  pCtx.translate(pCanvas.width,0);pCtx.scale(-1,1);
+  pCtx.drawImage(video,0,0);
+  buildReceipt2(pCanvas);
 }
 
-                const pCanvas = document.createElement('canvas');
-                pCanvas.width = video.videoWidth;
-                pCanvas.height = video.videoHeight;
-                const pCtx = pCanvas.getContext('2d');
-                
-                // บังคับฟิลเตอร์ถ้าเป็นโหมดนสพ.
-if(currentMode === 'news') {
-    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-} else {
-    pCtx.filter = filterStyle;
-}
-                
-                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-                
-                pics.push(pCanvas);
-                if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
-            }
-            
-            if (currentMode === 'news') {
-    buildNewspaper(pics[0]);
-} else if (currentMode === 'receipt2') {
-    buildReceipt2(pics[0]);
-} else {
-    buildReceipt(pics);
-}
-            
-        }
-
-        function buildReceipt(pics) {
-            canvas.width = 600;
-            canvas.height = 1520;
-            ctx.clearRect(0,0,600,1520);
-            ctx.fillStyle = "#fdfaf5"; 
-            ctx.fillRect(0, 0, 600, 1520);
-            for(let i=0; i<5000; i++) { ctx.fillStyle=`rgba(0,0,0,${Math.random()*0.05})`; ctx.fillRect(Math.random()*600, Math.random()*1520, 1, 1); }
-            ctx.fillStyle = "#111"; ctx.textAlign = "center";
-            ctx.font = "bold 90px 'VT323'"; ctx.fillText("Congrats!!", 300, 115);
-            ctx.font = "48px 'VT323'"; ctx.fillText("To Jarawee <3", 300, 175);
-            ctx.font = "20px monospace"; ctx.fillText("------------------------------", 300, 215);
-            ctx.textAlign = "left"; ctx.font = "32px 'VT323'";
-            ctx.fillText("Order: #" + Math.floor(100000 + Math.random()*900000), 90, 260);
-            pics.forEach((p, idx) => {
-                const y = 300 + (idx * 440);
-                const s = Math.min(p.width, p.height);
-                const sx = (p.width - s) / 2;
-                const sy = (p.height - s) / 2;
-                ctx.drawImage(p, sx, sy, s, s, 90, y, 420, 420);
-                ctx.strokeStyle = "#222"; ctx.lineWidth = 2; ctx.strokeRect(90, y, 420, 420);
-            });
-            ctx.font = "bold 25px Sarabun"; ctx.fillText("รายการ: แจงรักทุกคน อิอิ <3", 90, 1200);
-            for(let k=0; k<60; k++) { ctx.fillRect(90+(k*7), 1250, [2,4,5][Math.floor(Math.random()*3)], 80); }
-            ctx.textAlign = "center"; ctx.font = "26px 'VT323'"; ctx.fillText(new Date().toLocaleString(), 300, 1380);
-            ctx.globalAlpha = 0.5; ctx.font = "32px 'VT323'"; ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 1440);
-            ctx.globalAlpha = 1.0;
-            ctx.globalCompositeOperation = 'destination-out';
-            ctx.beginPath(); ctx.moveTo(0, 1520);
-            let step = 60;
-            for(let x=0; x<=600; x+=step) { ctx.lineTo(x + step/2, 1490 + (Math.random()*20)); ctx.lineTo(x + step, 1520); }
-            ctx.fill(); ctx.globalCompositeOperation = 'source-over';
-            renderFinal();
-        }        
-  function buildReceipt2(pic) {
-    canvas.width = 600;
-    canvas.height = 930;
-    ctx.clearRect(0,0,600,930);
-
-    // background
-    ctx.fillStyle = "#fdfaf5";
-    ctx.fillRect(0, 0, 600, 930);
-
-    // noise
-    for(let i=0;i<2200;i++){
-        ctx.fillStyle = `rgba(0,0,0,${Math.random()*0.04})`;
-        ctx.fillRect(Math.random()*600, Math.random()*930,1,1);
-    }
-
-    ctx.fillStyle = "#111";
-
-    // ================= HEADER =================
-    ctx.textAlign = "center";
-    ctx.font = "bold 34px monospace";
-    ctx.fillText("R E C E I P T   P H O T O", 300, 85);
-    ctx.fillText("B O O T H", 300, 120);
-
-    // ================= IMAGE =================
-    const s = Math.min(pic.width, pic.height);
-    const sx = (pic.width - s)/2;
-    const sy = (pic.height - s)/2;
-
-    // ✅ ขยับรูปลง
-    ctx.drawImage(pic, sx, sy, s, s, 100, 155, 400, 400);
-
-    // ✅ กรอบบางๆ
-    ctx.strokeStyle = "#222";
-    ctx.lineWidth = 1.5;
-    ctx.strokeRect(100, 155, 400, 400);
-
-    // ================= RECEIPT =================
-    const id = Math.floor(100 + Math.random()*900);
-
-    ctx.textAlign = "left";
-    ctx.font = "bold 28px monospace";
-    ctx.fillText("RECEIPT " + id, 70, 600);
-
-    // ⭐ ดาวใหญ่
-    const star = Math.floor(1 + Math.random()*5);
-    let starStr = "";
-    for(let i=0;i<5;i++){
-        starStr += i < star ? "★" : "☆";
-    }
-
-    ctx.textAlign = "right";
-    ctx.font = "bold 40px monospace";
-    ctx.fillText(starStr, 530, 600);
-
-    // ================= LEFT INFO =================
-    ctx.textAlign = "left";
-    ctx.font = "24px monospace";
-    ctx.fillText("BY NONGJANG", 70, 645);
-    ctx.fillText("PHOTO BOOTH", 70, 677);
-
-    // ✅ เส้นยาวเกือบสุดขวา
-    ctx.beginPath();
-    ctx.moveTo(70, 700);
-    ctx.lineTo(540, 700);
-    ctx.lineWidth = 1;
-    ctx.strokeStyle = "#111";
-    ctx.stroke();
-
-    // ================= BARCODE =================
-    const barcodeY = 725;
-    const barcodeWidth = 360;
-    const startX = (600 - barcodeWidth) / 2;
-    const lineH = 58;
-    const barGap = 3.4;
-
-    for(let i=0;i<110;i++){
-        if(Math.random() > 0.35){
-            ctx.fillRect(startX + i*barGap, barcodeY, 2.2, lineH);
-        }
-    }
-
-    // ================= FOOTER =================
-    ctx.textAlign = "center";
-    ctx.font = "18px monospace";
-    ctx.fillText("THANK YOU FOR BEING TOGETHER <3", 300, 845);
-
-    renderFinal();
-}
-    function buildNewspaper(pic) {
-    canvas.width = 1000; 
-    canvas.height = 1400;
-
-    ctx.fillStyle = "#e3dccb"; 
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    const photoW = 800;  
-    const photoH = 450;  
-    const photoX = 145; 
-    const photoY = 340; 
-
-    const targetRatio = photoW / photoH;
-    const zoomFactor = 1.0;
-
-    let sw = pic.width * zoomFactor;
-    let sh = sw / targetRatio;
-
-    if (sh > pic.height * zoomFactor) {
-        sh = pic.height * zoomFactor;
-        sw = sh * targetRatio;
-    }
-
-    let sx = (pic.width - sw) / 2;
-    let sy = (pic.height - sh) / 2;
-
-    // วาดรูปก่อน
-    ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
-
-    // ดึง pixel มาแต่งโทนหนังสือพิมพ์
-    const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        // แปลงเป็น grayscale ก่อน
-        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-
-        // ✅ เพิ่ม grain แบบสุ่ม
-        const grain = (Math.random() - 0.5) * 30;
-        gray += grain;
-
-        // จำกัดค่า
-        gray = Math.max(0, Math.min(255, gray));
-
-        // ✅ ทำโทนน้ำตาลกระดาษเก่า
-        data[i]     = gray * 1.08; // R
-        data[i + 1] = gray * 0.95; // G
-        data[i + 2] = gray * 0.75; // B
-    }
-
-    ctx.putImageData(imageData, photoX, photoY);
-
-    // ✅ เพิ่ม halftone dots
-    ctx.fillStyle = "rgba(60,40,20,0.08)";
-    for (let y = photoY; y < photoY + photoH; y += 6) {
-        for (let x = photoX; x < photoX + photoW; x += 6) {
-            ctx.beginPath();
-            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    // วาดกรอบทับ
-    if (newsFrame.complete) {
-        ctx.drawImage(newsFrame, 0, 0, 1000, 1400);
-    }
-
-    renderFinal();
-}
-        function renderFinal() {
-    canvas.toBlob((blob) => {
-        finalBlob = blob;
-        resultImg.src = URL.createObjectURL(blob);
-
-        document.getElementById('camera-ui').style.display = 'none';
-        printPage.style.display = 'flex';
-        printCont.classList.remove('flow-animation', 'news-roll');
-printCont.style.opacity = '0';
-printPage.style.flexDirection = 'column';
-printPage.style.alignItems = 'center';
-printPage.style.justifyContent = 'flex-start';
-
-        setTimeout(() => {
-    if (currentMode === 'news') {
-        printCont.classList.add('news-roll');
-    } else {
-        printCont.classList.add('flow-animation');
-
-        // 🔊 เล่นเสียงปริ้น
-        printSound.currentTime = 0;
-        printSound.play().catch(() => {});
-    }
-}, 300);
-        setTimeout(() => {
-    finalActions.style.display = 'block';
-    printSound.pause();
-}, 4700);
-
-    }, 'image/png');
+function buildReceipt2(pic){
+  canvas.width=600;canvas.height=930;
+  ctx.fillStyle='#fdfaf5';ctx.fillRect(0,0,600,930);
+  const s=Math.min(pic.width,pic.height);
+  const sx=(pic.width-s)/2; const sy=(pic.height-s)/2;
+  ctx.drawImage(pic,sx,sy,s,s,100,155,400,400);
+  ctx.strokeStyle='#222';ctx.strokeRect(100,155,400,400);
+  ctx.font='bold 28px monospace';ctx.fillStyle='#111';ctx.fillText('RECEIPT',70,600);
+  ctx.font='18px monospace';ctx.textAlign='center';ctx.fillText('THANK YOU FOR BEING TOGETHER <3',300,845);
+  renderFinal();
 }
 
-        async function saveImage() {
-    if (!finalBlob) return;
-
-    const fileName = (currentMode === 'news')
-        ? 'jarawee_newspaper.png'
-        : 'jarawee_receipt.png';
-
-    const file = new File([finalBlob], fileName, { type: 'image/png' });
-
-    // ✅ iPhone / Safari / PWA = เซฟเข้ารูปได้เลย
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
-        try {
-            await navigator.share({
-                files: [file],
-                title: 'Jarawee Booth',
-                text: 'บันทึกรูปภาพ'
-            });
-            return;
-        } catch (e) {
-            console.log("แชร์ถูกยกเลิก");
-        }
-    }
-
-    // fallback ถ้า browser ไม่รองรับ
-    const link = document.createElement('a');
-    link.download = fileName;
-    link.href = resultImg.src;
-    link.click();
+function renderFinal(){
+  canvas.toBlob((blob)=>{
+    finalBlob=blob;
+    resultImg.src=URL.createObjectURL(blob);
+    document.getElementById('camera-ui').style.display='none';
+    printPage.style.display='flex';
+    finalActions.style.display='none';
+    printCont.classList.remove('flow-animation','news-roll');
+    void printCont.offsetWidth;
+    setTimeout(()=>{
+      printCont.classList.add('flow-animation');
+      printSound.currentTime=0;
+      printSound.play().catch(()=>{});
+    },200);
+    setTimeout(()=>{
+      finalActions.style.display='block';
+      printSound.pause();
+    },4800);
+  },'image/png');
 }
-     async function printImage() {
-    if (!resultImg) return;
 
-    const img = new Image();
-    img.src = resultImg.src;
-
-    img.onload = async () => {
-
-        const canvas = document.createElement('canvas');
-        const ctx = canvas.getContext('2d');
-
-        const isNews = currentMode === 'news';
-
-        // =========================
-        // 🧾 RECEIPT (เพิ่มขนาดเฉพาะตอนพิมพ์)
-        // =========================
-        if (!isNews) {
-
-            const baseWidth = 576;
-            const scaleFactor = 1.6; // 👈 ทำให้ตอนปริ้นต์ตัวใหญ่ขึ้น
-
-            canvas.width = baseWidth * scaleFactor;
-            canvas.height = (img.height * baseWidth / img.width) * scaleFactor;
-
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.scale(scaleFactor, scaleFactor);
-
-            ctx.drawImage(
-                img,
-                0,
-                0,
-                baseWidth,
-                img.height * (baseWidth / img.width)
-            );
-        }
-
-        // =========================
-        // 📰 NEWSPAPER (เหมือนเดิม)
-        // =========================
-        else {
-
-            const targetWidth = 576;
-            const scale = targetWidth / img.height;
-
-            const newW = img.height * scale;
-            const newH = img.width * scale;
-
-            canvas.width = targetWidth;
-            canvas.height = newH;
-
-            ctx.fillStyle = "white";
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            ctx.save();
-            ctx.translate(canvas.width / 2, canvas.height / 2);
-            ctx.rotate(90 * Math.PI / 180);
-
-            ctx.drawImage(
-                img,
-                -newH / 2,
-                -canvas.width / 2,
-                newH,
-                canvas.width
-            );
-
-            ctx.restore();
-        }
-
-        // =========================
-        // 📤 SEND TO SHARE SHEET
-        // =========================
-        canvas.toBlob(async (blob) => {
-
-            const fileName = isNews ? 'news.png' : 'receipt.png';
-
-            const finalFile = new File([blob], fileName, {
-                type: 'image/png'
-            });
-
-            if (navigator.canShare && navigator.canShare({ files: [finalFile] })) {
-                try {
-                    await navigator.share({
-                        files: [finalFile],
-                        title: 'Print',
-                        text: 'ส่งไปเครื่องปริ้นต์'
-                    });
-                    return;
-                } catch (e) {}
-            }
-
-            alert("อุปกรณ์ไม่รองรับ Share Sheet");
-        }, 'image/png');
-    };
+async function saveImage(){
+  if(!finalBlob) return;
+  const file=new File([finalBlob],'jarawee_receipt.png',{type:'image/png'});
+  if(navigator.canShare && navigator.canShare({files:[file]})){
+    try{await navigator.share({files:[file],title:'Jarawee Booth'});return;}catch(e){}
+  }
+  const a=document.createElement('a');a.href=resultImg.src;a.download='jarawee_receipt.png';a.click();
 }
-    </script>
+</script>
 </body>
 </html>
