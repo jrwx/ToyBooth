@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
+    <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&family=Patrick+Hand&display=swap" rel="stylesheet">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Jarawee Pro Booth - Magical Edition</title>
@@ -134,7 +135,31 @@ mix-blend-mode: screen;
     pointer-events: none;
     transition: opacity 0.08s ease;
 }
-        .timer { position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%); color: #fff; z-index: 11; font-size: 70px; display: none; font-family: 'Press Start 2P'; text-shadow: 4px 4px 0px #000; }
+        .timer {
+    position: absolute;
+    top: 40%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+
+    color: #5a4a3b;
+    z-index: 11;
+
+    font-size: 80px;
+    font-family: 'Patrick Hand', cursive; /* 👈 น่ารักขึ้น */
+    font-weight: 600;
+
+    text-shadow: 2px 2px 0px rgba(255,255,255,0.4);
+
+    display: none;
+}
+.timer {
+    animation: pop 0.2s ease;
+}
+
+@keyframes pop {
+    0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0.5; }
+    100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+}
 
         .controls { margin-top: 25px; width: 100%; max-width: 360px; }
         .filter-group { display: flex; justify-content: center; gap: 15px; margin-bottom: 30px; }
