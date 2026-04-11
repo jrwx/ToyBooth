@@ -100,9 +100,22 @@ mix-blend-mode: screen;
     margin-top: -2px;
 }
 
-.print-container {
+.print-container{
     width: 100%;
     transform: translateY(-100%);
+    will-change: transform;
+}
+
+/* เอฟเฟกต์เครื่องปริ้นจริง */
+.flow-animation{
+    animation: paperFeed 5s cubic-bezier(.2,.8,.2,1) forwards;
+}
+
+@keyframes paperFeed{
+    0%{ transform: translateY(-100%); }
+    10%{ transform: translateY(-95%); }
+    60%{ transform: translateY(-20%); }
+    100%{ transform: translateY(0%); }
 }
 
    .flow-animation {
@@ -525,14 +538,23 @@ if(currentMode === 'news') {
         printCont.style.animation = '';
 
         setTimeout(() => {
-            if (currentMode === 'news') {
-                printCont.classList.add('news-roll');
-            } else {
-                printCont.classList.add('flow-animation');
-                printSound.currentTime = 0;
-                printSound.play().catch(() => {});
-            }
-        }, 50);
+
+    // reset animation ก่อน (สำคัญมาก)
+    printCont.classList.remove('flow-animation', 'news-roll');
+    printCont.style.transform = 'translateY(-100%)';
+
+    void printCont.offsetWidth; // restart CSS
+
+    if (currentMode === 'news') {
+        printCont.classList.add('news-roll');
+    } else {
+        printCont.classList.add('flow-animation');
+
+        printSound.currentTime = 0;
+        printSound.play().catch(() => {});
+    }
+
+}, 100);
 
         setTimeout(() => {
             finalActions.style.display = 'block';
