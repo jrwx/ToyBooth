@@ -692,12 +692,11 @@ if (currentMode === 'news') {
             renderFinal();
         };
     }
-}
-      function renderFinal() {
+}function renderFinal() {
     try {
         canvas.toBlob((blob) => {
             if (!blob) {
-                alert("โหลดภาพหนังสือพิมพ์ไม่สำเร็จ ลองใหม่อีกครั้ง");
+                alert("โหลดภาพไม่สำเร็จ");
                 return;
             }
 
@@ -707,16 +706,24 @@ if (currentMode === 'news') {
             document.getElementById('camera-ui').style.display = 'none';
             printPage.style.display = 'flex';
 
+            // ✅ reset animation ให้ receipt กลับมาสไลด์ได้
             printCont.classList.remove('flow-animation', 'news-roll');
-            void printCont.offsetWidth;
+            printCont.style.animation = 'none';
+            printCont.style.transform = 'translateY(-100%)';
 
-            if (currentMode === 'news') {
-                printCont.classList.add('news-roll');
-            } else {
-                printCont.classList.add('flow-animation');
-                printSound.currentTime = 0;
-                printSound.play();
-            }
+            void printCont.offsetHeight; // force reflow สำหรับ iPhone
+
+            printCont.style.animation = '';
+
+            setTimeout(() => {
+                if (currentMode === 'news') {
+                    printCont.classList.add('news-roll');
+                } else {
+                    printCont.classList.add('flow-animation');
+                    printSound.currentTime = 0;
+                    printSound.play();
+                }
+            }, 80);
 
             setTimeout(() => {
                 finalActions.style.display = 'grid';
@@ -725,8 +732,7 @@ if (currentMode === 'news') {
 
         }, 'image/png');
     } catch (e) {
-        console.error("Canvas export failed:", e);
-        alert("Canvas export ไม่สำเร็จ");
+        console.error(e);
     }
 }
         async function saveImage() {
