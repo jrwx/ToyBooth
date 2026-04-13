@@ -491,58 +491,56 @@ const printSound = new Audio('https://actions.google.com/sounds/v1/foley/printer
         }
 
         async function takePhotos() {
-            const pics = [];
-            const photoCount = (currentMode === 'news') ? 1 : (currentMode === 'receipt2') ? 1 : 2;
-            document.getElementById('snap-btn').style.opacity = '0';
+    const pics = [];
+    const photoCount = (currentMode === 'news') ? 1 : (currentMode === 'receipt2') ? 1 : 2;
 
-            for(let i=0; i<photoCount; i++) {
-                timer.style.display = 'block';
-                for(let s=3; s>0; s--) { timer.innerText = s; await new Promise(r => setTimeout(r, 1000)); }
-                timer.style.display = 'none';
+    document.getElementById('snap-btn').style.opacity = '0';
 
-if (currentMode === 'news') {
-    flash.style.background = 'white';
-    flash.style.opacity = '1';
-    setTimeout(() => { flash.style.opacity = '0.85'; }, 60);
-    setTimeout(() => { flash.style.opacity = '0'; }, 180);
-} else {
-    flash.style.opacity = '1';
-    setTimeout(() => flash.style.opacity = '0', 100);
-}
+    for (let i = 0; i < photoCount; i++) {
+        timer.style.display = 'block';
 
-const pCanvas = document.createElement('canvas');
-const vw = video.videoWidth;
-const vh = video.videoHeight;
-
-pCanvas.width = vw;
-pCanvas.height = vh;
-
-const pCtx = pCanvas.getContext('2d');
-
-// ✅ รอ 1 frame ให้ภาพนิ่งก่อน capture
-await new Promise(r => requestAnimationFrame(r));
-
-// mirror กล้องหน้า
-pCtx.setTransform(-1, 0, 0, 1, vw, 0);
-
-// ฟิลเตอร์เฉพาะ news
-if(currentMode === 'news') {
-    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-} else {
-    pCtx.filter = filterStyle;
-}
-
-// ✅ ถ่ายภาพนิ่งจริง
-pCtx.drawImage(video, 0, 0, vw, vh);
-
-pics.push(pCanvas);
-                if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
-            }
-            
-            if (currentMode === 'news') { buildNewspaper(pics[0]); } 
-            else if (currentMode === 'receipt2') { buildReceipt2(pics[0]); } 
-            else { buildReceipt(pics); }
+        for (let s = 3; s > 0; s--) {
+            timer.innerText = s;
+            await new Promise(r => setTimeout(r, 1000));
         }
+
+        timer.style.display = 'none';
+
+        flash.style.opacity = '1';
+        setTimeout(() => flash.style.opacity = '0', 100);
+
+        // ✅ ถ่ายภาพจริงจาก video
+        const pCanvas = document.createElement('canvas');
+        pCanvas.width = video.videoWidth;
+        pCanvas.height = video.videoHeight;
+
+        const pCtx = pCanvas.getContext('2d');
+
+        if (currentMode === 'news') {
+            pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+        } else {
+            pCtx.filter = filterStyle;
+        }
+
+        pCtx.translate(pCanvas.width, 0);
+        pCtx.scale(-1, 1);
+        pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+
+        pics.push(pCanvas);
+
+        if (i < photoCount - 1) {
+            await new Promise(r => setTimeout(r, 1000));
+        }
+    }
+
+    if (currentMode === 'news') {
+        buildNewspaper(pics[0]);
+    } else if (currentMode === 'receipt2') {
+        buildReceipt2(pics[0]);
+    } else {
+        buildReceipt(pics);
+    }
+}
 
         function buildReceipt(pics) {
             canvas.width = 600;
@@ -634,78 +632,66 @@ pics.push(pCanvas);
             renderFinal();
         }
 
-                function buildNewspaper(pic) {
-            canvas.width = 1000; 
-            canvas.height = 1400;
-            ctx.fillStyle = "#e3dccb"; 
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            function buildNewspaper(pic) {
+    canvas.width = 1000;
+    canvas.height = 1400;
 
-            // ตำแหน่งและขนาดของรูปถ่ายภายในหน้าหนังสือพิมพ์
-            const photoW = 800;  
-            const photoH = 450;  
-            const photoX = 145; 
-            const photoY = 340; 
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "#e3dccb";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-            const targetRatio = photoW / photoH;
-            const zoomFactor = 1.0;
+    const photoW = 800;
+    const photoH = 450;
+    const photoX = 145;
+    const photoY = 340;
 
-            let sw = pic.width * zoomFactor;
-            let sh = sw / targetRatio;
+    const targetRatio = photoW / photoH;
 
-            if (sh > pic.height * zoomFactor) {
-                sh = pic.height * zoomFactor;
-                sw = sh * targetRatio;
-            }
+    let sw = pic.width;
+    let sh = sw / targetRatio;
 
-            let sx = (pic.width - sw) / 2;
-            let sy = (pic.height - sh) / 2;
+    if (sh > pic.height) {
+        sh = pic.height;
+        sw = sh * targetRatio;
+    }
 
-            // 1. วาดรูปหน้าคนลงไปก่อน
-            ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
+    let sx = (pic.width - sw) / 2;
+    let sy = (pic.height - sh) / 2;
 
-            // 2. ✨ วาดรูปเฟรม overlay (harry.PNG) ทับลงไปบนรูปคนทันที
-            // เราดึงรูปมาจากแท็ก <img> ที่เราซ่อนไว้ตอนถ่าย (preview-overlay)
-            const overlayImg = document.getElementById('preview-overlay');
-            if (overlayImg) {
-                // วาดให้เต็ม Canvas (1000x1400) ตามสัดส่วนของเฟรมหนังสือพิมพ์จ้ะ
-                ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
-            }
+    // ✅ วาดรูปที่ถ่ายได้ก่อน
+    ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
 
-            // 3. ทำโทนสีและเอฟเฟกต์หนังสือพิมพ์เก่า (ทำทับทั้งรูปคนและเฟรมเลย)
-            const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
-            const data = imageData.data;
+    // ✅ แต่งโทนหนังสือพิมพ์
+    const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
+    const data = imageData.data;
 
-            for (let i = 0; i < data.length; i += 4) {
-                let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-                const grain = (Math.random() - 0.5) * 30;
-                gray = Math.max(0, Math.min(255, gray + grain));
-                // โทนน้ำตาลกระดาษเก่า
-                data[i] = gray * 1.08;     // R
-                data[i + 1] = gray * 0.95; // G
-                data[i + 2] = gray * 0.75; // B
-            }
-            ctx.putImageData(imageData, photoX, photoY);
+    for (let i = 0; i < data.length; i += 4) {
+        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+        gray += (Math.random() - 0.5) * 30;
+        gray = Math.max(0, Math.min(255, gray));
 
-            // 4. ใส่จุดๆ (Halftone halftone) ทับทั้งหมด
-            ctx.fillStyle = "rgba(60,40,20,0.08)";
-            for (let y = photoY; y < photoY + photoH; y += 6) {
-                for (let x = photoX; x < photoX + photoW; x += 6) {
-                    ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
-                }
-            }
-            // ===== FRAME OVERLAY (harry.png) =====
-if (newsFrame.complete) {
-    ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
-} else {
-    newsFrame.onload = () => {
-        ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
-        renderFinal();
-    };
-    return; // รอเฟรมโหลดก่อน
-}
+        data[i] = gray * 1.08;
+        data[i + 1] = gray * 0.95;
+        data[i + 2] = gray * 0.75;
+    }
 
-            renderFinal();
+    ctx.putImageData(imageData, photoX, photoY);
+
+    // ✅ จุดหนังสือพิมพ์
+    ctx.fillStyle = "rgba(60,40,20,0.08)";
+    for (let y = photoY; y < photoY + photoH; y += 6) {
+        for (let x = photoX; x < photoX + photoW; x += 6) {
+            ctx.beginPath();
+            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
+            ctx.fill();
         }
+    }
+
+    // ✅ วาดกรอบ overlay ทีเดียวจบ
+    ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
+
+    renderFinal();
+}
 
 
         function renderFinal() {
