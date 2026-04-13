@@ -528,10 +528,17 @@ if (currentMode === 'news') {
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
             }
             
-            if (currentMode === 'news') { buildNewspaper(pics[0]); } 
-            else if (currentMode === 'receipt2') { buildReceipt2(pics[0]); } 
-            else { buildReceipt(pics); }
-        }
+            // ... โค้ดช่วงบนของ takePhotos ...
+if (currentMode === 'news') { 
+    buildNewspaper(pics[0]); // ส่งรูปใบแรกไปทำหนังสือพิมพ์
+} 
+else if (currentMode === 'receipt2') { 
+    buildReceipt2(pics[0]); 
+} 
+else { 
+    buildReceipt(pics); 
+}
+
 
         function buildReceipt(pics) {
             canvas.width = 600;
@@ -623,16 +630,16 @@ if (currentMode === 'news') {
             renderFinal();
         }
 
-            function buildNewspaper(pic) {
-    // 1. ตั้งค่า Canvas ให้ตรงกับขนาดหนังสือพิมพ์
+        function buildNewspaper(pic) {
+    // 1. ตั้งขนาด Canvas
     canvas.width = 1000; 
     canvas.height = 1400;
     
-    // 2. ลงสีพื้นหลัง
+    // 2. ลงพื้นหลังสีกระดาษเก่า
     ctx.fillStyle = "#e3dccb"; 
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // 3. คำนวณตำแหน่งรูปถ่าย (ช่องในหนังสือพิมพ์)
+    // 3. วาดรูปที่ถ่ายมา (คำนวณตำแหน่งช่องว่างในหนังสือพิมพ์)
     const photoW = 800;  
     const photoH = 450;  
     const photoX = 145; 
@@ -641,40 +648,35 @@ if (currentMode === 'news') {
     const targetRatio = photoW / photoH;
     let sw = pic.width;
     let sh = pic.width / targetRatio;
-
     if (sh > pic.height) {
         sh = pic.height;
         sw = sh * targetRatio;
     }
-
     let sx = (pic.width - sw) / 2;
     let sy = (pic.height - sh) / 2;
 
-    // 4. วาดรูปที่ถ่ายมาลงไปก่อน
     ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
 
-    // 5. ปรับสีรูปถ่ายเฉพาะจุดให้ดูเก่า (ซีเปีย/ขาวดำ)
+    // 4. ใส่โทนสีเก่า (Sepia/Gray) ให้รูปถ่าย
     const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
     const data = imageData.data;
     for (let i = 0; i < data.length; i += 4) {
         let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-        data[i] = gray * 1.05;     // Red (อมส้มหน่อยๆ)
-        data[i + 1] = gray * 0.95; // Green
-        data[i + 2] = gray * 0.8;  // Blue
+        data[i] = gray * 1.05; 
+        data[i + 1] = gray * 0.95; 
+        data[i + 2] = gray * 0.8;
     }
     ctx.putImageData(imageData, photoX, photoY);
 
-    // 6. ✨ สำคัญ: วาดเฟรมหนังสือพิมพ์ทับ (ดึงจากหน้าจอมาเลย ไม่ต้องรอ Load)
+    // 5. ✨ จุดสำคัญ: วาดเฟรมทับ (ดึงจาก ID preview-overlay ที่โชว์บนจออยู่แล้ว)
     const overlayImg = document.getElementById('preview-overlay');
     if (overlayImg) {
         ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
     }
 
-    // 7. สั่งไปหน้าสรุปผลทันที
+    // 6. สั่ง Render เพื่อสลับหน้าจอ (ถ้าไม่รันบรรทัดนี้ มันจะค้างหน้าวิดีโอ)
     renderFinal();
 }
-
-
 
 function renderFinal() {
     canvas.toBlob((blob) => {
