@@ -372,7 +372,10 @@ mix-blend-mode: screen;
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
-                <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
+<img 
+    id="preview-overlay"
+    crossorigin="anonymous"
+    src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
                 <div id="flash"></div>
                 <div id="timer" class="timer">3</div>
             </div>
@@ -690,34 +693,42 @@ if (currentMode === 'news') {
         };
     }
 }
-        function renderFinal() {
-            canvas.toBlob((blob) => {
-                finalBlob = blob;
-                resultImg.src = URL.createObjectURL(blob);
-                document.getElementById('camera-ui').style.display = 'none';
-                printPage.style.display = 'flex';
-                printCont.classList.remove('flow-animation', 'news-roll');
-                printCont.style.animation = 'none';
-                void printCont.offsetHeight;
-                printCont.style.animation = '';
+      function renderFinal() {
+    try {
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                alert("โหลดภาพหนังสือพิมพ์ไม่สำเร็จ ลองใหม่อีกครั้ง");
+                return;
+            }
 
-                setTimeout(() => {
-                    printCont.classList.remove('flow-animation', 'news-roll');
-                    printCont.style.transform = 'translateY(-100%)';
-                    void printCont.offsetWidth; 
-                    if (currentMode === 'news') { printCont.classList.add('news-roll'); } 
-                    else { printCont.classList.add('flow-animation'); printSound.currentTime = 0; printSound.play(); }
-                }, 100);
+            finalBlob = blob;
+            resultImg.src = URL.createObjectURL(blob);
 
-                setTimeout(() => {
-                    // ✅ แสดงปุ่มแบบ Grid ใต้ภาพ
-                    finalActions.style.display = 'grid';
-                    printSound.pause();
-                }, 4700);
+            document.getElementById('camera-ui').style.display = 'none';
+            printPage.style.display = 'flex';
 
-            }, 'image/png');
-        }
+            printCont.classList.remove('flow-animation', 'news-roll');
+            void printCont.offsetWidth;
 
+            if (currentMode === 'news') {
+                printCont.classList.add('news-roll');
+            } else {
+                printCont.classList.add('flow-animation');
+                printSound.currentTime = 0;
+                printSound.play();
+            }
+
+            setTimeout(() => {
+                finalActions.style.display = 'grid';
+                printSound.pause();
+            }, currentMode === 'news' ? 2800 : 4700);
+
+        }, 'image/png');
+    } catch (e) {
+        console.error("Canvas export failed:", e);
+        alert("Canvas export ไม่สำเร็จ");
+    }
+}
         async function saveImage() {
             if (!finalBlob) return;
             const fileName = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
