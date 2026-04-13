@@ -510,21 +510,32 @@ if (currentMode === 'news') {
     setTimeout(() => flash.style.opacity = '0', 100);
 }
 
-                const pCanvas = document.createElement('canvas');
-                pCanvas.width = video.videoWidth;
-                pCanvas.height = video.videoHeight;
-                const pCtx = pCanvas.getContext('2d');
-                
-                if(currentMode === 'news') {
-                    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
-                } else {
-                    pCtx.filter = filterStyle;
-                }
-                
-                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-                
-                pics.push(pCanvas);
+const pCanvas = document.createElement('canvas');
+const vw = video.videoWidth;
+const vh = video.videoHeight;
+
+pCanvas.width = vw;
+pCanvas.height = vh;
+
+const pCtx = pCanvas.getContext('2d');
+
+// ✅ รอ 1 frame ให้ภาพนิ่งก่อน capture
+await new Promise(r => requestAnimationFrame(r));
+
+// mirror กล้องหน้า
+pCtx.setTransform(-1, 0, 0, 1, vw, 0);
+
+// ฟิลเตอร์เฉพาะ news
+if(currentMode === 'news') {
+    pCtx.filter = 'sepia(1) saturate(2) contrast(1.8) brightness(0.4) grayscale(0.2)';
+} else {
+    pCtx.filter = filterStyle;
+}
+
+// ✅ ถ่ายภาพนิ่งจริง
+pCtx.drawImage(video, 0, 0, vw, vh);
+
+pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
             }
             
