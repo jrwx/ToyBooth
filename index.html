@@ -82,14 +82,15 @@ border: 0.25px solid rgba(90,74,59,0.12);
 }
         
         #display-box video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            transform: scaleX(-1);
-            z-index: 1;
-        }
+    position: absolute;
+    top: 0; left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: scaleX(-1) scale(1.35);
+    transform-origin: center;
+    z-index: 1;
+}
 
         #booth-machine.news-mode { max-width: 400px; }
         #display-box.news-mode { 
@@ -522,8 +523,20 @@ if (currentMode === 'news') {
                     pCtx.filter = filterStyle;
                 }
                 
-                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                pCtx.translate(pCanvas.width, 0);
+pCtx.scale(-1, 1);
+
+if (currentMode !== 'news') {
+    const zoom = 1.35;
+    const sw = video.videoWidth / zoom;
+    const sh = video.videoHeight / zoom;
+    const sx = (video.videoWidth - sw) / 2;
+    const sy = (video.videoHeight - sh) / 2;
+
+    pCtx.drawImage(video, sx, sy, sw, sh, 0, 0, pCanvas.width, pCanvas.height);
+} else {
+    pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+}
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
