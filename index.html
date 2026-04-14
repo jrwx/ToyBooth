@@ -81,16 +81,15 @@ border: 0.25px solid rgba(90,74,59,0.12);
     box-shadow: none;
 }
         
-#display-box video {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100% !important;
-    height: 100% !important;
-    object-fit: cover !important;
-    transform: scaleX(-1) scale(1.35);
-    transform-origin: center;
-    z-index: 1;
-}
+        #display-box video {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            transform: scaleX(-1.35);
+            z-index: 1;
+        }
 
         #booth-machine.news-mode { max-width: 400px; }
         #display-box.news-mode { 
@@ -522,25 +521,8 @@ if (currentMode === 'news') {
                     pCtx.filter = filterStyle;
                 }
                 
-                if (currentMode === 'news') {
-    pCtx.translate(pCanvas.width, 0);
-    pCtx.scale(-1, 1);
-    pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
-} else {
-    const zoom = 1.35;
-    const sw = video.videoWidth / zoom;
-    const sh = video.videoHeight / zoom;
-    const sx = (video.videoWidth - sw) / 2;
-    const sy = (video.videoHeight - sh) / 2;
-
-    pCtx.translate(pCanvas.width, 0);
-    pCtx.scale(-1, 1);
-    pCtx.drawImage(
-        video,
-        sx, sy, sw, sh,
-        0, 0, video.videoWidth, video.videoHeight
-    );
-}
+                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1,35);
+                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
@@ -719,39 +701,34 @@ function renderFinal() {
     canvas.toBlob((blob) => {
         finalBlob = blob;
         resultImg.src = URL.createObjectURL(blob);
-
         document.getElementById('camera-ui').style.display = 'none';
         printPage.style.display = 'flex';
-
-        // รีเซ็ตก่อนเริ่ม animation
-        finalActions.style.display = 'none';
-        printCont.className = 'print-container';
+        
+        // --- ส่วนที่แก้ไข: รีเซ็ตสถานะก่อนเริ่มฉาย ---
         printCont.style.animation = 'none';
-        printCont.style.transform = 'translateY(-100%)';
+        printCont.style.transform = 'translateY(-100%)'; 
+        finalActions.style.display = 'none'; // ซ่อนปุ่มไว้ก่อนจนกว่าจะ "ปริ้นต์" เสร็จ
+        
+        // Force Reflow เพื่อให้ Browser ล้างค่า Animation เก่า
+        void printCont.offsetWidth; 
 
-        // force reflow
-        void printCont.offsetHeight;
-
-        // เริ่ม animation ใหม่
         if (currentMode === 'news') {
-            printCont.classList.add('news-roll');
-
+            // โหมดหนังสือพิมพ์: ใช้เวลาคลี่กระดาษ 2.8 วินาที
+            printCont.style.animation = 'newspaperUnroll 2.8s ease forwards';
             setTimeout(() => {
                 finalActions.style.display = 'grid';
-            }, 3000);
-
+            }, 3000); // โชว์ปุ่มหลังคลี่เสร็จ
         } else {
-            printCont.classList.add('flow-animation');
-
+            // โหมดใบเสร็จ: ใช้เวลาไหล 4.8 วินาที + เล่นเสียง
+            printCont.style.animation = 'printReceiptOut 4.8s linear forwards';
             printSound.currentTime = 0;
             printSound.play().catch(()=>{});
-
+            
             setTimeout(() => {
                 finalActions.style.display = 'grid';
                 printSound.pause();
-            }, 4800);
+            }, 4800); // โชว์ปุ่มหลังไหลเสร็จ
         }
-
     }, 'image/png');
 }
 
