@@ -719,34 +719,39 @@ function renderFinal() {
     canvas.toBlob((blob) => {
         finalBlob = blob;
         resultImg.src = URL.createObjectURL(blob);
+
         document.getElementById('camera-ui').style.display = 'none';
         printPage.style.display = 'flex';
-        
-        // --- ส่วนที่แก้ไข: รีเซ็ตสถานะก่อนเริ่มฉาย ---
-        printCont.style.animation = 'none';
-        printCont.style.transform = 'translateY(-100%)'; 
-        finalActions.style.display = 'none'; // ซ่อนปุ่มไว้ก่อนจนกว่าจะ "ปริ้นต์" เสร็จ
-        
-        // Force Reflow เพื่อให้ Browser ล้างค่า Animation เก่า
-        void printCont.offsetWidth; 
 
+        // รีเซ็ตก่อนเริ่ม animation
+        finalActions.style.display = 'none';
+        printCont.className = 'print-container';
+        printCont.style.animation = 'none';
+        printCont.style.transform = 'translateY(-100%)';
+
+        // force reflow
+        void printCont.offsetHeight;
+
+        // เริ่ม animation ใหม่
         if (currentMode === 'news') {
-            // โหมดหนังสือพิมพ์: ใช้เวลาคลี่กระดาษ 2.8 วินาที
-            printCont.style.animation = 'newspaperUnroll 2.8s ease forwards';
+            printCont.classList.add('news-roll');
+
             setTimeout(() => {
                 finalActions.style.display = 'grid';
-            }, 3000); // โชว์ปุ่มหลังคลี่เสร็จ
+            }, 3000);
+
         } else {
-            // โหมดใบเสร็จ: ใช้เวลาไหล 4.8 วินาที + เล่นเสียง
-            printCont.style.animation = 'printReceiptOut 4.8s linear forwards';
+            printCont.classList.add('flow-animation');
+
             printSound.currentTime = 0;
             printSound.play().catch(()=>{});
-            
+
             setTimeout(() => {
                 finalActions.style.display = 'grid';
                 printSound.pause();
-            }, 4800); // โชว์ปุ่มหลังไหลเสร็จ
+            }, 4800);
         }
+
     }, 'image/png');
 }
 
