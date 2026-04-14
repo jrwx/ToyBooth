@@ -81,15 +81,16 @@ border: 0.25px solid rgba(90,74,59,0.12);
     box-shadow: none;
 }
         
-        #display-box video {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100% !important;
-            height: 100% !important;
-            object-fit: cover !important;
-            transform: scaleX(-1);
-            z-index: 1;
-        }
+#display-box video {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover !important;
+    transform: scaleX(-1) scale(1.15);
+    transform-origin: center;
+    z-index: 1;
+}
 
         #booth-machine.news-mode { max-width: 400px; }
         #display-box.news-mode { 
@@ -214,11 +215,7 @@ mix-blend-mode: screen;
     display: none;
     position: fixed;
     inset: 0;
-    /* ✅ เปลี่ยนจากสีดำ เป็นสีครีมลายจุดแบบหน้าแรกเป๊ะ */
-    background-color: #f7f1e3;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Crect width='80' height='80' fill='none'/%3E%3Ccircle cx='20' cy='20' r='2' fill='%23d8cbb0' opacity='0.35'/%3E%3Ccircle cx='60' cy='40' r='1.8' fill='%23d8cbb0' opacity='0.25'/%3E%3Ccircle cx='35' cy='65' r='1.5' fill='%23d8cbb0' opacity='0.3'/%3E%3Ccircle cx='70' cy='75' r='1.2' fill='%23d8cbb0' opacity='0.2'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 90px 90px;
+    background: #000;
     z-index: 100;
     flex-direction: column;
     align-items: center;
@@ -226,7 +223,6 @@ mix-blend-mode: screen;
     overflow-y: auto;
     padding-bottom: 40px;
 }
-
 .print-container{
     width: 100%;
     transform: translateY(-100%);
@@ -377,10 +373,7 @@ mix-blend-mode: screen;
         <div id="booth-machine">
             <div id="display-box">
                 <video id="video" autoplay playsinline muted></video>
-<img 
-    id="preview-overlay"
-    crossorigin="anonymous"
-    src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
+                <img id="preview-overlay" src="https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG">
                 <div id="flash"></div>
                 <div id="timer" class="timer">3</div>
             </div>
@@ -429,6 +422,8 @@ mix-blend-mode: screen;
         printSound.currentTime = 0;
     }).catch(() => {});
 }
+const newsFrame = new Image();
+newsFrame.src = "https://raw.githubusercontent.com/jrwx/my-booth/refs/heads/main/harry.PNG";
 
         const video = document.getElementById('video');
         const timer = document.getElementById('timer');
@@ -527,8 +522,25 @@ if (currentMode === 'news') {
                     pCtx.filter = filterStyle;
                 }
                 
-                pCtx.translate(pCanvas.width, 0); pCtx.scale(-1, 1);
-                pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+                if (currentMode === 'news') {
+    pCtx.translate(pCanvas.width, 0);
+    pCtx.scale(-1, 1);
+    pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+} else {
+    const zoom = 1.15;
+    const sw = video.videoWidth / zoom;
+    const sh = video.videoHeight / zoom;
+    const sx = (video.videoWidth - sw) / 2;
+    const sy = (video.videoHeight - sh) / 2;
+
+    pCtx.translate(pCanvas.width, 0);
+    pCtx.scale(-1, 1);
+    pCtx.drawImage(
+        video,
+        sx, sy, sw, sh,
+        0, 0, video.videoWidth, video.videoHeight
+    );
+}
                 
                 pics.push(pCanvas);
                 if(i < photoCount - 1) await new Promise(r => setTimeout(r, 1000));
@@ -629,117 +641,116 @@ if (currentMode === 'news') {
             renderFinal();
         }
 
-            function buildNewspaper(pic) {
-    canvas.width = 1000;
-    canvas.height = 1400;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                function buildNewspaper(pic) {
+            canvas.width = 1000; 
+            canvas.height = 1400;
+            ctx.fillStyle = "#e3dccb"; 
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // พื้นหลังกระดาษ
-    ctx.fillStyle = "#e3dccb";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+            // ตำแหน่งและขนาดของรูปถ่ายภายในหน้าหนังสือพิมพ์
+            const photoW = 800;  
+            const photoH = 450;  
+            const photoX = 145; 
+            const photoY = 340; 
 
-    const photoW = 800;
-    const photoH = 450;
-    const photoX = 145;
-    const photoY = 340;
+            const targetRatio = photoW / photoH;
+            const zoomFactor = 1.0;
 
-    const targetRatio = photoW / photoH;
+            let sw = pic.width * zoomFactor;
+            let sh = sw / targetRatio;
 
-    let sw = pic.width;
-    let sh = sw / targetRatio;
-
-    if (sh > pic.height) {
-        sh = pic.height;
-        sw = sh * targetRatio;
-    }
-
-    const sx = (pic.width - sw) / 2;
-    const sy = (pic.height - sh) / 2;
-
-    // วาดรูปจากกล้องลง canvas ก่อน
-    ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
-
-    // ทำโทนหนังสือพิมพ์เฉพาะรูป
-    const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
-    const data = imageData.data;
-
-    for (let i = 0; i < data.length; i += 4) {
-        let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
-        const grain = (Math.random() - 0.5) * 30;
-        gray = Math.max(0, Math.min(255, gray + grain));
-
-        data[i] = gray * 1.08;
-        data[i + 1] = gray * 0.95;
-        data[i + 2] = gray * 0.75;
-    }
-
-    ctx.putImageData(imageData, photoX, photoY);
-
-    // halftone dots
-    ctx.fillStyle = "rgba(60,40,20,0.08)";
-    for (let y = photoY; y < photoY + photoH; y += 6) {
-        for (let x = photoX; x < photoX + photoW; x += 6) {
-            ctx.beginPath();
-            ctx.arc(x, y, 0.8, 0, Math.PI * 2);
-            ctx.fill();
-        }
-    }
-
-    // วาดเฟรมหนังสือพิมพ์ทับ "รอบเดียว"
-    const frame = document.getElementById('preview-overlay');
-
-    if (frame.complete) {
-        ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
-        renderFinal();
-    } else {
-        frame.onload = () => {
-            ctx.drawImage(frame, 0, 0, canvas.width, canvas.height);
-            renderFinal();
-        };
-    }
-}function renderFinal() {
-    try {
-        canvas.toBlob((blob) => {
-            if (!blob) {
-                alert("โหลดภาพไม่สำเร็จ");
-                return;
+            if (sh > pic.height * zoomFactor) {
+                sh = pic.height * zoomFactor;
+                sw = sh * targetRatio;
             }
 
-            finalBlob = blob;
-            resultImg.src = URL.createObjectURL(blob);
+            let sx = (pic.width - sw) / 2;
+            let sy = (pic.height - sh) / 2;
 
-            document.getElementById('camera-ui').style.display = 'none';
-            printPage.style.display = 'flex';
+            // 1. วาดรูปหน้าคนลงไปก่อน
+            ctx.drawImage(pic, sx, sy, sw, sh, photoX, photoY, photoW, photoH);
 
-            // ✅ reset animation ให้ receipt กลับมาสไลด์ได้
-            printCont.classList.remove('flow-animation', 'news-roll');
-            printCont.style.animation = 'none';
-            printCont.style.transform = 'translateY(-100%)';
+            // 2. ✨ วาดรูปเฟรม overlay (harry.PNG) ทับลงไปบนรูปคนทันที
+            // เราดึงรูปมาจากแท็ก <img> ที่เราซ่อนไว้ตอนถ่าย (preview-overlay)
+            const overlayImg = document.getElementById('preview-overlay');
+            if (overlayImg) {
+                // วาดให้เต็ม Canvas (1000x1400) ตามสัดส่วนของเฟรมหนังสือพิมพ์จ้ะ
+                ctx.drawImage(overlayImg, 0, 0, canvas.width, canvas.height);
+            }
 
-            void printCont.offsetHeight; // force reflow สำหรับ iPhone
+            // 3. ทำโทนสีและเอฟเฟกต์หนังสือพิมพ์เก่า (ทำทับทั้งรูปคนและเฟรมเลย)
+            const imageData = ctx.getImageData(photoX, photoY, photoW, photoH);
+            const data = imageData.data;
 
-            printCont.style.animation = '';
+            for (let i = 0; i < data.length; i += 4) {
+                let gray = data[i] * 0.299 + data[i + 1] * 0.587 + data[i + 2] * 0.114;
+                const grain = (Math.random() - 0.5) * 30;
+                gray = Math.max(0, Math.min(255, gray + grain));
+                // โทนน้ำตาลกระดาษเก่า
+                data[i] = gray * 1.08;     // R
+                data[i + 1] = gray * 0.95; // G
+                data[i + 2] = gray * 0.75; // B
+            }
+            ctx.putImageData(imageData, photoX, photoY);
 
-            setTimeout(() => {
-                if (currentMode === 'news') {
-                    printCont.classList.add('news-roll');
-                } else {
-                    printCont.classList.add('flow-animation');
-                    printSound.currentTime = 0;
-                    printSound.play();
+            // 4. ใส่จุดๆ (Halftone halftone) ทับทั้งหมด
+            ctx.fillStyle = "rgba(60,40,20,0.08)";
+            for (let y = photoY; y < photoY + photoH; y += 6) {
+                for (let x = photoX; x < photoX + photoW; x += 6) {
+                    ctx.beginPath(); ctx.arc(x, y, 0.8, 0, Math.PI * 2); ctx.fill();
                 }
-            }, 80);
+            }
+            // ===== FRAME OVERLAY (harry.png) =====
+if (newsFrame.complete) {
+    ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
+} else {
+    newsFrame.onload = () => {
+        ctx.drawImage(newsFrame, 0, 0, canvas.width, canvas.height);
+        renderFinal();
+    };
+    return; // รอเฟรมโหลดก่อน
+}
 
+            renderFinal();
+        }
+
+
+function renderFinal() {
+    canvas.toBlob((blob) => {
+        finalBlob = blob;
+        resultImg.src = URL.createObjectURL(blob);
+        document.getElementById('camera-ui').style.display = 'none';
+        printPage.style.display = 'flex';
+        
+        // --- ส่วนที่แก้ไข: รีเซ็ตสถานะก่อนเริ่มฉาย ---
+        printCont.style.animation = 'none';
+        printCont.style.transform = 'translateY(-100%)'; 
+        finalActions.style.display = 'none'; // ซ่อนปุ่มไว้ก่อนจนกว่าจะ "ปริ้นต์" เสร็จ
+        
+        // Force Reflow เพื่อให้ Browser ล้างค่า Animation เก่า
+        void printCont.offsetWidth; 
+
+        if (currentMode === 'news') {
+            // โหมดหนังสือพิมพ์: ใช้เวลาคลี่กระดาษ 2.8 วินาที
+            printCont.style.animation = 'newspaperUnroll 2.8s ease forwards';
+            setTimeout(() => {
+                finalActions.style.display = 'grid';
+            }, 3000); // โชว์ปุ่มหลังคลี่เสร็จ
+        } else {
+            // โหมดใบเสร็จ: ใช้เวลาไหล 4.8 วินาที + เล่นเสียง
+            printCont.style.animation = 'printReceiptOut 4.8s linear forwards';
+            printSound.currentTime = 0;
+            printSound.play().catch(()=>{});
+            
             setTimeout(() => {
                 finalActions.style.display = 'grid';
                 printSound.pause();
-            }, currentMode === 'news' ? 2800 : 4700);
-
-        }, 'image/png');
-    } catch (e) {
-        console.error(e);
-    }
+            }, 4800); // โชว์ปุ่มหลังไหลเสร็จ
+        }
+    }, 'image/png');
 }
+
+
         async function saveImage() {
             if (!finalBlob) return;
             const fileName = (currentMode === 'news') ? 'jarawee_newspaper.png' : 'jarawee_receipt.png';
@@ -754,79 +765,46 @@ if (currentMode === 'news') {
         }
 
         async function printImage() {
-    if (!resultImg.src) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-    img.src = resultImg.src;
-
-    img.onload = async () => {
-        const printCanvas = document.createElement("canvas");
-        const pctx = printCanvas.getContext("2d");
-
-        const dpi = 203; // thermal printer
-        const mmToPx = (mm) => Math.round((mm / 25.4) * dpi);
-
-        const printW = mmToPx(80); // 80mm
-        const printH50 = mmToPx(50); // 50mm
-
-        // ✅ โหมดใบเสร็จอันแรก = ยาวตามภาพ
-        if (currentMode === "receipt") {
-            const dynamicH = Math.round((img.height / img.width) * printW);
-
-            printCanvas.width = printW;
-            printCanvas.height = dynamicH;
-
-            pctx.fillStyle = "#fff";
-            pctx.fillRect(0, 0, printW, dynamicH);
-
-            pctx.drawImage(img, 0, 0, printW, dynamicH);
-        } 
-        
-        // ✅ Newspaper + Receipt2 = แนวนอน 80x50
-        else {
-            printCanvas.width = printW;
-            printCanvas.height = printH50;
-
-            pctx.fillStyle = "#fff";
-            pctx.fillRect(0, 0, printW, printH50);
-
-            // หมุนภาพทั้งใบ
-            pctx.save();
-            pctx.translate(printW / 2, printH50 / 2);
-            pctx.rotate(Math.PI / 2);
-
-            const scale = Math.min(printH50 / img.width, printW / img.height);
-            const drawW = img.width * scale;
-            const drawH = img.height * scale;
-
-            pctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
-            pctx.restore();
-        }
-
-        printCanvas.toBlob(async (blob) => {
-            if (!blob) return;
-
-            const file = new File([blob], "barigan-print.png", {
-                type: "image/png"
-            });
-
-            if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                try {
-                    await navigator.share({
-                        files: [file],
-                        title: "BARIGAN PR-01W",
-                        text: "Print ผ่าน Wi-Fi"
-                    });
-                } catch (e) {
-                    console.log("cancel print");
+            if (!resultImg) return;
+            const img = new Image();
+            img.src = resultImg.src;
+            img.onload = async () => {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                const isNews = currentMode === 'news';
+                if (!isNews) {
+                    const baseWidth = 576;
+                    const scaleFactor = 1.6; 
+                    canvas.width = baseWidth * scaleFactor;
+                    canvas.height = (img.height * baseWidth / img.width) * scaleFactor;
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.scale(scaleFactor, scaleFactor);
+                    ctx.drawImage(img, 0, 0, baseWidth, img.height * (baseWidth / img.width));
+                } else {
+                    const targetWidth = 576;
+                    const scale = targetWidth / img.height;
+                    const newH = img.width * scale;
+                    canvas.width = targetWidth;
+                    canvas.height = newH;
+                    ctx.fillStyle = "white";
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.save();
+                    ctx.translate(canvas.width / 2, canvas.height / 2);
+                    ctx.rotate(90 * Math.PI / 180);
+                    ctx.drawImage(img, -newH / 2, -canvas.width / 2, newH, canvas.width);
+                    ctx.restore();
                 }
-            } else {
-                alert("อุปกรณ์นี้ไม่รองรับ Share Print");
-            }
-        }, "image/png");
-    };
-}
+                canvas.toBlob(async (blob) => {
+                    const fileName = isNews ? 'news.png' : 'receipt.png';
+                    const finalFile = new File([blob], fileName, { type: 'image/png' });
+                    if (navigator.canShare && navigator.canShare({ files: [finalFile] })) {
+                        try { await navigator.share({ files: [finalFile], title: 'Print', text: 'ส่งไปเครื่องปริ้นต์' }); return; } catch (e) {}
+                    }
+                    alert("อุปกรณ์ไม่รองรับ Share Sheet");
+                }, 'image/png');
+            };
+        }
     </script>
 </body>
 </html>
