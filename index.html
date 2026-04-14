@@ -87,7 +87,7 @@ border: 0.25px solid rgba(90,74,59,0.12);
     width: 100% !important;
     height: 100% !important;
     object-fit: cover !important;
-    transform: scaleX(-1) scale(1.25);
+    transform: scaleX(-1) scale(1.35);
     transform-origin: center;
     z-index: 1;
 }
@@ -527,7 +527,7 @@ if (currentMode === 'news') {
     pCtx.scale(-1, 1);
     pCtx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 } else {
-    const zoom = 1.25;
+    const zoom = 1.35;
     const sw = video.videoWidth / zoom;
     const sh = video.videoHeight / zoom;
     const sx = (video.videoWidth - sw) / 2;
